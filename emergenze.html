@@ -4,6 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Gestione Emergenze - CRI</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b71c1c">
+
 <style>
   :root{
     --rosso-cri:#b71c1c;
@@ -14,7 +18,7 @@
     --giallo:#ffc107;
     --grigio2:#6c757d;
   }
-  *{box-sizing:border-box}
+  *{ margin: 0; padding: 0; box-sizing: border-box; }
   body{
     margin:0;
     font-family:Arial,sans-serif;
@@ -23,21 +27,18 @@
     background:var(--grigio);
   }
 
-  /* Sidebar */
+  /* ===== Sidebar (UGUALE A index.html) ===== */
   .sidebar{
-    position:fixed;
-    left:0; top:0;
     width:260px;
-    height:100vh;
+    flex-shrink:0;
     background:var(--rosso-cri);
     color:var(--bianco);
     display:flex;
     flex-direction:column;
     padding-top:20px;
-    z-index:1000;
+    height:100vh;
+    overflow:hidden;
     align-items:center;
-    overflow-y:auto;
-    overflow-x:hidden;
   }
   .sidebar img{
     width:220px;
@@ -45,7 +46,14 @@
     border-radius:8px;
     flex-shrink:0;
   }
-  .menu{list-style:none; padding:0; width:100%; flex:1 1 auto;}
+  .menu{
+    list-style:none;
+    padding:0;
+    width:100%;
+    flex-grow:1;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
   .menu li{width:100%}
   .menu a{
     display:block;
@@ -56,25 +64,12 @@
   }
   .menu a:hover,.menu a.active{background:#9f1b1b}
 
-  .sidebar-footer{
-    margin-top:auto;
-    width:100%;
-    position:sticky;
-    bottom:0;
-    padding:14px 0 18px;
-    display:flex;
-    justify-content:center;
-    background:linear-gradient(
-      to top,
-      rgba(183,28,28,1) 0%,
-      rgba(183,28,28,0.95) 70%,
-      rgba(183,28,28,0) 100%
-    );
-  }
   #logout{
-    padding:12px 20px;
+    flex-shrink:0;
+    margin:12px auto 20px auto;
+    padding:10px 20px;
     width:80%;
-    background:var(--bianco);
+    background:#fff;
     color:var(--rosso-cri);
     border:2px solid var(--rosso-cri);
     border-radius:6px;
@@ -82,10 +77,10 @@
     cursor:pointer;
     transition:background .3s,color .3s;
   }
-  #logout:hover{background:var(--rosso-cri); color:var(--bianco)}
+  #logout:hover{background:var(--rosso-cri); color:#fff}
 
+  /* ===== Main ===== */
   .main{
-    margin-left:260px;
     flex-grow:1;
     background:var(--bianco);
     padding:30px;
@@ -475,9 +470,9 @@
 
   @media (max-width:768px){
     body{flex-direction:column}
-    .sidebar{position:relative; width:100%; height:auto; overflow:visible}
-    .sidebar-footer{position:relative; background:transparent}
-    .main{margin-left:0; padding:20px}
+    .sidebar{width:100%; height:auto; padding:15px; overflow:visible}
+    .menu{overflow:visible}
+    .main{padding:20px}
     .info-label{min-width:150px}
   }
 </style>
@@ -487,9 +482,7 @@
 <aside class="sidebar" aria-label="Navigazione principale">
   <img id="logo-cri" src="logo.svg" alt="Logo Croce Rossa Italiana" />
   <ul class="menu" id="menu-sidebar" role="navigation" aria-label="Menu principale"></ul>
-  <div class="sidebar-footer">
-    <button id="logout" type="button">🚪 Logout</button>
-  </div>
+  <button id="logout" type="button">Logout</button>
 </aside>
 
 <main class="main">
@@ -688,7 +681,7 @@
    SESSIONE / PERMESSI
 =========================== */
 const userId = localStorage.getItem("userId") || "";
-const role = (localStorage.getItem("role") || "").toLowerCase();
+const role = (localStorage.getItem("role") || "").toLowerCase().trim();
 const comitato = localStorage.getItem("comitato") || "";
 
 if (!userId) {
@@ -747,7 +740,7 @@ function logout() {
 document.getElementById("logout").addEventListener("click", logout);
 
 /* ===========================
-   LOGO + MENU
+   LOGO + MENU (UGUALE A index.html)
 =========================== */
 const logoImg = document.getElementById("logo-cri");
 let logoSrc = "logo.svg";
@@ -769,7 +762,7 @@ if (role === "sol") {
     "sant-angelo-in-vado": "logo-santangeloinvado.svg"
   };
   logoSrc = map[c] || "logo-sop.svg";
-} else if (["sop","amministratore","tlc_provinciale"].includes(role)) {
+} else if (role === "sop" || role === "amministratore" || role === "tlc_provinciale") {
   logoSrc = "logo-sop.svg";
 }
 logoImg.src = logoSrc;
@@ -777,6 +770,7 @@ logoImg.onerror = () => { logoImg.src = "logo-sop.svg"; };
 
 const menu = document.getElementById("menu-sidebar");
 menu.innerHTML = "";
+
 const items = [
   { text: "🏠 Home", href: "index.html" },
   { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html" },
@@ -787,8 +781,13 @@ const items = [
   { text: "📅 Eventi", href: "eventi.html" },
   { text: "📄 Documenti", href: "documenti.html" }
 ];
-if (["sop","sol","amministratore","tlc_provinciale"].includes(role)) items.push({ text: "📡 TLC", href: "tlc.html" });
-if (["sop","sol","amministratore"].includes(role)) items.push({ text: "⚙️ Admin", href: "admin.html" });
+
+if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
+  items.push({ text: "📡 TLC", href: "tlc.html" });
+}
+if (["sop", "sol", "amministratore"].includes(role)) {
+  items.push({ text: "⚙️ Admin", href: "admin.html" });
+}
 
 items.forEach(({ text, href }) => {
   const li = document.createElement("li");
@@ -984,7 +983,7 @@ function ensureEmergenzaShape(em){
     const c = em.contributi[k] || {};
     if (!Array.isArray(c.mezziUsati)) c.mezziUsati = [];
     if (!Array.isArray(c.materialiUsati)) c.materialiUsati = [];
-    if (!Array.isArray(c.volontariUsati)) c.volontariUsati = [];   // ✅ aggiunto
+    if (!Array.isArray(c.volontariUsati)) c.volontariUsati = [];
     if (!Array.isArray(c.logInterventi)) c.logInterventi = [];
 
     c.volontariUsati = c.volontariUsati
@@ -1166,7 +1165,7 @@ function volontarioKey(v){ return ((v.cf || "").toUpperCase()).trim(); }
 =========================== */
 let selectedMezzi = new Set();
 let selectedMateriali = new Map();
-let selectedVolontari = new Set(); // ✅ aggiunto
+let selectedVolontari = new Set();
 
 function getAllCommittees(){
   const set = new Set();
@@ -1254,14 +1253,6 @@ btnSelectAllVol.addEventListener("click", () => {
 });
 
 resSearch.addEventListener("input", renderResources);
-
-function volunteerLabelByCf(cf){
-  const cfu = (cf||"").toUpperCase();
-  const v = getVolontari().find(x => ((x.cf||"").toUpperCase()) === cfu);
-  if (!v) return cfu;
-  const name = `${v.nome||""} ${v.cognome||""}`.trim();
-  return name ? `${name} (${cfu})` : cfu;
-}
 
 function renderChips(){
   const mezzi = getMezziDisponibiliPerComitato(resTargetComitatoLower);
@@ -1417,7 +1408,7 @@ function renderResources(){
     materialiCards.appendChild(el);
   });
 
-  // VOLONTARI ✅
+  // VOLONTARI
   const vols = getVolontariDisponibiliPerComitato(resTargetComitatoLower).filter(v => {
     if (!q) return true;
     const name = `${v.nome||""} ${v.cognome||""}`.trim();
