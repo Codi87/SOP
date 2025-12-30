@@ -121,6 +121,8 @@
     transition: all 0.25s ease;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
   .card::before {
     content: '';
@@ -187,6 +189,10 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(183,28,28,0.35);
   }
+
+  /* ✅ allinea i bottoni in fondo alle card */
+  .card .btn-admin { margin-top: auto; align-self: flex-start; }
+  .card .stat-label { margin-bottom: 12px; }
 
   @media (max-width: 768px) {
     body { flex-direction: column; overflow: auto; } /* su mobile scroll normale */
@@ -260,7 +266,38 @@
     border-radius: 8px;
     font-weight: 700;
   }
-  .btn-small{
+  
+  /* ✅ colori per ruolo (popup ruoli) */
+  .select-role.role-amministratore{
+    background: rgba(183,28,28,0.12);
+    border-color: rgba(183,28,28,0.55);
+    color: #b71c1c;
+  }
+  .select-role.role-sop{
+    background: rgba(255,152,0,0.16);
+    border-color: rgba(255,152,0,0.65);
+    color: #a35a00;
+  }
+  .select-role.role-tlc{
+    background: rgba(33,150,243,0.16);
+    border-color: rgba(33,150,243,0.65);
+    color: #0b63b8;
+  }
+  .select-role.role-sol{
+    background: rgba(255,235,59,0.22);
+    border-color: rgba(255,235,59,0.75);
+    color: #6f6500;
+  }
+
+  /* Badge ruolo per riconoscimento veloce */
+  .role-cell{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .role-pill{ display:inline-block; padding:4px 10px; border-radius:999px; font-weight:900; font-size:0.8rem; letter-spacing:.2px; }
+  .pill-amministratore{ background: var(--rosso-cri); color:#fff; }
+  .pill-sop{ background: #ff9800; color:#000; }
+  .pill-tlc_provinciale{ background: #2196f3; color:#fff; }
+  .pill-sol{ background: #fff176; color:#000; border: 1px solid #fbc02d; }
+
+.btn-small{
     padding: 8px 12px;
     border:none;
     border-radius: 8px;
@@ -269,8 +306,7 @@
     margin-right: 8px;
   }
   .btn-save{ background:#28a745; color:#fff; }
-  .btn-reset{ background:#6c757d; color:#fff; }
-  @media (max-width: 768px){
+    @media (max-width: 768px){
     .ruoli-table{ min-width: 0; }
   }
 </style>
@@ -286,6 +322,7 @@
 <main class="main" tabindex="-1">
   <h1 id="page-title">⚙️ Area Amministratore</h1>
 
+  
   <div class="cards">
     <div class="card">
       <h2>📋 Iscrizioni in attesa</h2>
@@ -357,9 +394,10 @@
       <p>Gestisci i ruoli assegnati (SOL / SOP / Admin / TLC Provinciale).</p>
       <div class="stat-number" id="num-ruoli-speciali">0</div>
       <div class="stat-label">utenti con ruolo speciale</div>
-      <button type="button" class="btn-admin" id="btn-apri-ruoli" style="border:none;cursor:pointer;">👥 Apri gestione ruoli</button>
+      <button type="button" class="btn-admin" id="btn-apri-ruoli">👥 Apri gestione ruoli</button>
     </div>
   </div>
+
 </main>
 
 <!-- POPUP RUOLI (solo Admin) -->
@@ -518,8 +556,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return ((obj?.cf || obj?.userId || obj?.username || obj?.email || obj?.id || "") + "").toUpperCase().trim();
   }
   function pickNome(obj) {
-    const n = `${obj?.nome || ""} ${obj?.cognome || ""}`.trim();
-    return n || (obj?.nomeCompleto || obj?.name || obj?.displayName || "—");
+    const composed = `${obj?.nome || ""} ${obj?.cognome || ""}`.trim();
+    const fallback = (obj?.nomeCompleto || obj?.name || obj?.displayName || "").toString().trim();
+    const raw = (composed || fallback || "—").toString().trim();
+
+    // ✅ se il nome è "__" (o simile) mostriamo "Admin CRI"
+    const compact = raw.replace(/\s+/g, "");
+    if (/^_+$/.test(compact)) return "Admin CRI";
+
+    return raw || "—";
   }
   function pickComitato(obj) {
     return obj?.comitato || obj?.comitatoCreatore || obj?.comitatoEvento || obj?.comitato_volontario || obj?.comitatoVolontario || obj?.comitatoOrigine || obj?.comitato_origine || "—";
@@ -562,8 +607,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const mapEntry = rolesMap[id] || {};
       const raw = normalizeRoleValue(mapEntry.ruolo || pickRawRole(obj) || "");
-      const nome = mapEntry.nome || pickNome(obj);
+      const nomeBase = mapEntry.nome || pickNome(obj);
       const com = mapEntry.comitato || pickComitato(obj);
+      const nome = (raw === 'amministratore' && (nomeBase === '—' || /^_+$/.test(String(nomeBase).replace(/\s+/g,'')))) ? 'Admin CRI' : nomeBase;
 
       const prev = byId.get(id);
       if (!prev) byId.set(id, { id, nome, comitato: com, rawRuolo: raw });
@@ -577,11 +623,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const allowed = new Set(["sol", "sop", "amministratore", "tlc_provinciale"]);
     return Array.from(byId.values())
       .filter(x => allowed.has(x.rawRuolo))
-      .sort((a,b) =>
-        a.rawRuolo.localeCompare(b.rawRuolo) ||
-        String(a.comitato).localeCompare(String(b.comitato)) ||
-        a.nome.localeCompare(b.nome)
-      );
+      .sort((a,b) => {
+        const order = { amministratore: 0, sop: 1, tlc_provinciale: 2, sol: 3 };
+        const ao = order[a.rawRuolo] ?? 99;
+        const bo = order[b.rawRuolo] ?? 99;
+        if (ao !== bo) return ao - bo;
+        return String(a.comitato).localeCompare(String(b.comitato)) || a.nome.localeCompare(b.nome);
+      });
   }
 
   const cardRuoli = document.getElementById("card-ruoli");
@@ -656,31 +704,83 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const roleOptions = [
       { value: "volontario", label: "Volontario (nessun privilegio)" },
-      { value: "sol", label: "SOL" },
-      { value: "sop", label: "SOP" },
       { value: "amministratore", label: "Amministratore" },
-      { value: "tlc_provinciale", label: "TLC Provinciale" }
+      { value: "sop", label: "SOP" },
+      { value: "tlc_provinciale", label: "TLC Provinciale" },
+      { value: "sol", label: "SOL" }
     ];
+
+    function pillClassFromRole(roleVal){
+      const r = normalizeRoleValue(roleVal);
+      if (r === "amministratore") return "pill-amministratore";
+      if (r === "sop") return "pill-sop";
+      if (r === "tlc_provinciale") return "pill-tlc_provinciale";
+      return "pill-sol";
+    }
+    function pillTextFromRole(roleVal){
+      const r = normalizeRoleValue(roleVal);
+      if (r === "amministratore") return "ADMIN";
+      if (r === "sop") return "SOP";
+      if (r === "tlc_provinciale") return "TLC PROV";
+      return "SOL";
+    }
+
+    function applySelectColor(selectEl) {
+      if (!selectEl) return;
+      selectEl.classList.remove("role-amministratore","role-sop","role-sol","role-tlc_provinciale");
+      const r = normalizeRoleValue(selectEl.value);
+      if (r === "amministratore") selectEl.classList.add("role-amministratore");
+      else if (r === "sop") selectEl.classList.add("role-sop");
+      else if (r === "tlc_provinciale") selectEl.classList.add("role-tlc_provinciale");
+      else if (r === "sol") selectEl.classList.add("role-sol");
+    }
+
+    function applyRolePill(tr, roleVal){
+      const pill = tr.querySelector(".role-pill");
+      if (!pill) return;
+      pill.classList.remove("pill-amministratore","pill-sop","pill-tlc_provinciale","pill-sol");
+      pill.classList.add(pillClassFromRole(roleVal));
+      pill.textContent = pillTextFromRole(roleVal);
+    }
 
     ruoliBody.innerHTML = list.map(u => {
       const current = normalizeRoleValue(u.rawRuolo);
       const opts = roleOptions.map(o => {
-        const selected = current === normalizeRoleValue(o.value) ? "selected" : "";
+        const selected = normalizeRoleValue(o.value) === current ? "selected" : "";
         return `<option value="${o.value}" ${selected}>${o.label}</option>`;
       }).join("");
 
+      const pillClass = pillClassFromRole(current);
+      const pillText = pillTextFromRole(current);
+
       return `
-        <tr data-id="${escapeHtml(u.id)}" data-original="${escapeHtml(current)}">
+        <tr data-id="${escapeHtml(u.id)}">
           <td>${escapeHtml(u.nome)}</td>
           <td>${escapeHtml(u.comitato)}</td>
-          <td><select class="select-role">${opts}</select></td>
+          <td>
+            <div class="role-cell">
+              <span class="role-pill ${pillClass}">${pillText}</span>
+              <select class="select-role">${opts}</select>
+            </div>
+          </td>
           <td>
             <button type="button" class="btn-small btn-save" data-action="save">Salva</button>
-            <button type="button" class="btn-small btn-reset" data-action="reset">Reset</button>
           </td>
         </tr>
       `;
     }).join("");
+
+    // Colori + badge live (quando cambi il select)
+    ruoliBody.querySelectorAll("tr").forEach(tr => {
+      const sel = tr.querySelector("select.select-role");
+      if (!sel) return;
+      applySelectColor(sel);
+      applyRolePill(tr, sel.value);
+      sel.addEventListener("change", () => {
+        applySelectColor(sel);
+        applyRolePill(tr, sel.value);
+      });
+    });
 
     ruoliBody.querySelectorAll("button[data-action]").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -688,15 +788,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!tr) return;
         const id = tr.getAttribute("data-id");
         const sel = tr.querySelector("select");
-        if (!sel) return;
-
-        const action = btn.getAttribute("data-action");
-        if (action === "reset") {
-          sel.value = tr.getAttribute("data-original") || "volontario";
-          return;
-        }
-
-        updateRoleForId(id, sel.value);
+        if (!sel) return;        updateRoleForId(id, sel.value);
         renderRuoliPopup();
       });
     });
