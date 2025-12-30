@@ -15,12 +15,15 @@
     --blu: #2196f3;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ✅ Layout: scroll SOLO nel main, sidebar ferma */
+  html, body { height: 100%; }
   body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
-    min-height: 100vh;
     background: linear-gradient(135deg, var(--grigio) 0%, #e8f0fe 100%);
+    overflow: hidden; /* ✅ evita scroll pagina + “spazio bianco sotto” */
   }
 
   /* ===== SIDEBAR IDENTICA A INDEX (tranne logo che resta TLC) ===== */
@@ -33,21 +36,24 @@
     flex-direction: column;
     padding-top: 20px;
     height: 100vh;
-    overflow: hidden;
+    position: sticky;  /* ✅ resta ferma */
+    top: 0;
+    overflow: hidden;  /* lo scroll lo fa il menu */
     align-items: center;
   }
   .sidebar img {
     width: 220px;
     margin-bottom: 20px;
     border-radius: 8px;
+    flex-shrink: 0;
   }
 
   .menu {
     list-style: none;
     padding: 0;
     width: 100%;
-    flex-grow: 1;
-    overflow-y: auto;
+    flex: 1 1 auto;
+    overflow-y: auto;                 /* ✅ scroll solo qui */
     overscroll-behavior: contain;
   }
   .menu li { width: 100%; }
@@ -75,14 +81,14 @@
   }
   #logout:hover { background-color: var(--rosso-cri); color: #fff; }
 
-  /* ===== MAIN allineata a INDEX (no margin-left) ===== */
+  /* ===== MAIN: scroll interno (come pagina admin) ===== */
   .main {
-    flex-grow: 1;
+    flex: 1 1 auto;
+    height: 100vh;        /* ✅ fondamentale */
+    overflow-y: auto;     /* ✅ scroll solo qui */
     padding: 30px;
     background: var(--bianco);
-    overflow-y: auto;
     position: relative;
-    min-height: 100vh;
     width: 100%;
   }
 
@@ -268,10 +274,10 @@
 
   /* ===== RESPONSIVE identico a INDEX per sidebar/menu ===== */
   @media (max-width: 768px) {
-    body { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
+    body { flex-direction: column; overflow: auto; } /* ✅ su mobile torna scroll normale */
+    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; position: relative; }
     .menu { overflow: visible; }
-    .main { padding: 20px; }
+    .main { padding: 20px; height: auto; overflow: visible; }
     .cards { grid-template-columns: 1fr; gap: 18px; }
     .form-grid { grid-template-columns: 1fr; }
   }
