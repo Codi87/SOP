@@ -4,6 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Gestione Eventi - CRI</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b71c1c">
+
 <style>
   :root {
     --rosso-cri: #b71c1c;
@@ -12,7 +16,7 @@
     --blu-info: #007bff;
   }
 
-  * { box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     margin: 0;
@@ -22,70 +26,49 @@
     background: var(--grigio);
   }
 
+  /* ✅ SIDEBAR IDENTICA A index.html */
   .sidebar {
-    position: fixed;
-    left: 0; top: 0;
     width: 260px;
-    height: 100vh;
+    flex-shrink: 0;
     background: var(--rosso-cri);
     color: var(--bianco);
     display: flex;
     flex-direction: column;
     padding-top: 20px;
-    z-index: 1000;
+    height: 100vh;
+    overflow: hidden;
     align-items: center;
-    overflow-y: auto;
-    overflow-x: hidden;
   }
-
   .sidebar img {
     width: 220px;
     margin-bottom: 20px;
     border-radius: 8px;
-    flex-shrink: 0;
   }
 
   .menu {
     list-style: none;
     padding: 0;
     width: 100%;
-    flex: 1 1 auto;
+    flex-grow: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .menu li { width: 100%; }
-
   .menu a {
     display: block;
     padding: 15px 20px;
     color: var(--bianco);
-    font-weight: bold;
     text-decoration: none;
+    font-weight: bold;
   }
+  .menu a:hover, .menu a.active { background: #9f1b1b; }
 
-  .menu a:hover,
-  .menu a.active {
-    background: #9f1b1b;
-  }
-
-  .sidebar-footer {
-    margin-top: auto;
-    width: 100%;
-    position: sticky;
-    bottom: 0;
-    padding: 14px 0 18px;
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(
-      to top,
-      rgba(183, 28, 28, 1) 0%,
-      rgba(183, 28, 28, 0.95) 70%,
-      rgba(183, 28, 28, 0) 100%
-    );
-  }
-
-  #logout {
-    padding: 12px 20px;
+#logout {
+    flex-shrink: 0;
+    margin: 12px auto 20px auto;
+    padding: 10px 20px;
     width: 80%;
-    background: var(--bianco);
+    background-color: #fff;
     color: var(--rosso-cri);
     border: 2px solid var(--rosso-cri);
     border-radius: 6px;
@@ -93,29 +76,15 @@
     cursor: pointer;
     transition: background 0.3s, color 0.3s;
   }
-  #logout:hover {
-    background-color: var(--rosso-cri);
-    color: var(--bianco);
-  }
+  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
 
-  .sidebar::-webkit-scrollbar { width: 10px; }
-  .sidebar::-webkit-scrollbar-track { background: rgba(255,255,255,0.12); }
-  .sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.35);
-    border-radius: 999px;
-    border: 2px solid rgba(183,28,28,0.9);
-  }
-  .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.55); }
-  .sidebar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.45) rgba(255,255,255,0.12); }
-
+  /* ✅ MAIN IDENTICO A index.html (layout/scroll) */
   .main {
-    margin-left: 260px;
     flex-grow: 1;
-    background: var(--bianco);
     padding: 30px;
+    background: var(--bianco);
     overflow-y: auto;
-    min-height: 100vh;
-    width: 100%;
+    position: relative;
   }
 
   .main h1 {
@@ -123,6 +92,7 @@
     margin-top: 0;
   }
 
+  /* ====== STILI SPECIFICI EVENTI ====== */
   #search {
     width: 100%;
     padding: 10px;
@@ -182,11 +152,9 @@
   .reject-btn { background-color: #6c757d; color: #fff; }
   .manage-btn { background-color: #343a40; color: #fff; }
 
-  /* ✅ bottone iscrizione volontario */
   .signup-btn { background:#28a745; color:#fff; }
   .signup-btn[disabled] { opacity:.6; cursor:not-allowed; }
 
-  /* Modale form */
   #form-container {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -511,9 +479,7 @@
 <aside class="sidebar" aria-label="Navigazione principale">
   <img id="logo-cri" src="logo.svg" alt="Logo Croce Rossa Italiana" />
   <ul class="menu" id="menu-sidebar" role="navigation" aria-label="Menu principale"></ul>
-
-  <div class="sidebar-footer">
-    <button id="logout" type="button">🚪 Logout</button>
+  <button id="logout" type="button">Logout</button>
   </div>
 </aside>
 
