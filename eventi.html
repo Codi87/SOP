@@ -4,6 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Gestione Eventi - CRI</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b71c1c">
+
 <style>
   :root {
     --rosso-cri: #b71c1c;
@@ -12,7 +16,7 @@
     --blu-info: #007bff;
   }
 
-  * { box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
     margin: 0;
@@ -22,70 +26,49 @@
     background: var(--grigio);
   }
 
+  /* ✅ SIDEBAR IDENTICA A index.html */
   .sidebar {
-    position: fixed;
-    left: 0; top: 0;
     width: 260px;
-    height: 100vh;
+    flex-shrink: 0;
     background: var(--rosso-cri);
     color: var(--bianco);
     display: flex;
     flex-direction: column;
     padding-top: 20px;
-    z-index: 1000;
+    height: 100vh;
+    overflow: hidden;
     align-items: center;
-    overflow-y: auto;
-    overflow-x: hidden;
   }
-
   .sidebar img {
     width: 220px;
     margin-bottom: 20px;
     border-radius: 8px;
-    flex-shrink: 0;
   }
 
   .menu {
     list-style: none;
     padding: 0;
     width: 100%;
-    flex: 1 1 auto;
+    flex-grow: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .menu li { width: 100%; }
-
   .menu a {
     display: block;
     padding: 15px 20px;
     color: var(--bianco);
-    font-weight: bold;
     text-decoration: none;
+    font-weight: bold;
   }
-
-  .menu a:hover,
-  .menu a.active {
-    background: #9f1b1b;
-  }
-
-  .sidebar-footer {
-    margin-top: auto;
-    width: 100%;
-    position: sticky;
-    bottom: 0;
-    padding: 14px 0 18px;
-    display: flex;
-    justify-content: center;
-    background: linear-gradient(
-      to top,
-      rgba(183, 28, 28, 1) 0%,
-      rgba(183, 28, 28, 0.95) 70%,
-      rgba(183, 28, 28, 0) 100%
-    );
-  }
+  .menu a:hover, .menu a.active { background: #9f1b1b; }
 
   #logout {
-    padding: 12px 20px;
+    flex-shrink: 0;
+    margin: 12px auto 20px auto;
+    padding: 10px 20px;
     width: 80%;
-    background: var(--bianco);
+    background-color: #fff;
     color: var(--rosso-cri);
     border: 2px solid var(--rosso-cri);
     border-radius: 6px;
@@ -93,29 +76,15 @@
     cursor: pointer;
     transition: background 0.3s, color 0.3s;
   }
-  #logout:hover {
-    background-color: var(--rosso-cri);
-    color: var(--bianco);
-  }
+  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
 
-  .sidebar::-webkit-scrollbar { width: 10px; }
-  .sidebar::-webkit-scrollbar-track { background: rgba(255,255,255,0.12); }
-  .sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.35);
-    border-radius: 999px;
-    border: 2px solid rgba(183,28,28,0.9);
-  }
-  .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.55); }
-  .sidebar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.45) rgba(255,255,255,0.12); }
-
+  /* ✅ MAIN IDENTICO A index.html (layout/scroll) */
   .main {
-    margin-left: 260px;
     flex-grow: 1;
-    background: var(--bianco);
     padding: 30px;
+    background: var(--bianco);
     overflow-y: auto;
-    min-height: 100vh;
-    width: 100%;
+    position: relative;
   }
 
   .main h1 {
@@ -123,6 +92,7 @@
     margin-top: 0;
   }
 
+  /* ====== STILI SPECIFICI EVENTI ====== */
   #search {
     width: 100%;
     padding: 10px;
@@ -182,11 +152,9 @@
   .reject-btn { background-color: #6c757d; color: #fff; }
   .manage-btn { background-color: #343a40; color: #fff; }
 
-  /* ✅ bottone iscrizione volontario */
   .signup-btn { background:#28a745; color:#fff; }
   .signup-btn[disabled] { opacity:.6; cursor:not-allowed; }
 
-  /* Modale form */
   #form-container {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -277,7 +245,6 @@
     margin-top: -2px;
   }
 
-  /* Popup info evento */
   #info-popup {
     position: fixed;
     top: 50%;
@@ -398,7 +365,6 @@
   .mini-actions .ok{ background:#28a745; color:#fff; }
   .mini-actions .no{ background:#6c757d; color:#fff; }
 
-  /* MODALE REQUISITI (Qualifiche + Patenti) */
   #req-popup {
     position: fixed;
     inset: 0;
@@ -498,9 +464,9 @@
 
   @media (max-width: 768px) {
     body { flex-direction: column; }
-    .sidebar { position: relative; width: 100%; height: auto; overflow: visible; }
-    .sidebar-footer { position: relative; background: transparent; }
-    .main { margin-left: 0; padding: 20px; }
+    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
+    .menu { overflow: visible; }
+    .main { padding: 20px; }
     .info-label { min-width: 150px; }
     .req-grid { grid-template-columns: 1fr; }
   }
@@ -511,10 +477,7 @@
 <aside class="sidebar" aria-label="Navigazione principale">
   <img id="logo-cri" src="logo.svg" alt="Logo Croce Rossa Italiana" />
   <ul class="menu" id="menu-sidebar" role="navigation" aria-label="Menu principale"></ul>
-
-  <div class="sidebar-footer">
-    <button id="logout" type="button">🚪 Logout</button>
-  </div>
+  <button id="logout" type="button">Logout</button>
 </aside>
 
 <main class="main">
@@ -660,7 +623,7 @@ document.getElementById("logout").addEventListener("click", logout);
 function normalize(s){ return (s || "").toLowerCase().trim(); }
 
 /* ===========================
-   LOGO + MENU
+   LOGO + MENU (IDENTICI A index.html)
 =========================== */
 const logoImg = document.getElementById("logo-cri");
 let logoSrc = "logo.svg";
@@ -864,7 +827,6 @@ function startOfToday() {
 }
 
 function getEventoEndDate(ev) {
-  // fine se presente, altrimenti inizio
   const d = ev.dataFine || ev.dataInizio;
   if (!d) return null;
   const dt = new Date(d);
@@ -872,7 +834,6 @@ function getEventoEndDate(ev) {
   return dt;
 }
 
-// ✅ evento chiuso se data fine/inizio < oggi
 function isEventoChiuso(ev) {
   const end = getEventoEndDate(ev);
   if (!end) return false;
@@ -994,7 +955,6 @@ reqSave.addEventListener("click", () => {
   let qualificheSel = getCheckedValues(".rq-qualifica");
   let patentiSel = getCheckedValues(".rq-patente");
 
-  // regola NESSUNA
   if (patentiSel.includes("NESSUNA") && patentiSel.length > 1) {
     patentiSel = patentiSel.filter(x => x !== "NESSUNA");
   }
@@ -1049,7 +1009,6 @@ function normalizeIscrizioniForEvento(ev) {
   return changed;
 }
 
-/* ✅ requisiti separati */
 function normalizeRequisitiEvento(ev) {
   let changed = false;
   if (!Array.isArray(ev.qualificheRichieste)) ev.qualificheRichieste = [];
@@ -1109,7 +1068,6 @@ function intersects(a, b) {
   return false;
 }
 
-// ✅ basta 1 qualifica richiesta O 1 patente richiesta (se impostate)
 function volontarioSoddisfaRequisiti(ev, vol) {
   normalizeRequisitiEvento(ev);
 
@@ -1119,14 +1077,11 @@ function volontarioSoddisfaRequisiti(ev, vol) {
   const volQ = (vol?.qualifiche || []);
   const volP = (vol?.patenti || []);
 
-  // se non richiede qualifiche -> ok
   const okQ = reqQ.length === 0 ? true : intersects(volQ, reqQ);
 
-  // se non richiede patenti o richiede "NESSUNA" -> ok
   const reqPclean = reqP.filter(x => x && x !== "NESSUNA");
   const okP = reqPclean.length === 0 ? true : intersects(volP, reqPclean);
 
-  // ✅ entrambe le categorie devono essere ok (se una categoria è vuota, è ok)
   return okQ && okP;
 }
 
@@ -1145,10 +1100,10 @@ function getVisibleEventi() {
     const closed = isEventoChiuso(ev);
 
     if (role === "sop" || role === "amministratore") return true;
-    if (role === "sol") return true; // ✅ SOL vede anche chiusi (memoria)
+    if (role === "sol") return true;
 
     if (role === "volontario") {
-      if (closed) return false; // ✅ non visibile se chiuso
+      if (closed) return false;
       if (!c) return false;
 
       if (isApprovedGlobally) return true;
@@ -1181,7 +1136,6 @@ function canManageIscrizioniForEvent(ev) {
   return creator === c || dest.includes(c) || globalApproved;
 }
 
-/* ✅ richiesta iscrizione volontario */
 function getMyIscrizione(ev, cf) {
   normalizeIscrizioniForEvento(ev);
   const cSol = normalize(comitato);
@@ -1210,13 +1164,11 @@ function richiediIscrizione(eventId) {
     return;
   }
 
-  // requisiti OR (basta 1)
   if (!volontarioSoddisfaRequisiti(ev, vol)) {
     alert("⛔ Non possiedi i requisiti richiesti (serve almeno 1 qualifica/patente richiesta).");
     return;
   }
 
-  // capienza
   const max = ev.maxPartecipanti || 0;
   if (max > 0) {
     const occupati = countOccupati(ev);
@@ -1324,7 +1276,6 @@ function showInfoPopup(evento) {
 <div><span class="info-label">Descrizione:</span><span class="info-value">${escapeHtml(evento.descrizione)}</span></div>
   `;
 
-  // se volontario -> bottone richiedi iscrizione (solo se aperto)
   let bloccoVol = "";
   if (role === "volontario") {
     const vol = getVolontarioByCf(cfUtente);
