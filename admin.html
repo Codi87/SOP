@@ -1,199 +1,195 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Area Admin - CRI</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b71c1c">
+
 <style>
   :root {
     --rosso-cri: #b71c1c;
     --bianco: #ffffff;
     --grigio: #f5f5f5;
-    --grigio-scuro: #e0e0e0;
-    --blu-info: #007bff;
-    --verde: #4caf50;
-    --arancione: #ff9800;
+
+    /* solo per grafica contenuti (non sidebar) */
     --blu: #2196f3;
+    --verde: #4caf50;
   }
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: Arial, sans-serif;
     display: flex;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--grigio) 0%, #e8f0fe 100%);
+    background: var(--grigio);
   }
+
+  /* ✅ SIDEBAR IDENTICA A index.html */
   .sidebar {
     width: 260px;
     flex-shrink: 0;
-    background: linear-gradient(180deg, var(--rosso-cri) 0%, #9a0007 100%);
+    background: var(--rosso-cri);
     color: var(--bianco);
     display: flex;
     flex-direction: column;
     padding-top: 20px;
     height: 100vh;
-    overflow-y: auto;
+    overflow: hidden;
     align-items: center;
-    box-shadow: 2px 0 15px rgba(183,28,28,0.3);
   }
   .sidebar img {
     width: 220px;
-    margin-bottom: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+    border-radius: 8px;
   }
+
   .menu {
     list-style: none;
     padding: 0;
     width: 100%;
+    flex-grow: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .menu li { width: 100%; }
   .menu a {
-    display: flex;
-    align-items: center;
-    padding: 18px 25px;
+    display: block;
+    padding: 15px 20px;
     color: var(--bianco);
     text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border-left: 4px solid transparent;
+    font-weight: bold;
   }
-  .menu a:hover, .menu a.active { 
-    background: rgba(255,255,255,0.15);
-    border-left-color: var(--bianco);
-    transform: translateX(5px);
-  }
+  .menu a:hover, .menu a.active { background: #9f1b1b; }
+
   #logout {
-    margin-top: auto;
-    margin-bottom: 30px;
-    padding: 15px 30px;
-    width: 85%;
-    background: rgba(255,255,255,0.95);
+    flex-shrink: 0;
+    margin: 12px auto 20px auto;
+    padding: 10px 20px;
+    width: 80%;
+    background-color: #fff;
     color: var(--rosso-cri);
-    border: none;
-    border-radius: 25px;
-    font-weight: 700;
-    font-size: 1rem;
+    border: 2px solid var(--rosso-cri);
+    border-radius: 6px;
+    font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: background 0.3s, color 0.3s;
   }
-  #logout:hover {
-    background: var(--rosso-cri);
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(183,28,28,0.4);
-  }
+  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
+
+  /* ✅ MAIN come index (scroll/layout) */
   .main {
     flex-grow: 1;
-    padding: 40px;
+    padding: 30px;
     background: var(--bianco);
     overflow-y: auto;
+    position: relative;
   }
-  .main h1 { 
-    color: var(--rosso-cri); 
-    margin: 0 0 25px 0; 
-    font-size: 2.5rem;
-    font-weight: 700;
+
+  .main h1 {
+    color: var(--rosso-cri);
+    margin: 0 0 20px 0;
+    font-size: 2rem;
   }
-  
-  /* Cards Dashboard - 3 colonne desktop, 2 mobile */
+
+  /* ====== GRAFICA CONTENUTO (come "prima", più carina) ====== */
   .cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
     gap: 25px;
-    margin-bottom: 40px;
+    margin-top: 10px;
   }
+
   .card {
     background: rgba(255,255,255,0.95);
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    transition: all 0.3s ease;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.10);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.25s ease;
     position: relative;
     overflow: hidden;
   }
   .card::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 5px;
     background: linear-gradient(90deg, var(--rosso-cri), var(--blu));
   }
   .card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.13);
   }
-  .card h2 { 
-    margin: 0 0 20px 0; 
-    color: var(--rosso-cri); 
-    font-size: 1.5rem;
-    font-weight: 700;
+
+  .card h2 {
+    margin: 0 0 14px 0;
+    color: var(--rosso-cri);
+    font-size: 1.35rem;
+    font-weight: 800;
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  .card p { 
-    line-height: 1.7; 
-    color: #444; 
-    margin-bottom: 15px;
+
+  .card p {
+    line-height: 1.7;
+    color: #444;
+    margin-bottom: 12px;
   }
-  .btn-admin {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 15px;
-    padding: 12px 24px;
-    background: linear-gradient(45deg, var(--rosso-cri), #d32f2f);
-    color: #fff;
-    border-radius: 25px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(183,28,28,0.3);
-  }
-  .btn-admin:hover { 
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(183,28,28,0.4);
-  }
+
   .stat-number {
     font-size: 3rem;
-    font-weight: 800;
+    font-weight: 900;
     background: linear-gradient(45deg, var(--rosso-cri), var(--blu));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin: 15px 0;
+    margin: 10px 0 6px;
     line-height: 1;
   }
+
   .stat-label {
     font-size: 1rem;
     color: #666;
-    font-weight: 500;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .btn-admin {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 12px 22px;
+    background: linear-gradient(45deg, var(--rosso-cri), #d32f2f);
+    color: #fff;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 800;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(183,28,28,0.25);
+    border: 0;
+  }
+  .btn-admin:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(183,28,28,0.35);
   }
 
   @media (max-width: 768px) {
     body { flex-direction: column; }
-    .sidebar {
-      width: 100%;
-      height: auto;
-      padding: 20px;
-    }
-    .cards {
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    .main { padding: 25px 20px; }
+    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
+    .menu { overflow: visible; }
+    .main { padding: 20px; }
+    .cards { grid-template-columns: 1fr; gap: 18px; }
   }
 </style>
 </head>
+
 <body>
 <aside class="sidebar" aria-label="Navigazione principale">
   <img id="logo-cri" src="logo.svg" alt="Logo Croce Rossa Italiana" />
@@ -203,77 +199,69 @@
 
 <main class="main" tabindex="-1">
   <h1 id="page-title">⚙️ Area Amministratore</h1>
-  
+
   <div class="cards">
-    <!-- ISCRIZIONI -->
     <div class="card">
       <h2>📋 Iscrizioni in attesa</h2>
       <p>Candidature inserite dal form pubblico, in attesa di approvazione.</p>
-      <p><span class="stat-number" id="num-iscrizioni">0</span></p>
-      <p class="stat-label">candidature da approvare</p>
+      <div class="stat-number" id="num-iscrizioni">0</div>
+      <div class="stat-label">candidature da approvare</div>
       <a href="iscrizioni-in-attesa.html" class="btn-admin">📝 Gestisci iscrizioni</a>
     </div>
 
-    <!-- VOLONTARI -->
     <div class="card">
       <h2>👥 Volontari attivi</h2>
       <p>Totale volontari registrati e approvati nel sistema.</p>
-      <p><span class="stat-number" id="num-volontari">0</span></p>
-      <p class="stat-label">volontari gestiti</p>
+      <div class="stat-number" id="num-volontari">0</div>
+      <div class="stat-label">volontari gestiti</div>
       <a href="volontari.html" class="btn-admin">👀 Vedi volontari</a>
     </div>
 
-    <!-- MEZZI -->
     <div class="card">
       <h2>🚗 Mezzi disponibili</h2>
       <p>Veicoli e mezzi operativi registrati.</p>
-      <p><span class="stat-number" id="num-mezzi">0</span></p>
-      <p class="stat-label">mezzi in flotta</p>
+      <div class="stat-number" id="num-mezzi">0</div>
+      <div class="stat-label">mezzi in flotta</div>
       <a href="mezzi.html" class="btn-admin">🔧 Gestisci mezzi</a>
     </div>
 
-    <!-- MATERIALI -->
     <div class="card">
       <h2>📦 Materiali</h2>
       <p>Inventario materiali e attrezzature disponibili.</p>
-      <p><span class="stat-number" id="num-materiali">0</span></p>
-      <p class="stat-label">materiali registrati</p>
+      <div class="stat-number" id="num-materiali">0</div>
+      <div class="stat-label">materiali registrati</div>
       <a href="materiali.html" class="btn-admin">📋 Gestisci materiali</a>
     </div>
 
-    <!-- EMERGENZE -->
     <div class="card">
       <h2>🚨 Emergenze attive</h2>
       <p>Interventi di emergenza attualmente in corso.</p>
-      <p><span class="stat-number" id="num-emergenze">0</span></p>
-      <p class="stat-label">emergenze in corso</p>
+      <div class="stat-number" id="num-emergenze">0</div>
+      <div class="stat-label">emergenze in corso</div>
       <a href="emergenze.html" class="btn-admin">🚨 Vedi emergenze</a>
     </div>
 
-    <!-- EVENTI -->
     <div class="card">
       <h2>📅 Eventi programmati</h2>
       <p>Eventi e attività in calendario.</p>
-      <p><span class="stat-number" id="num-eventi">0</span></p>
-      <p class="stat-label">eventi pianificati</p>
+      <div class="stat-number" id="num-eventi">0</div>
+      <div class="stat-label">eventi pianificati</div>
       <a href="eventi.html" class="btn-admin">📅 Vedi eventi</a>
     </div>
 
-    <!-- NUOVO: TIMBRATURE TLC -->
     <div class="card">
       <h2>📡 Timbrature TLC</h2>
       <p>Timbrature ore TLC in attesa di approvazione da parte degli operatori.</p>
-      <p><span class="stat-number" id="num-timbrature-tlc">0</span></p>
-      <p class="stat-label">timbrature da confermare</p>
+      <div class="stat-number" id="num-timbrature-tlc">0</div>
+      <div class="stat-label">timbrature da confermare</div>
       <a href="tlc.html" class="btn-admin">⏱️ Gestisci timbrature TLC</a>
     </div>
 
-    <!-- TOTALE ORE TLC -->
     <div class="card">
       <h2>⏱️ Ore TLC Totali</h2>
       <p>Totale ore TLC approvate da tutti gli operatori.</p>
-      <p><span class="stat-number" id="totale-ore-tlc" style="color: var(--verde);">0</span></p>
-      <p class="stat-label">ore totali confermate</p>
+      <div class="stat-number" id="totale-ore-tlc">0</div>
+      <div class="stat-label">ore totali confermate</div>
       <a href="tlc.html#timbrature-section" class="btn-admin">📊 Vedi dettaglio</a>
     </div>
   </div>
@@ -282,8 +270,8 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const userId = localStorage.getItem("userId");
-  const role = localStorage.getItem("role");
-  const comitato = localStorage.getItem("comitato");
+  const role = (localStorage.getItem("role") || "").toLowerCase().trim();
+  const comitato = localStorage.getItem("comitato") || "";
 
   // ✅ Accesso: SOP, Amministratore e SOL
   if (!userId || (role !== "sop" && role !== "amministratore" && role !== "sol")) {
@@ -292,15 +280,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // LOGO in base a ruolo/comitato
+  const normalize = (s) => (s || "").toString().toLowerCase().trim();
+
+  // ✅ LOGO (uguale a index.html)
   const logoImg = document.getElementById("logo-cri");
   let logoSrc = "logo.svg";
 
-  if (role === "sop" || role === "amministratore") {
-    logoSrc = "logo-sop.svg";
-  } else if (role === "sol") {
-    const c = (comitato || "").toLowerCase();
-    const comitatiMap = {
+  if (role === "sol") {
+    const c = normalize(comitato);
+    const map = {
       "pesaro": "logo-pesaro.svg",
       "urbino": "logo-urbino.svg",
       "fano": "logo-fano.svg",
@@ -314,121 +302,129 @@ document.addEventListener("DOMContentLoaded", () => {
       "santangelo in vado": "logo-santangeloinvado.svg",
       "sant-angelo-in-vado": "logo-santangeloinvado.svg"
     };
-    logoSrc = comitatiMap[c] || "logo-sop.svg";
+    logoSrc = map[c] || "logo-sop.svg";
+  } else if (role === "sop" || role === "amministratore" || role === "tlc_provinciale") {
+    logoSrc = "logo-sop.svg";
   }
-  logoImg.src = logoSrc;
 
-  // Titolo personalizzato
+  logoImg.src = logoSrc;
+  logoImg.onerror = () => { logoImg.src = "logo-sop.svg"; };
+
+  // Titolo
   const pageTitle = document.getElementById("page-title");
   if (role === "sop" || role === "amministratore") {
     pageTitle.textContent = "⚙️ Area Admin - SOP Provinciale";
   } else if (role === "sol") {
-    pageTitle.textContent = `⚙️ Area Admin - SOL ${comitato || ""}`;
+    pageTitle.textContent = `⚙️ Area Admin - SOL ${comitato}`;
   }
 
-  function logout() {
+  // Logout
+  document.getElementById("logout").addEventListener("click", () => {
     localStorage.clear();
     window.location.href = "login.html";
-  }
-  document.getElementById("logout").addEventListener("click", logout);
+  });
 
-  // Menu laterale con emoji
+  // ✅ MENU IDENTICO A index.html
   const menu = document.getElementById("menu-sidebar");
-  const menuItems = [
+  menu.innerHTML = "";
+
+  const items = [
     { text: "🏠 Home", href: "index.html" },
-    { text: "✅ Approvazioni", href: "approvazioni.html" },
+    { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html" },
     { text: "👥 Volontari", href: "volontari.html" },
     { text: "🚗 Mezzi", href: "mezzi.html" },
     { text: "📦 Materiali", href: "materiali.html" },
     { text: "🚨 Emergenze", href: "emergenze.html" },
     { text: "📅 Eventi", href: "eventi.html" },
-    { text: "📄 Documenti", href: "documenti.html" },
-    { text: "📡 TLC", href: "tlc.html" }
+    { text: "📄 Documenti", href: "documenti.html" }
   ];
 
-  if (role === "sop" || role === "sol" || role === "amministratore") {
-    menuItems.push({ text: "⚙️ Admin", href: "admin.html" });
+  if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
+    items.push({ text: "📡 TLC", href: "tlc.html" });
+  }
+  if (["sop", "sol", "amministratore"].includes(role)) {
+    items.push({ text: "⚙️ Admin", href: "admin.html" });
   }
 
-  menuItems.forEach(item => {
+  items.forEach(({ text, href }) => {
     const li = document.createElement("li");
     const a = document.createElement("a");
-    a.href = item.href;
-    a.textContent = item.text;
-    if (item.text.includes("Admin")) a.classList.add("active");
+    a.href = href;
+    a.textContent = text;
+    if (href === "admin.html") a.classList.add("active");
     li.appendChild(a);
     menu.appendChild(li);
   });
 
-  // === STATISTICHE ORIGINALI ===
-  
+  // ====== STATISTICHE ======
+
   // 1. ISCRIZIONI IN ATTESA
   let iscrizioni = JSON.parse(localStorage.getItem("volontari-pubblici") || "[]");
   if (role === "sol") {
-    const c = (comitato || "").toLowerCase();
-    iscrizioni = iscrizioni.filter(v => (v.comitato || "").toLowerCase() === c);
+    const c = normalize(comitato);
+    iscrizioni = iscrizioni.filter(v => normalize(v.comitato) === c);
   }
   document.getElementById("num-iscrizioni").textContent = iscrizioni.length;
 
   // 2. VOLONTARI ATTIVI
   let volontari = JSON.parse(localStorage.getItem("volontari") || "[]");
   if (role === "sol") {
-    const c = (comitato || "").toLowerCase();
-    volontari = volontari.filter(v => (v.comitato || "").toLowerCase() === c);
+    const c = normalize(comitato);
+    volontari = volontari.filter(v => normalize(v.comitato) === c);
   }
   document.getElementById("num-volontari").textContent = volontari.length;
 
   // 3. MEZZI
   let mezzi = JSON.parse(localStorage.getItem("mezzi") || "[]");
   if (role === "sol") {
-    const c = (comitato || "").toLowerCase();
-    mezzi = mezzi.filter(m => (m.comitato || "").toLowerCase() === c);
+    const c = normalize(comitato);
+    mezzi = mezzi.filter(m => normalize(m.comitato) === c);
   }
   document.getElementById("num-mezzi").textContent = mezzi.length;
 
   // 4. MATERIALI
   let materiali = JSON.parse(localStorage.getItem("materiali") || "[]");
   if (role === "sol") {
-    const c = (comitato || "").toLowerCase();
-    materiali = materiali.filter(m => (m.comitato || "").toLowerCase() === c);
+    const c = normalize(comitato);
+    materiali = materiali.filter(m => normalize(m.comitato) === c);
   }
   document.getElementById("num-materiali").textContent = materiali.length;
 
   // 5. EMERGENZE
   let emergenze = JSON.parse(localStorage.getItem("emergenze") || "[]");
   if (role === "sol") {
-    const c = (comitato || "").toLowerCase();
-    emergenze = emergenze.filter(e => (e.comitato || "").toLowerCase() === c);
+    const c = normalize(comitato);
+    emergenze = emergenze.filter(e => normalize(e.comitato) === c);
   }
   document.getElementById("num-emergenze").textContent = emergenze.length;
 
   // 6. EVENTI
   let eventi = JSON.parse(localStorage.getItem("eventi") || "[]");
   if (role === "sol") {
-    const c = (comitato || "").toLowerCase();
-    eventi = eventi.filter(e => (e.comitato || "").toLowerCase() === c);
+    const c = normalize(comitato);
+    eventi = eventi.filter(e => normalize(e.comitatoCreatore || e.comitato || "") === c);
   }
   document.getElementById("num-eventi").textContent = eventi.length;
 
-  // === NUOVE STATISTICHE TLC ===
-  
   // 7. TIMBRATURE TLC IN ATTESA
   let timbratureTlc = JSON.parse(localStorage.getItem("timbrature-tlc") || "[]");
-  const timbratureInAttesa = timbratureTlc.filter(t => t.stato === "attesa").length;
+  const timbratureInAttesa = timbratureTlc.filter(t => (t.stato || "") === "attesa").length;
   document.getElementById("num-timbrature-tlc").textContent = timbratureInAttesa;
 
   // 8. TOTALE ORE TLC APPROVATE
   function calcolaOre(inizio, fine) {
-    const [h1, m1] = inizio.split(':').map(Number);
-    const [h2, m2] = fine.split(':').map(Number);
+    if (!inizio || !fine) return 0;
+    const [h1, m1] = String(inizio).split(':').map(Number);
+    const [h2, m2] = String(fine).split(':').map(Number);
+    if ([h1,m1,h2,m2].some(x => Number.isNaN(x))) return 0;
     const diffMin = (h2 * 60 + m2) - (h1 * 60 + m1);
-    return Math.floor(diffMin / 60);
+    return Math.max(0, Math.floor(diffMin / 60));
   }
 
   const totaleOreApprovate = timbratureTlc
-    .filter(t => t.stato === "approvato")
+    .filter(t => (t.stato || "") === "approvato")
     .reduce((sum, t) => sum + calcolaOre(t.inizio, t.fine), 0);
-  
+
   document.getElementById("totale-ore-tlc").textContent = totaleOreApprovate;
 });
 </script>
