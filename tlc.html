@@ -23,104 +23,66 @@
     background: linear-gradient(135deg, var(--grigio) 0%, #e8f0fe 100%);
   }
 
-  /* ✅ Sidebar: menu scroll + logout sticky (come richiesto) */
+  /* ===== SIDEBAR IDENTICA A INDEX (tranne logo che resta TLC) ===== */
   .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
     width: 260px;
-    height: 100vh;
+    flex-shrink: 0;
     background: var(--rosso-cri);
     color: var(--bianco);
     display: flex;
     flex-direction: column;
     padding-top: 20px;
-    z-index: 1000;
-    align-items: center;
-
-    /* importante: niente scroll sulla sidebar intera */
+    height: 100vh;
     overflow: hidden;
+    align-items: center;
   }
-
   .sidebar img {
     width: 220px;
-    margin-bottom: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    flex-shrink: 0;
+    margin-bottom: 20px;
+    border-radius: 8px;
   }
 
-  /* ✅ scroll SOLO nel menu */
   .menu {
     list-style: none;
     padding: 0;
     width: 100%;
     flex-grow: 1;
     overflow-y: auto;
-    overflow-x: hidden;
+    overscroll-behavior: contain;
   }
-
   .menu li { width: 100%; }
-
   .menu a {
-    display: flex;
-    align-items: center;
-    padding: 18px 25px;
+    display: block;
+    padding: 15px 20px;
     color: var(--bianco);
     text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    border-left: 4px solid transparent;
+    font-weight: bold;
   }
-  .menu a:hover, .menu a.active {
-    background: rgba(255,255,255,0.15);
-    border-left-color: var(--bianco);
-    transform: translateX(5px);
-  }
-
-  /* ✅ footer sempre visibile */
-  .sidebar-footer {
-    width: 100%;
-    flex-shrink: 0;
-    padding: 16px 0 22px;
-    display: flex;
-    justify-content: center;
-
-    background: linear-gradient(
-      to top,
-      rgba(183, 28, 28, 1) 0%,
-      rgba(183, 28, 28, 0.95) 70%,
-      rgba(183, 28, 28, 0) 100%
-    );
-  }
+  .menu a:hover, .menu a.active { background: #9f1b1b; }
 
   #logout {
-    padding: 15px 30px;
-    width: 85%;
-    background: rgba(255,255,255,0.95);
+    flex-shrink: 0;
+    margin: 12px auto 20px auto;
+    padding: 10px 20px;
+    width: 80%;
+    background-color: #fff;
     color: var(--rosso-cri);
-    border: none;
-    border-radius: 25px;
-    font-weight: 700;
-    font-size: 1rem;
+    border: 2px solid var(--rosso-cri);
+    border-radius: 6px;
+    font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: background 0.3s, color 0.3s;
   }
-  #logout:hover {
-    background: var(--rosso-cri);
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(183,28,28,0.4);
-  }
+  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
 
-  /* Main */
+  /* ===== MAIN allineata a INDEX (no margin-left) ===== */
   .main {
-    margin-left: 260px;
+    flex-grow: 1;
     padding: 30px;
     background: var(--bianco);
-    min-height: 100vh;
     overflow-y: auto;
+    position: relative;
+    min-height: 100vh;
     width: 100%;
   }
 
@@ -304,28 +266,12 @@
     margin-bottom: 18px;
   }
 
+  /* ===== RESPONSIVE identico a INDEX per sidebar/menu ===== */
   @media (max-width: 768px) {
     body { flex-direction: column; }
-
-    .sidebar {
-      position: relative;
-      width: 100%;
-      height: auto;
-      overflow: visible;
-    }
-
-    .menu {
-      max-height: none;
-      overflow: visible;
-      flex-grow: 0;
-    }
-
-    .sidebar-footer {
-      background: transparent;
-      padding: 12px 0 18px;
-    }
-
-    .main { margin-left: 0; padding: 20px; }
+    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
+    .menu { overflow: visible; }
+    .main { padding: 20px; }
     .cards { grid-template-columns: 1fr; gap: 18px; }
     .form-grid { grid-template-columns: 1fr; }
   }
@@ -333,15 +279,11 @@
 </head>
 <body>
 
-<aside class="sidebar" aria-label="Navigazione TLC">
-  <!-- ✅ Logo sempre TLC -->
+<aside class="sidebar" aria-label="Navigazione principale">
+  <!-- ✅ Logo sempre TLC (come richiesto) -->
   <img id="logo-cri" src="logo-tlc.svg" alt="Logo TLC CRI" />
-
   <ul class="menu" id="menu-sidebar"></ul>
-
-  <div class="sidebar-footer">
-    <button id="logout" type="button">Logout</button>
-  </div>
+  <button id="logout" type="button">Logout</button>
 </aside>
 
 <main class="main">
@@ -434,7 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // ✅ In TLC: logo sempre TLC per tutti
+  // ✅ In TLC: logo sempre TLC per tutti (come richiesto)
   const logoImg = document.getElementById("logo-cri");
   if (logoImg) {
     logoImg.src = "logo-tlc.svg";
@@ -462,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // ---- Menu ----
+  // ---- Menu (ALLINEATO A INDEX + Admin per ruoli abilitati) ----
   const menu = document.getElementById("menu-sidebar");
   menu.innerHTML = "";
 
@@ -473,19 +415,34 @@ document.addEventListener("DOMContentLoaded", () => {
     { text: "📡 TLC", href: "tlc.html" }
   ];
 
-  const menuOps = [
-    { text: "🏠 Home", href: "index.html" },
-    { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html" },
-    { text: "👥 Volontari", href: "volontari.html" },
-    { text: "🚗 Mezzi", href: "mezzi.html" },
-    { text: "📦 Materiali", href: "materiali.html" },
-    { text: "🚨 Emergenze", href: "emergenze.html" },
-    { text: "📅 Eventi", href: "eventi.html" },
-    { text: "📄 Documenti", href: "documenti.html" },
-    { text: "📡 TLC", href: "tlc.html" }
-  ];
+  const items = [];
 
-  const items = isVolontario ? menuVol : menuOps;
+  if (isVolontario) {
+    items.push(...menuVol);
+  } else {
+    // stesso ordine/voci di index
+    items.push(
+      { text: "🏠 Home", href: "index.html" },
+      { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html" },
+      { text: "👥 Volontari", href: "volontari.html" },
+      { text: "🚗 Mezzi", href: "mezzi.html" },
+      { text: "📦 Materiali", href: "materiali.html" },
+      { text: "🚨 Emergenze", href: "emergenze.html" },
+      { text: "📅 Eventi", href: "eventi.html" },
+      { text: "📄 Documenti", href: "documenti.html" }
+    );
+
+    // TLC: come index
+    if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
+      items.push({ text: "📡 TLC", href: "tlc.html" });
+    }
+
+    // ✅ Admin: aggiunto come richiesto, con gli stessi requisiti di index
+    if (["sop", "sol", "amministratore"].includes(role)) {
+      items.push({ text: "⚙️ Admin", href: "admin.html" });
+    }
+  }
+
   items.forEach(it => {
     const li = document.createElement("li");
     const a = document.createElement("a");
@@ -496,7 +453,7 @@ document.addEventListener("DOMContentLoaded", () => {
     menu.appendChild(li);
   });
 
-  // ✅ Logout (sempre raggiungibile e cliccabile)
+  // ✅ Logout identico a index
   document.getElementById("logout").addEventListener("click", () => {
     localStorage.clear();
     window.location.href = "login.html";
