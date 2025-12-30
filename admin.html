@@ -9,197 +9,211 @@
 <meta name="theme-color" content="#b71c1c">
 
 <style>
-  :root {
-    --rosso-cri: #b71c1c;
-    --bianco: #ffffff;
-    --grigio: #f5f5f5;
+  :root{
+    --rosso-cri:#b71c1c;
+    --bianco:#ffffff;
+    --grigio:#f5f5f5;
 
-    /* solo per grafica contenuti (non sidebar) */
-    --blu: #2196f3;
-    --verde: #4caf50;
+    --blu:#2196f3;
+
+    --role-admin:#b71c1c;
+    --role-sop:#ef6c00;
+    --role-tlc:#1976d2;
+    --role-sol:#f9a825;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
 
-  /* ✅ layout: scroll SOLO nel main (sidebar ferma) */
-  html, body { height: 100%; }
-  body {
+  /* ✅ Layout: scroll SOLO nel main, sidebar ferma */
+  html, body{ height:100%; }
+  body{
     font-family: Arial, sans-serif;
-    display: flex;
     background: var(--grigio);
-    overflow: hidden; /* ✅ evita lo scroll della pagina: scrolla solo il main */
+    display:flex;
+    overflow:hidden; /* ✅ evita lo “spazio bianco” sotto */
   }
 
-  /* ✅ SIDEBAR IDENTICA A index.html, ma FISSA */
-  .sidebar {
-    position: fixed;
-    left: 0; top: 0;
-    width: 260px;
-    height: 100vh;
+  /* ✅ SIDEBAR IDENTICA A index.html (con scroll interno menu) */
+  .sidebar{
+    width:260px;
+    flex-shrink:0;
     background: var(--rosso-cri);
     color: var(--bianco);
-    display: flex;
-    flex-direction: column;
-    padding-top: 20px;
-    overflow: hidden;     /* ✅ niente scroll sulla sidebar intera */
-    align-items: center;
-    z-index: 1000;
+    display:flex;
+    flex-direction:column;
+    padding-top:20px;
+    height:100vh;
+    position:sticky;
+    top:0;
+    overflow:hidden; /* lo scroll lo fa il menu */
+    align-items:center;
   }
-  .sidebar img {
-    width: 220px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    flex-shrink: 0;
+  .sidebar img{
+    width:220px;
+    margin-bottom:20px;
+    border-radius:8px;
+    flex-shrink:0;
   }
 
-  /* ✅ scroll SOLO nel menu (quando ci passi sopra col mouse) */
-  .menu {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-    flex-grow: 1;
-    overflow-y: auto;
+  .menu{
+    list-style:none;
+    padding:0;
+    width:100%;
+    flex:1 1 auto;
+    overflow-y:auto;                 /* ✅ scroll solo qui */
     overscroll-behavior: contain;
-    overflow-x: hidden;
   }
-  .menu li { width: 100%; }
-  .menu a {
-    display: block;
-    padding: 15px 20px;
-    color: var(--bianco);
-    text-decoration: none;
-    font-weight: bold;
+  .menu li{ width:100%; }
+  .menu a{
+    display:block;
+    padding:15px 20px;
+    color:var(--bianco);
+    text-decoration:none;
+    font-weight:bold;
   }
-  .menu a:hover, .menu a.active { background: #9f1b1b; }
+  .menu a:hover, .menu a.active{ background:#9f1b1b; }
 
-  #logout {
-    flex-shrink: 0;
-    margin: 12px auto 20px auto;
-    padding: 10px 20px;
-    width: 80%;
-    background-color: #fff;
-    color: var(--rosso-cri);
-    border: 2px solid var(--rosso-cri);
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s, color 0.3s;
+  /* scrollbar sidebar come in eventi/emergenze */
+  .menu::-webkit-scrollbar{ width:10px; }
+  .menu::-webkit-scrollbar-track{ background: rgba(255,255,255,0.12); }
+  .menu::-webkit-scrollbar-thumb{
+    background: rgba(255,255,255,0.35);
+    border-radius:999px;
+    border:2px solid rgba(183,28,28,0.9);
   }
-  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
+  .menu::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.55); }
+  .menu{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.45) rgba(255,255,255,0.12); }
+
+  #logout{
+    flex-shrink:0;
+    margin:12px auto 20px auto;
+    padding:10px 20px;
+    width:80%;
+    background:#fff;
+    color:var(--rosso-cri);
+    border:2px solid var(--rosso-cri);
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+    transition: background .3s, color .3s;
+  }
+  #logout:hover{ background: var(--rosso-cri); color:#fff; }
 
   /* ✅ MAIN: scroll interno */
-  .main {
-    margin-left: 260px;      /* spazio sidebar fissa */
-    width: calc(100% - 260px);
-    height: 100vh;
-    padding: 30px;
+  .main{
+    flex:1 1 auto;
+    height:100vh;
+    overflow-y:auto;
     background: var(--bianco);
-    overflow-y: auto;        /* ✅ scroll qui */
-    position: relative;
+    padding:30px;
   }
 
-  .main h1 {
+  .main h1{
     color: var(--rosso-cri);
-    margin: 0 0 20px 0;
-    font-size: 2rem;
+    margin:0 0 20px 0;
+    font-size:2rem;
   }
 
-  /* ====== GRAFICA CONTENUTO ====== */
-  .cards {
-    display: grid;
+  /* ====== Cards uniformi ====== */
+  .cards{
+    display:grid;
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 25px;
-    margin-top: 10px;
+    gap:25px;
+    align-items: stretch;
   }
 
-  .card {
+  .card{
     background: rgba(255,255,255,0.95);
     border-radius: 20px;
     padding: 30px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.10);
     border: 1px solid rgba(0,0,0,0.05);
-    transition: all 0.25s ease;
+    transition: transform .2s ease, box-shadow .2s ease;
     position: relative;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
+
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height: 305px; /* ✅ tutte uguali */
   }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 5px;
+  .card::before{
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0;
+    height:5px;
     background: linear-gradient(90deg, var(--rosso-cri), var(--blu));
   }
-  .card:hover {
+  .card:hover{
     transform: translateY(-6px);
     box-shadow: 0 20px 60px rgba(0,0,0,0.13);
   }
 
-  .card h2 {
-    margin: 0 0 14px 0;
+  .card h2{
+    margin:0;
     color: var(--rosso-cri);
     font-size: 1.35rem;
     font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    line-height: 1.2;
   }
 
-  .card p {
-    line-height: 1.7;
-    color: #444;
-    margin-bottom: 12px;
+  .card-desc{
+    margin:0;
+    line-height:1.7;
+    color:#444;
+    min-height: 60px; /* ✅ allinea numeri/bottoni */
   }
 
-  .stat-number {
+  .stat-number{
     font-size: 3rem;
     font-weight: 900;
     background: linear-gradient(45deg, var(--rosso-cri), var(--blu));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin: 10px 0 6px;
-    line-height: 1;
+    line-height:1;
+    margin-top: 2px;
+    min-height: 3.2rem;
+    font-variant-numeric: tabular-nums;
   }
 
-  .stat-label {
+  .stat-label{
     font-size: 1rem;
-    color: #666;
-    font-weight: 600;
-    margin-bottom: 8px;
+    color:#666;
+    font-weight:700;
+    margin: 0;
   }
 
-  .btn-admin {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
+  .btn-admin{
+    margin-top:auto; /* ✅ tutti i bottoni in fondo */
+    align-self:flex-start;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height: 44px;
     padding: 12px 22px;
     background: linear-gradient(45deg, var(--rosso-cri), #d32f2f);
-    color: #fff;
-    border-radius: 999px;
-    text-decoration: none;
-    font-weight: 800;
-    transition: all 0.25s ease;
+    color:#fff;
+    border-radius:999px;
+    text-decoration:none;
+    font-weight:800;
+    font-size:0.95rem;
+    border:0;
+    cursor:pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
     box-shadow: 0 4px 15px rgba(183,28,28,0.25);
-    border: 0;
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    white-space: nowrap; /* ✅ evita “spostamenti” del bottone */
   }
-  .btn-admin:hover {
+  .btn-admin:hover{
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(183,28,28,0.35);
-  }
-
-  /* ✅ allinea i bottoni in fondo alle card */
-  .card .btn-admin { margin-top: auto; align-self: flex-start; }
-  .card .stat-label { margin-bottom: 12px; }
-
-  @media (max-width: 768px) {
-    body { flex-direction: column; overflow: auto; } /* su mobile scroll normale */
-    .sidebar { position: relative; width: 100%; height: auto; padding: 15px; overflow: visible; }
-    .menu { overflow: visible; }
-    .main { margin-left: 0; width: 100%; height: auto; padding: 20px; overflow: visible; }
-    .cards { grid-template-columns: 1fr; gap: 18px; }
   }
 
   /* =========================
@@ -214,6 +228,7 @@
     z-index: 3000;
   }
   #ruoli-popup.active{ display:flex; }
+
   #ruoli-box{
     background:#fff;
     width: 980px;
@@ -222,6 +237,7 @@
     overflow:hidden;
     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
   }
+
   #ruoli-header{
     background: var(--rosso-cri);
     color:#fff;
@@ -243,15 +259,17 @@
     flex: 0 0 auto;
   }
   #ruoli-close:hover{ background: rgba(255,255,255,0.28); }
+
   #ruoli-content{
     padding: 18px 20px 20px;
     max-height: 75vh;
     overflow:auto;
   }
+
   .ruoli-table{
     width:100%;
     border-collapse: collapse;
-    min-width: 720px;
+    min-width: 760px;
   }
   .ruoli-table th, .ruoli-table td{
     border: 1px solid #ddd;
@@ -260,54 +278,71 @@
     vertical-align: middle;
   }
   .ruoli-table th{ background:#f3f3f3; color:#333; }
+
+  .role-badge{
+    display:inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 900;
+    font-size: .85rem;
+    border: 2px solid transparent;
+    line-height:1.2;
+    white-space: nowrap;
+  }
+  .rb-admin{ background: rgba(183,28,28,.12); border-color: rgba(183,28,28,.35); color: var(--role-admin); }
+  .rb-sop{ background: rgba(239,108,0,.14); border-color: rgba(239,108,0,.35); color: var(--role-sop); }
+  .rb-tlc{ background: rgba(25,118,210,.14); border-color: rgba(25,118,210,.35); color: var(--role-tlc); }
+  .rb-sol{ background: rgba(249,168,37,.18); border-color: rgba(249,168,37,.45); color: var(--role-sol); }
+
+  .ruolo-row{ border-left: 6px solid transparent; }
+  .ruolo-row.amministratore{ border-left-color: var(--role-admin); }
+  .ruolo-row.sop{ border-left-color: var(--role-sop); }
+  .ruolo-row.tlc_provinciale{ border-left-color: var(--role-tlc); }
+  .ruolo-row.sol{ border-left-color: var(--role-sol); }
+
   .select-role{
     padding: 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-weight: 700;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    font-weight: 900;
+    font-family: inherit;
+    cursor: pointer;
+    background:#fff;
   }
-  
-  /* ✅ colori per ruolo (popup ruoli) */
-  .select-role.role-amministratore{
-    background: rgba(183,28,28,0.12);
-    border-color: rgba(183,28,28,0.55);
-    color: #b71c1c;
-  }
-  .select-role.role-sop{
-    background: rgba(255,152,0,0.16);
-    border-color: rgba(255,152,0,0.65);
-    color: #a35a00;
-  }
-  .select-role.role-tlc_provinciale{
-    background: rgba(33,150,243,0.16);
-    border-color: rgba(33,150,243,0.65);
-    color: #0b63b8;
-  }
-  .select-role.role-sol{
-    background: rgba(255,235,59,0.22);
-    border-color: rgba(255,235,59,0.75);
-    color: #6f6500;
-  }
+  .select-role.role-amministratore{ background: rgba(183,28,28,0.12); border-color: rgba(183,28,28,0.40); color: #8a1010; }
+  .select-role.role-sop{ background: rgba(239,108,0,0.14); border-color: rgba(239,108,0,0.45); color: #b44b00; }
+  .select-role.role-tlc_provinciale{ background: rgba(25,118,210,0.14); border-color: rgba(25,118,210,0.45); color: #0b63b8; }
+  .select-role.role-sol{ background: rgba(249,168,37,0.18); border-color: rgba(249,168,37,0.55); color: #9a6f00; }
 
-  /* Badge ruolo per riconoscimento veloce */
-  .role-cell{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .role-pill{ display:inline-block; padding:4px 10px; border-radius:999px; font-weight:900; font-size:0.8rem; letter-spacing:.2px; }
-  .pill-amministratore{ background: var(--rosso-cri); color:#fff; }
-  .pill-sop{ background: #ff9800; color:#000; }
-  .pill-tlc_provinciale{ background: #2196f3; color:#fff; }
-  .pill-sol{ background: #fff176; color:#000; border: 1px solid #fbc02d; }
-
-.btn-small{
+  .btn-small{
     padding: 8px 12px;
     border:none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor:pointer;
-    font-weight: 800;
-    margin-right: 8px;
+    font-weight: 900;
+    background:#28a745;
+    color:#fff;
   }
-  .btn-save{ background:#28a745; color:#fff; }
-    @media (max-width: 768px){
+  .btn-small:hover{ filter: brightness(1.05); }
+
+  @media (max-width: 768px){
+    body{ flex-direction: column; overflow:auto; }
+    .sidebar{
+      width:100%;
+      height:auto;
+      padding:15px;
+      position:relative;
+      overflow: visible;
+    }
+    .menu{ overflow: visible; }
+    .main{
+      height:auto;
+      overflow: visible;
+      padding:20px;
+    }
+    .cards{ grid-template-columns: 1fr; gap:18px; }
     .ruoli-table{ min-width: 0; }
+    .btn-admin{ white-space: normal; } /* su mobile può andare a capo */
   }
 </style>
 </head>
@@ -322,11 +357,10 @@
 <main class="main" tabindex="-1">
   <h1 id="page-title">⚙️ Area Amministratore</h1>
 
-  
   <div class="cards">
     <div class="card">
       <h2>📋 Iscrizioni in attesa</h2>
-      <p>Candidature inserite dal form pubblico, in attesa di approvazione.</p>
+      <p class="card-desc">Candidature inserite dal form pubblico, in attesa di approvazione.</p>
       <div class="stat-number" id="num-iscrizioni">0</div>
       <div class="stat-label">candidature da approvare</div>
       <a href="iscrizioni-in-attesa.html" class="btn-admin">📝 Gestisci iscrizioni</a>
@@ -334,7 +368,7 @@
 
     <div class="card">
       <h2>👥 Volontari attivi</h2>
-      <p>Totale volontari registrati e approvati nel sistema.</p>
+      <p class="card-desc">Totale volontari registrati e approvati nel sistema.</p>
       <div class="stat-number" id="num-volontari">0</div>
       <div class="stat-label">volontari gestiti</div>
       <a href="volontari.html" class="btn-admin">👀 Vedi volontari</a>
@@ -342,7 +376,7 @@
 
     <div class="card">
       <h2>🚗 Mezzi disponibili</h2>
-      <p>Veicoli e mezzi operativi registrati.</p>
+      <p class="card-desc">Veicoli e mezzi operativi registrati.</p>
       <div class="stat-number" id="num-mezzi">0</div>
       <div class="stat-label">mezzi in flotta</div>
       <a href="mezzi.html" class="btn-admin">🔧 Gestisci mezzi</a>
@@ -350,7 +384,7 @@
 
     <div class="card">
       <h2>📦 Materiali</h2>
-      <p>Inventario materiali e attrezzature disponibili.</p>
+      <p class="card-desc">Inventario materiali e attrezzature disponibili.</p>
       <div class="stat-number" id="num-materiali">0</div>
       <div class="stat-label">materiali registrati</div>
       <a href="materiali.html" class="btn-admin">📋 Gestisci materiali</a>
@@ -358,7 +392,7 @@
 
     <div class="card">
       <h2>🚨 Emergenze attive</h2>
-      <p>Interventi di emergenza attualmente in corso.</p>
+      <p class="card-desc">Interventi di emergenza attualmente in corso.</p>
       <div class="stat-number" id="num-emergenze">0</div>
       <div class="stat-label">emergenze in corso</div>
       <a href="emergenze.html" class="btn-admin">🚨 Vedi emergenze</a>
@@ -366,7 +400,7 @@
 
     <div class="card">
       <h2>📅 Eventi programmati</h2>
-      <p>Eventi e attività in calendario.</p>
+      <p class="card-desc">Eventi e attività in calendario.</p>
       <div class="stat-number" id="num-eventi">0</div>
       <div class="stat-label">eventi pianificati</div>
       <a href="eventi.html" class="btn-admin">📅 Vedi eventi</a>
@@ -374,30 +408,29 @@
 
     <div class="card">
       <h2>📡 Timbrature TLC</h2>
-      <p>Timbrature ore TLC in attesa di approvazione da parte degli operatori.</p>
+      <p class="card-desc">Timbrature ore TLC in attesa di approvazione da parte degli operatori.</p>
       <div class="stat-number" id="num-timbrature-tlc">0</div>
       <div class="stat-label">timbrature da confermare</div>
-      <a href="tlc.html" class="btn-admin">⏱️ Gestisci timbrature TLC</a>
+      <a href="tlc.html" class="btn-admin">⏱️ Gestisci timbrature</a>
     </div>
 
     <div class="card">
       <h2>⏱️ Ore TLC Totali</h2>
-      <p>Totale ore TLC approvate da tutti gli operatori.</p>
+      <p class="card-desc">Totale ore TLC approvate da tutti gli operatori.</p>
       <div class="stat-number" id="totale-ore-tlc">0</div>
       <div class="stat-label">ore totali confermate</div>
       <a href="tlc.html#timbrature-section" class="btn-admin">📊 Vedi dettaglio</a>
     </div>
 
-    <!-- ✅ RUOLI INFONDO (solo Admin) -->
+    <!-- ✅ RUOLI: in fondo, solo admin (stessa struttura delle altre card) -->
     <div class="card" id="card-ruoli" style="display:none;">
       <h2>🛡️ Ruoli</h2>
-      <p>Gestisci i ruoli assegnati (SOL / SOP / Admin / TLC Provinciale).</p>
+      <p class="card-desc">Gestisci i ruoli assegnati (SOL / SOP / Admin / TLC Provinciale).</p>
       <div class="stat-number" id="num-ruoli-speciali">0</div>
       <div class="stat-label">utenti con ruolo speciale</div>
       <button type="button" class="btn-admin" id="btn-apri-ruoli">👥 Apri gestione ruoli</button>
     </div>
   </div>
-
 </main>
 
 <!-- POPUP RUOLI (solo Admin) -->
@@ -406,14 +439,14 @@
     <div id="ruoli-header">
       <div>
         <h3 id="ruoli-title" style="margin:0;font-size:1.2rem;">🛡️ Gestione Ruoli</h3>
-        <div id="ruoli-summary" style="margin-top:6px;font-weight:700;"></div>
+        <div id="ruoli-summary" style="margin-top:6px;font-weight:900;"></div>
       </div>
       <button id="ruoli-close" type="button" aria-label="Chiudi">&times;</button>
     </div>
 
     <div id="ruoli-content">
       <p style="margin:0 0 12px;color:#666;">
-        Qui vedi tutti gli utenti con ruoli speciali e puoi modificarli. (Non mostriamo il CF.)
+        Qui vedi tutti gli utenti con ruoli speciali e puoi modificarli.
       </p>
 
       <div style="overflow:auto;">
@@ -431,7 +464,7 @@
       </div>
 
       <div id="ruoli-empty-hint" style="display:none;margin-top:12px;color:#666;">
-        Nessun ruolo speciale trovato nei dati attuali. Se i ruoli sono gestiti da un file di login esterno, inviamelo e lo colleghiamo.
+        Nessun ruolo speciale trovato nei dati attuali.
       </div>
     </div>
   </div>
@@ -476,17 +509,13 @@ document.addEventListener("DOMContentLoaded", () => {
   } else if (role === "sop" || role === "amministratore" || role === "tlc_provinciale") {
     logoSrc = "logo-sop.svg";
   }
-
   logoImg.src = logoSrc;
   logoImg.onerror = () => { logoImg.src = "logo-sop.svg"; };
 
   // Titolo
   const pageTitle = document.getElementById("page-title");
-  if (role === "sop" || role === "amministratore") {
-    pageTitle.textContent = "⚙️ Area Admin - SOP Provinciale";
-  } else if (role === "sol") {
-    pageTitle.textContent = `⚙️ Area Admin - SOL ${comitato}`;
-  }
+  if (role === "sop" || role === "amministratore") pageTitle.textContent = "⚙️ Area Admin - SOP Provinciale";
+  if (role === "sol") pageTitle.textContent = `⚙️ Area Admin - SOL ${comitato}`;
 
   // Logout
   document.getElementById("logout").addEventListener("click", () => {
@@ -508,13 +537,8 @@ document.addEventListener("DOMContentLoaded", () => {
     { text: "📅 Eventi", href: "eventi.html" },
     { text: "📄 Documenti", href: "documenti.html" }
   ];
-
-  if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
-    items.push({ text: "📡 TLC", href: "tlc.html" });
-  }
-  if (["sop", "sol", "amministratore"].includes(role)) {
-    items.push({ text: "⚙️ Admin", href: "admin.html" });
-  }
+  if (["sop","sol","amministratore","tlc_provinciale"].includes(role)) items.push({ text: "📡 TLC", href: "tlc.html" });
+  if (["sop","sol","amministratore"].includes(role)) items.push({ text: "⚙️ Admin", href: "admin.html" });
 
   items.forEach(({ text, href }) => {
     const li = document.createElement("li");
@@ -527,7 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================
-     RUOLI (solo Admin)
+     STATISTICHE
   ========================= */
   const safeParse = (key, fallback) => {
     try {
@@ -536,11 +560,73 @@ document.addEventListener("DOMContentLoaded", () => {
       return JSON.parse(raw);
     } catch { return fallback; }
   };
+
+  const myCom = normalize(comitato);
+
+  // 1. Iscrizioni in attesa
+  let iscrizioni = safeParse("volontari-pubblici", []);
+  if (!Array.isArray(iscrizioni)) iscrizioni = [];
+  if (role === "sol") iscrizioni = iscrizioni.filter(v => normalize(v?.comitato) === myCom);
+  document.getElementById("num-iscrizioni").textContent = String(iscrizioni.length);
+
+  // 2. Volontari
+  let volontari = safeParse("volontari", []);
+  if (!Array.isArray(volontari)) volontari = [];
+  if (role === "sol") volontari = volontari.filter(v => normalize(v?.comitato) === myCom);
+  document.getElementById("num-volontari").textContent = String(volontari.length);
+
+  // 3. Mezzi
+  let mezzi = safeParse("mezzi", []);
+  if (!Array.isArray(mezzi)) mezzi = [];
+  if (role === "sol") mezzi = mezzi.filter(m => normalize(m?.comitato) === myCom);
+  document.getElementById("num-mezzi").textContent = String(mezzi.length);
+
+  // 4. Materiali
+  let materiali = safeParse("materiali", []);
+  if (!Array.isArray(materiali)) materiali = [];
+  if (role === "sol") materiali = materiali.filter(m => normalize(m?.comitato) === myCom);
+  document.getElementById("num-materiali").textContent = String(materiali.length);
+
+  // 5. Emergenze
+  let emergenze = safeParse("emergenze", []);
+  if (!Array.isArray(emergenze)) emergenze = [];
+  if (role === "sol") emergenze = emergenze.filter(e => normalize(e?.comitato) === myCom);
+  document.getElementById("num-emergenze").textContent = String(emergenze.length);
+
+  // 6. Eventi
+  let eventi = safeParse("eventi", []);
+  if (!Array.isArray(eventi)) eventi = [];
+  if (role === "sol") eventi = eventi.filter(e => normalize(e?.comitatoCreatore || e?.comitato || "") === myCom);
+  document.getElementById("num-eventi").textContent = String(eventi.length);
+
+  // 7. Timbrature TLC in attesa
+  let timbratureTlc = safeParse("timbrature-tlc", []);
+  if (!Array.isArray(timbratureTlc)) timbratureTlc = [];
+  const timbratureInAttesa = timbratureTlc.filter(t => (t?.stato || "") === "attesa").length;
+  document.getElementById("num-timbrature-tlc").textContent = String(timbratureInAttesa);
+
+  // 8. Ore TLC approvate
+  function calcolaOre(inizio, fine){
+    if (!inizio || !fine) return 0;
+    const [h1,m1] = String(inizio).split(":").map(Number);
+    const [h2,m2] = String(fine).split(":").map(Number);
+    if ([h1,m1,h2,m2].some(x => Number.isNaN(x))) return 0;
+    const diffMin = (h2*60 + m2) - (h1*60 + m1);
+    return Math.max(0, Math.floor(diffMin/60));
+  }
+  const totaleOreApprovate = timbratureTlc
+    .filter(t => (t?.stato || "") === "approvato")
+    .reduce((sum, t) => sum + calcolaOre(t?.inizio, t?.fine), 0);
+  document.getElementById("totale-ore-tlc").textContent = String(totaleOreApprovate);
+
+  /* =========================
+     RUOLI (solo Admin)
+  ========================= */
   const escapeHtml = (t) => (t == null ? "" : String(t).replace(/[&<>"']/g, m => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   }[m])));
 
-  function normalizeRoleValue(r) {
+  function normalizeRoleValue(r){
     const x = normalize(r);
     if (!x) return "volontario";
     if (x === "admin") return "amministratore";
@@ -548,88 +634,138 @@ document.addEventListener("DOMContentLoaded", () => {
     return x;
   }
 
-  const ruoloMapKey = "cri_ruoli_map";
-  function loadRuoliMap() { return safeParse(ruoloMapKey, {}) || {}; }
-  function saveRuoliMap(m) { localStorage.setItem(ruoloMapKey, JSON.stringify(m || {})); }
+  function cleanDisplayName(name){
+    const cleaned = String(name || "").trim();
+    if (!cleaned) return "";
+    // ✅ FIX: se il nome è solo "_" / "-" / spazi (anche con caratteri invisibili) => Admin CRI
+    const stripped = cleaned.replace(/[_\-\s]+/g, "");
+    if (!stripped) return "Admin CRI";
+    // fallback extra: se rimuovendo tutto ciò che non è lettera/numero resta vuoto => Admin CRI
+    const alnum = cleaned.replace(/[^a-z0-9]+/gi, "");
+    if (!alnum) return "Admin CRI";
+    return cleaned;
+  }
 
-  function pickId(obj) {
+  function roleBadgeClass(r){
+    const x = normalizeRoleValue(r);
+    if (x === "amministratore") return "rb-admin";
+    if (x === "sop") return "rb-sop";
+    if (x === "tlc_provinciale") return "rb-tlc";
+    if (x === "sol") return "rb-sol";
+    return "";
+  }
+  function roleLabel(r){
+    const x = normalizeRoleValue(r);
+    if (x === "amministratore") return "Admin";
+    if (x === "sop") return "SOP";
+    if (x === "tlc_provinciale") return "TLC Provinciale";
+    if (x === "sol") return "SOL";
+    return "Volontario";
+  }
+
+  const ruoloMapKey = "cri_ruoli_map";
+  function loadRuoliMap(){ return safeParse(ruoloMapKey, {}) || {}; }
+  function saveRuoliMap(m){ localStorage.setItem(ruoloMapKey, JSON.stringify(m || {})); }
+
+  function pickId(obj){
     return ((obj?.cf || obj?.userId || obj?.username || obj?.email || obj?.id || "") + "").toUpperCase().trim();
   }
-  function pickNome(obj) {
-    const composed = `${obj?.nome || ""} ${obj?.cognome || ""}`.trim();
-    const fallback = (obj?.nomeCompleto || obj?.name || obj?.displayName || "").toString().trim();
-    const raw = (composed || fallback || "—").toString().trim();
-
-    // ✅ se il nome è "__" (o simile) mostriamo "Admin CRI"
-    const compact = raw.replace(/\s+/g, "");
-    if (/^_+$/.test(compact)) return "Admin CRI";
-
-    return raw || "—";
+  function pickNome(obj){
+    const raw = (`${obj?.nome || ""} ${obj?.cognome || ""}`.trim()) ||
+                (obj?.nomeCompleto || obj?.name || obj?.displayName || "_");
+    return cleanDisplayName(raw) || "—";
   }
-  function pickComitato(obj) {
+  function pickComitato(obj){
     return obj?.comitato || obj?.comitatoCreatore || obj?.comitatoEvento || obj?.comitato_volontario || obj?.comitatoVolontario || obj?.comitatoOrigine || obj?.comitato_origine || "—";
   }
-  function pickRawRole(obj) {
+  function pickRawRole(obj){
     return obj?.ruolo || obj?.role || obj?.ruoloSistema || obj?.ruoloUtente || obj?.privilegio || obj?.permessi || "";
   }
 
-  function scanLocalStorageArraysForUsers() {
+  // scan robusto: array o object in localStorage con role non volontario
+  function scanLocalStorageForUsers(){
     const out = [];
-    for (let i = 0; i < localStorage.length; i++) {
+    for (let i=0; i<localStorage.length; i++){
       const k = localStorage.key(i);
       if (!k) continue;
-      if (/^(mezzi|materiali|eventi|emergenze|timbrature|volontari|volontari-pubblici|cri_ruoli_map)/i.test(k)) continue;
+      if (/^(mezzi|materiali|eventi|emergenze|timbrature|volontari|volontari-pubblici|cri_ruoli_map|approvazioni)/i.test(k)) continue;
 
       const val = safeParse(k, null);
-      if (!Array.isArray(val)) continue;
-      const cand = val.filter(x => x && typeof x === "object" && (pickId(x) || pickRawRole(x) || x.nome || x.cognome || x.comitato));
-      if (!cand.length) continue;
-      if (!cand.some(x => normalizeRoleValue(pickRawRole(x)) !== "volontario")) continue;
-      out.push(...cand);
+      if (!val) continue;
+
+      if (Array.isArray(val)){
+        val.forEach(x => {
+          if (!x || typeof x !== "object") return;
+          const rid = pickId(x);
+          const rr = normalizeRoleValue(pickRawRole(x));
+          if (rid && rr !== "volontario") out.push(x);
+        });
+      } else if (typeof val === "object"){
+        const rid = pickId(val);
+        const rr = normalizeRoleValue(pickRawRole(val));
+        if (rid && rr !== "volontario") out.push(val);
+      }
     }
     return out;
   }
 
-  function collectRoleHolders() {
+  function collectRoleHolders(){
     const volontariAll = safeParse("volontari", []) || [];
     const rolesMap = loadRuoliMap();
 
     const candidates = [
       ...volontariAll,
-      ...scanLocalStorageArraysForUsers(),
-      { userId, nomeCompleto: localStorage.getItem("nomeCompleto") || "", comitato, role }
+      ...scanLocalStorageForUsers()
     ];
 
+    // aggiungi sempre utente corrente
+    candidates.push({
+      userId,
+      nomeCompleto: localStorage.getItem("nomeCompleto") || "",
+      comitato,
+      role
+    });
+
     const byId = new Map();
+
     candidates.forEach(obj => {
       const id = pickId(obj);
       if (!id) return;
 
       const mapEntry = rolesMap[id] || {};
-      const raw = normalizeRoleValue(mapEntry.ruolo || pickRawRole(obj) || "");
-      const nomeBase = mapEntry.nome || pickNome(obj);
-      const com = mapEntry.comitato || pickComitato(obj);
-      const nome = (raw === 'amministratore' && (nomeBase === '—' || /^_+$/.test(String(nomeBase).replace(/\s+/g,'')))) ? 'Admin CRI' : nomeBase;
+      const raw = normalizeRoleValue(mapEntry.ruolo || pickRawRole(obj) || obj?.role || "");
+      const nomeFromMap = cleanDisplayName(mapEntry.nome);
+      const nome = nomeFromMap || pickNome(obj);
+      const com  = mapEntry.comitato || pickComitato(obj);
 
       const prev = byId.get(id);
-      if (!prev) byId.set(id, { id, nome, comitato: com, rawRuolo: raw });
-      else {
-        const prevSpecial = prev.rawRuolo !== "volontario";
-        const nowSpecial = raw !== "volontario";
-        if (nowSpecial && !prevSpecial) byId.set(id, { id, nome, comitato: com, rawRuolo: raw });
+      const nowSpecial = raw !== "volontario";
+      if (!prev){
+        byId.set(id, { id, nome, comitato: com, rawRuolo: raw });
+        return;
       }
+      const prevSpecial = prev.rawRuolo !== "volontario";
+      if (nowSpecial && !prevSpecial){
+        byId.set(id, { id, nome, comitato: com, rawRuolo: raw });
+        return;
+      }
+      // arricchisci dati
+      byId.set(id, {
+        id,
+        nome: (prev.nome && prev.nome !== "—") ? prev.nome : nome,
+        comitato: (prev.comitato && prev.comitato !== "—") ? prev.comitato : com,
+        rawRuolo: prev.rawRuolo
+      });
     });
 
-    const allowed = new Set(["sol", "sop", "amministratore", "tlc_provinciale"]);
+    const allowed = new Set(["sol","sop","amministratore","tlc_provinciale"]);
+    const order = { amministratore: 0, sop: 1, tlc_provinciale: 2, sol: 3 };
+
     return Array.from(byId.values())
       .filter(x => allowed.has(x.rawRuolo))
-      .sort((a,b) => {
-        const order = { amministratore: 0, sop: 1, tlc_provinciale: 2, sol: 3 };
-        const ao = order[a.rawRuolo] ?? 99;
-        const bo = order[b.rawRuolo] ?? 99;
-        if (ao !== bo) return ao - bo;
-        return String(a.comitato).localeCompare(String(b.comitato)) || a.nome.localeCompare(b.nome);
-      });
+      .sort((a,b) => (order[a.rawRuolo] ?? 99) - (order[b.rawRuolo] ?? 99)
+                  || String(a.comitato).localeCompare(String(b.comitato))
+                  || String(a.nome).localeCompare(String(b.nome)));
   }
 
   const cardRuoli = document.getElementById("card-ruoli");
@@ -642,39 +778,45 @@ document.addEventListener("DOMContentLoaded", () => {
   const ruoliSummary = document.getElementById("ruoli-summary");
   const ruoliEmptyHint = document.getElementById("ruoli-empty-hint");
 
-  function openRuoli() {
+  function openRuoli(){
     ruoliPopup.classList.add("active");
-    ruoliPopup.setAttribute("aria-hidden", "false");
+    ruoliPopup.setAttribute("aria-hidden","false");
   }
-  function closeRuoli() {
+  function closeRuoli(){
     ruoliPopup.classList.remove("active");
-    ruoliPopup.setAttribute("aria-hidden", "true");
+    ruoliPopup.setAttribute("aria-hidden","true");
   }
 
-  function updateRoleForId(id, newRole) {
+  function applySelectColor(sel, ruolo){
+    const r = normalizeRoleValue(ruolo);
+    sel.classList.remove("role-amministratore","role-sop","role-tlc_provinciale","role-sol");
+    sel.classList.add("role-" + r);
+  }
+
+  function updateRoleForId(id, newRole){
     const rolesMap = loadRuoliMap();
     const rid = (id || "").toUpperCase().trim();
     const r = normalizeRoleValue(newRole);
 
-    if (r === "volontario") {
+    if (r === "volontario"){
       delete rolesMap[rid];
     } else {
       const volontariAll = safeParse("volontari", []) || [];
-      const v = volontariAll.find(x => pickId(x) === rid) || null;
+      const v = volontariAll.find(x => (pickId(x) === rid)) || null;
 
       rolesMap[rid] = {
         ruolo: r,
-        nome: pickNome(v || { userId: rid }),
-        comitato: v ? pickComitato(v) : (rolesMap[rid]?.comitato || comitato || "—")
+        nome: cleanDisplayName(pickNome(v || { userId: rid })) || "—",
+        comitato: (v ? pickComitato(v) : (rolesMap[rid]?.comitato || comitato || "—"))
       };
     }
     saveRuoliMap(rolesMap);
 
-    // compat: aggiorna anche volontari[] se esiste
+    // compatibilità: se è in volontari, aggiorna anche lì
     const volontariAll = safeParse("volontari", []) || [];
     const idx = volontariAll.findIndex(x => pickId(x) === rid);
-    if (idx !== -1) {
-      if (r === "volontario") {
+    if (idx !== -1){
+      if (r === "volontario"){
         delete volontariAll[idx].ruolo;
         delete volontariAll[idx].role;
       } else {
@@ -685,17 +827,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function renderRuoliPopup() {
+  function renderRuoliPopup(){
     const list = collectRoleHolders();
+
     if (numRuoliEl) numRuoliEl.textContent = String(list.length);
 
-    const counts = { amministratore: 0, sop: 0, sol: 0, tlc_provinciale: 0 };
+    const counts = { amministratore:0, sop:0, tlc_provinciale:0, sol:0 };
     list.forEach(x => { if (counts[x.rawRuolo] != null) counts[x.rawRuolo]++; });
-    if (ruoliSummary) {
-      ruoliSummary.textContent = `ADMIN: ${counts.amministratore} • SOP: ${counts.sop} • SOL: ${counts.sol} • TLC PROV: ${counts.tlc_provinciale}`;
+
+    if (ruoliSummary){
+      ruoliSummary.textContent = `ADMIN: ${counts.amministratore} • SOP: ${counts.sop} • TLC PROV: ${counts.tlc_provinciale} • SOL: ${counts.sol}`;
     }
 
-    if (!list.length) {
+    if (!list.length){
       ruoliBody.innerHTML = `<tr><td colspan="4" style="color:#666;">Nessun ruolo speciale assegnato.</td></tr>`;
       if (ruoliEmptyHint) ruoliEmptyHint.style.display = "block";
       return;
@@ -703,170 +847,78 @@ document.addEventListener("DOMContentLoaded", () => {
     if (ruoliEmptyHint) ruoliEmptyHint.style.display = "none";
 
     const roleOptions = [
-      { value: "volontario", label: "Volontario (nessun privilegio)" },
-      { value: "amministratore", label: "Amministratore" },
+      { value: "amministratore", label: "Admin" },
       { value: "sop", label: "SOP" },
       { value: "tlc_provinciale", label: "TLC Provinciale" },
-      { value: "sol", label: "SOL" }
+      { value: "sol", label: "SOL" },
+      { value: "volontario", label: "Volontario (nessun privilegio)" }
     ];
 
-    function pillClassFromRole(roleVal){
-      const r = normalizeRoleValue(roleVal);
-      if (r === "amministratore") return "pill-amministratore";
-      if (r === "sop") return "pill-sop";
-      if (r === "tlc_provinciale") return "pill-tlc_provinciale";
-      return "pill-sol";
-    }
-    function pillTextFromRole(roleVal){
-      const r = normalizeRoleValue(roleVal);
-      if (r === "amministratore") return "ADMIN";
-      if (r === "sop") return "SOP";
-      if (r === "tlc_provinciale") return "TLC PROV";
-      return "SOL";
-    }
-
-    function applySelectColor(selectEl) {
-      if (!selectEl) return;
-      selectEl.classList.remove("role-amministratore","role-sop","role-sol","role-tlc_provinciale");
-      const r = normalizeRoleValue(selectEl.value);
-      if (r === "amministratore") selectEl.classList.add("role-amministratore");
-      else if (r === "sop") selectEl.classList.add("role-sop");
-      else if (r === "tlc_provinciale") selectEl.classList.add("role-tlc_provinciale");
-      else if (r === "sol") selectEl.classList.add("role-sol");
-    }
-
-    function applyRolePill(tr, roleVal){
-      const pill = tr.querySelector(".role-pill");
-      if (!pill) return;
-      pill.classList.remove("pill-amministratore","pill-sop","pill-tlc_provinciale","pill-sol");
-      pill.classList.add(pillClassFromRole(roleVal));
-      pill.textContent = pillTextFromRole(roleVal);
-    }
-
     ruoliBody.innerHTML = list.map(u => {
-      const current = normalizeRoleValue(u.rawRuolo);
-      const opts = roleOptions.map(o => {
-        const selected = normalizeRoleValue(o.value) === current ? "selected" : "";
-        return `<option value="${o.value}" ${selected}>${o.label}</option>`;
-      }).join("");
-
-      const pillClass = pillClassFromRole(current);
-      const pillText = pillTextFromRole(current);
+      const r = normalizeRoleValue(u.rawRuolo);
+      const badgeCls = roleBadgeClass(r);
+      const rowCls = `ruolo-row ${r}`;
+      const nameRaw = cleanDisplayName(u.nome) || u.nome || "—";
+      const name = (r === "amministratore" && cleanDisplayName(nameRaw) === "Admin CRI") ? "Admin CRI" : nameRaw;
 
       return `
-        <tr data-id="${escapeHtml(u.id)}">
-          <td>${escapeHtml(u.nome)}</td>
+        <tr class="${rowCls}" data-id="${escapeHtml(u.id)}">
+          <td>${escapeHtml(name)}</td>
           <td>${escapeHtml(u.comitato)}</td>
           <td>
-            <div class="role-cell">
-              <span class="role-pill ${pillClass}">${pillText}</span>
-              <select class="select-role">${opts}</select>
-            </div>
+            <span class="role-badge ${badgeCls}" style="margin-right:8px;">${escapeHtml(roleLabel(r))}</span>
+            <select class="select-role"></select>
           </td>
           <td>
-            <button type="button" class="btn-small btn-save" data-action="save">Salva</button>
+            <button type="button" class="btn-small" data-action="save">Salva</button>
           </td>
         </tr>
       `;
     }).join("");
 
-    // Colori + badge live (quando cambi il select)
+    // inserisci options e colori
     ruoliBody.querySelectorAll("tr").forEach(tr => {
-      const sel = tr.querySelector("select.select-role");
-      if (!sel) return;
-      applySelectColor(sel);
-      applyRolePill(tr, sel.value);
-      sel.addEventListener("change", () => {
-        applySelectColor(sel);
-        applyRolePill(tr, sel.value);
-      });
+      const id = tr.getAttribute("data-id");
+      const u = list.find(x => x.id === id) || null;
+      const sel = tr.querySelector("select");
+      if (!sel || !u) return;
+
+      sel.innerHTML = roleOptions.map(o => {
+        const selected = normalizeRoleValue(o.value) === normalizeRoleValue(u.rawRuolo) ? "selected" : "";
+        return `<option value="${o.value}" ${selected}>${o.label}</option>`;
+      }).join("");
+
+      applySelectColor(sel, u.rawRuolo);
+      sel.addEventListener("change", () => applySelectColor(sel, sel.value));
     });
 
-    ruoliBody.querySelectorAll("button[data-action]").forEach(btn => {
+    ruoliBody.querySelectorAll("button[data-action='save']").forEach(btn => {
       btn.addEventListener("click", () => {
         const tr = btn.closest("tr");
         if (!tr) return;
         const id = tr.getAttribute("data-id");
         const sel = tr.querySelector("select");
-        if (!sel) return;        updateRoleForId(id, sel.value);
+        const val = sel ? sel.value : "volontario";
+        updateRoleForId(id, val);
         renderRuoliPopup();
       });
     });
   }
 
   // Attiva card + popup solo se amministratore
-  if (role === "amministratore") {
-    cardRuoli.style.display = "block";
-    btnApriRuoli.addEventListener("click", () => { renderRuoliPopup(); openRuoli(); });
-    ruoliClose.addEventListener("click", closeRuoli);
-    ruoliPopup.addEventListener("click", (e) => { if (e.target === ruoliPopup) closeRuoli(); });
+  if (role === "amministratore"){
+    if (cardRuoli) cardRuoli.style.display = "flex";
+    if (btnApriRuoli) btnApriRuoli.addEventListener("click", () => { renderRuoliPopup(); openRuoli(); });
+
+    if (ruoliClose) ruoliClose.addEventListener("click", closeRuoli);
+    if (ruoliPopup) ruoliPopup.addEventListener("click", (e) => { if (e.target === ruoliPopup) closeRuoli(); });
+
+    // primo conteggio
+    renderRuoliPopup();
   } else {
-    cardRuoli.style.display = "none";
+    if (cardRuoli) cardRuoli.style.display = "none";
   }
-
-  // ====== STATISTICHE ======
-  let iscrizioni = JSON.parse(localStorage.getItem("volontari-pubblici") || "[]");
-  if (role === "sol") {
-    const c = normalize(comitato);
-    iscrizioni = iscrizioni.filter(v => normalize(v.comitato) === c);
-  }
-  document.getElementById("num-iscrizioni").textContent = iscrizioni.length;
-
-  let volontari = JSON.parse(localStorage.getItem("volontari") || "[]");
-  if (role === "sol") {
-    const c = normalize(comitato);
-    volontari = volontari.filter(v => normalize(v.comitato) === c);
-  }
-  document.getElementById("num-volontari").textContent = volontari.length;
-
-  let mezzi = JSON.parse(localStorage.getItem("mezzi") || "[]");
-  if (role === "sol") {
-    const c = normalize(comitato);
-    mezzi = mezzi.filter(m => normalize(m.comitato) === c);
-  }
-  document.getElementById("num-mezzi").textContent = mezzi.length;
-
-  let materiali = JSON.parse(localStorage.getItem("materiali") || "[]");
-  if (role === "sol") {
-    const c = normalize(comitato);
-    materiali = materiali.filter(m => normalize(m.comitato) === c);
-  }
-  document.getElementById("num-materiali").textContent = materiali.length;
-
-  let emergenze = JSON.parse(localStorage.getItem("emergenze") || "[]");
-  if (role === "sol") {
-    const c = normalize(comitato);
-    emergenze = emergenze.filter(e => normalize(e.comitato) === c);
-  }
-  document.getElementById("num-emergenze").textContent = emergenze.length;
-
-  let eventi = JSON.parse(localStorage.getItem("eventi") || "[]");
-  if (role === "sol") {
-    const c = normalize(comitato);
-    eventi = eventi.filter(e => normalize(e.comitatoCreatore || e.comitato || "") === c);
-  }
-  document.getElementById("num-eventi").textContent = eventi.length;
-
-  let timbratureTlc = JSON.parse(localStorage.getItem("timbrature-tlc") || "[]");
-  const timbratureInAttesa = timbratureTlc.filter(t => (t.stato || "") === "attesa").length;
-  document.getElementById("num-timbrature-tlc").textContent = timbratureInAttesa;
-
-  function calcolaOre(inizio, fine) {
-    if (!inizio || !fine) return 0;
-    const [h1, m1] = String(inizio).split(':').map(Number);
-    const [h2, m2] = String(fine).split(':').map(Number);
-    if ([h1,m1,h2,m2].some(x => Number.isNaN(x))) return 0;
-    const diffMin = (h2 * 60 + m2) - (h1 * 60 + m1);
-    return Math.max(0, Math.floor(diffMin / 60));
-  }
-
-  const totaleOreApprovate = timbratureTlc
-    .filter(t => (t.stato || "") === "approvato")
-    .reduce((sum, t) => sum + calcolaOre(t.inizio, t.fine), 0);
-
-  document.getElementById("totale-ore-tlc").textContent = totaleOreApprovate;
 });
 </script>
 </body>
 </html>
-
