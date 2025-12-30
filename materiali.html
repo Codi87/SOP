@@ -11,6 +11,9 @@
     --grigio: #f5f5f5;
     --blu-info: #007bff;
   }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -18,15 +21,18 @@
     min-height: 100vh;
     background: var(--grigio);
   }
+
+  /* ===== SIDEBAR + MENU (come index) ===== */
   .sidebar {
     width: 260px;
+    flex-shrink: 0;
     background: var(--rosso-cri);
     color: var(--bianco);
     display: flex;
     flex-direction: column;
-    padding: 20px 0;
+    padding-top: 20px;
     height: 100vh;
-    overflow-y: auto;
+    overflow: hidden;          /* come index */
     align-items: center;
   }
   .sidebar img {
@@ -39,6 +45,8 @@
     padding: 0;
     width: 100%;
     flex-grow: 1;
+    overflow-y: auto;          /* come index */
+    overscroll-behavior: contain;
   }
   .menu li { width: 100%; }
   .menu a {
@@ -52,7 +60,8 @@
   .menu a.active { background: #9f1b1b; }
 
   #logout {
-    margin: 20px auto 0 auto;
+    flex-shrink: 0;
+    margin: 12px auto 20px auto;  /* come index */
     padding: 10px 20px;
     width: 80%;
     background: var(--bianco);
@@ -72,10 +81,7 @@
     overflow-y: auto;
     position: relative;
   }
-  .main h1 {
-    color: var(--rosso-cri);
-    margin-top: 0;
-  }
+  .main h1 { color: var(--rosso-cri); margin-top: 0; }
 
   #search {
     width: 100%;
@@ -110,10 +116,7 @@
     text-align: left;
     vertical-align: middle;
   }
-  table th {
-    background: var(--rosso-cri);
-    color: var(--bianco);
-  }
+  table th { background: var(--rosso-cri); color: var(--bianco); }
 
   .badge {
     display: inline-block;
@@ -137,18 +140,9 @@
     font-weight: bold;
     font-size: 0.9rem;
   }
-  .edit-btn {
-    background-color: #ffc107;
-    color: #000;
-  }
-  .delete-btn {
-    background-color: #dc3545;
-    color: #fff;
-  }
-  .info-btn {
-    background-color: var(--blu-info);
-    color: #fff;
-  }
+  .edit-btn { background-color: #ffc107; color: #000; }
+  .delete-btn { background-color: #dc3545; color: #fff; }
+  .info-btn { background-color: var(--blu-info); color: #fff; }
 
   /* Modale form */
   #form-container {
@@ -196,10 +190,7 @@
     border: 1px solid #ccc;
     font-size: 1rem;
   }
-  form textarea {
-    flex: 1 1 100%;
-    min-height: 60px;
-  }
+  form textarea { flex: 1 1 100%; min-height: 60px; }
   form input[readonly] {
     background-color: #e9ecef;
     color: #6c757d;
@@ -290,9 +281,11 @@
     transform: rotate(90deg);
   }
 
+  /* ===== MOBILE (come index) ===== */
   @media (max-width: 768px) {
     body { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; }
+    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
+    .menu { overflow: visible; }
     table { font-size: 0.95rem; }
   }
 </style>
@@ -302,7 +295,7 @@
 <aside class="sidebar" aria-label="Navigazione principale">
   <img id="logo-cri" src="logo.svg" alt="Logo Croce Rossa Italiana" />
   <ul class="menu" id="menu-sidebar" role="navigation" aria-label="Menu principale"></ul>
-  <button id="logout" type="button">🚪 Logout</button>
+  <button id="logout" type="button">Logout</button>
 </aside>
 
 <main class="main">
@@ -401,7 +394,7 @@
 
 <script>
 const userId = localStorage.getItem("userId");
-const role = (localStorage.getItem("role") || "").toLowerCase();
+const role = (localStorage.getItem("role") || "").toLowerCase().trim();
 const comitato = localStorage.getItem("comitato");
 
 if (!userId) {
@@ -416,34 +409,41 @@ function logout() {
 }
 document.getElementById("logout").onclick = logout;
 
-// LOGO dinamico (stessa logica di mezzi)
+// helper come index
+const normalize = (s) => (s || "").toString().toLowerCase().trim();
+
+// LOGO dinamico (come index)
 const logoImg = document.getElementById("logo-cri");
 let logoSrc = "logo.svg";
 
-if (role === "sop" || role === "amministratore") {
+if (role === "sol") {
+  const c = normalize(comitato);
+  const map = {
+    "pesaro": "logo-pesaro.svg",
+    "urbino": "logo-urbino.svg",
+    "fano": "logo-fano.svg",
+    "pergola": "logo-pergola.svg",
+    "marotta-mondolfo": "logo-marotta-mondolfo.svg",
+    "fossombrone": "logo-fossombrone.svg",
+    "cagli": "logo-cagli.svg",
+    "montelabbate": "logo-montelabbate.svg",
+    "fermignano": "logo-fermignano.svg",
+    "sant'angelo in vado": "logo-santangeloinvado.svg",
+    "santangelo in vado": "logo-santangeloinvado.svg",
+    "sant-angelo-in-vado": "logo-santangeloinvado.svg"
+  };
+  logoSrc = map[c] || "logo-sop.svg";
+} else if (role === "sop" || role === "amministratore" || role === "tlc_provinciale") {
   logoSrc = "logo-sop.svg";
-} else if (role === "sol") {
-  const c = (comitato || "").toLowerCase();
-  if (c === "pesaro") logoSrc = "logo-pesaro.svg";
-  else if (c === "urbino") logoSrc = "logo-urbino.svg";
-  else if (c === "fano") logoSrc = "logo-fano.svg";
-  else if (c === "pergola") logoSrc = "logo-pergola.svg";
-  else if (c === "marotta-mondolfo") logoSrc = "logo-marotta-mondolfo.svg";
-  else if (c === "fossombrone") logoSrc = "logo-fossombrone.svg";
-  else if (c === "cagli") logoSrc = "logo-cagli.svg";
-  else if (c === "montelabbate") logoSrc = "logo-montelabbate.svg";
-  else if (c === "fermignano") logoSrc = "logo-fermignano.svg";
-  else if (c === "sant'angelo in vado" || c === "santangelo in vado" || c === "sant-angelo-in-vado") {
-    logoSrc = "logo-santangeloinvado.svg";
-  } else {
-    logoSrc = "logo-sop.svg";
-  }
 }
 logoImg.src = logoSrc;
+logoImg.onerror = () => { logoImg.src = "logo-sop.svg"; };
 
-// MENU laterale (simile a mezzi.html)
+// MENU laterale (come index, con TLC + Admin se previsti)
 const menu = document.getElementById("menu-sidebar");
-const menuItems = [
+menu.innerHTML = "";
+
+const items = [
   { text: "🏠 Home", href: "index.html" },
   { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html" },
   { text: "👥 Volontari", href: "volontari.html" },
@@ -454,16 +454,19 @@ const menuItems = [
   { text: "📄 Documenti", href: "documenti.html" }
 ];
 
-if (role === "sop" || role === "amministratore" || role === "sol") {
-  menuItems.push({ text: "⚙️ Admin", href: "admin.html" });
+if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
+  items.push({ text: "📡 TLC", href: "tlc.html" });
+}
+if (["sop", "sol", "amministratore"].includes(role)) {
+  items.push({ text: "⚙️ Admin", href: "admin.html" });
 }
 
-menuItems.forEach(({ text, href }) => {
+items.forEach(({ text, href }) => {
   const li = document.createElement("li");
   const a = document.createElement("a");
   a.href = href;
   a.textContent = text;
-  if (text.includes("Materiali")) a.classList.add("active");
+  if (href === "materiali.html") a.classList.add("active");
   li.appendChild(a);
   menu.appendChild(li);
 });
@@ -706,7 +709,6 @@ form.addEventListener("submit", e => {
 
   const locali = JSON.parse(localStorage.getItem("materiali") || "[]");
 
-  // Evito doppioni: codice + comitato + lotto (se lotto vuoto, vale vuoto)
   const duplicateIndex = locali.findIndex((m, idx) =>
     (m.codice || "").toUpperCase() === nuovoMateriale.codice &&
     (m.comitato || "").toLowerCase() === (nuovoMateriale.comitato || "").toLowerCase() &&
