@@ -26,6 +26,8 @@
     font-family: Arial, sans-serif;
     display: flex;
     min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
     background: var(--grigio);
   }
 
@@ -88,6 +90,8 @@
     background: var(--bianco);
     overflow-y: auto;
     position: relative;
+ 
+    height: 100vh;
   }
 
   .main h1 {
@@ -181,12 +185,97 @@
   }
 
   @media (max-width: 768px) {
-    body { flex-direction: column; }
+    body { flex-direction: column; height: auto; overflow: auto; }
     .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
     .menu { overflow: visible; }
     .main { padding: 20px; }
     .cards { grid-template-columns: 1fr; gap: 18px; }
   }
+
+  /* ✅ Popup Ruoli (solo Admin) */
+  button.btn-admin { border: none; cursor: pointer; }
+  #ruoli-container {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1300;
+  }
+  #ruoli-container.active { display: flex; }
+
+  #ruoli-box {
+    background: #fff;
+    width: 920px;
+    max-width: 95%;
+    max-height: 90vh;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  }
+  #ruoli-header {
+    background: var(--rosso-cri);
+    color: #fff;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  #ruoli-header h3 { margin: 0; font-size: 1.2rem; }
+  #ruoli-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    font-size: 1.6rem;
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  #ruoli-close:hover { background: rgba(255,255,255,0.28); }
+
+  #ruoli-content {
+    padding: 18px 22px;
+    overflow-y: auto;
+    max-height: calc(90vh - 120px);
+  }
+
+  #ruoli-table { width: 100%; border-collapse: collapse; }
+  #ruoli-table th, #ruoli-table td { border: 1px solid #e0e0e0; padding: 10px; text-align: left; vertical-align: top; }
+  #ruoli-table th { background: #f3f3f3; color: #333; }
+  .role-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: #fff;
+    background: #111;
+    white-space: nowrap;
+  }
+  .muted { color: #666; }
+
+.ruoli-summary{
+  margin: 10px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: #fafafa;
+  font-weight: 800;
+  color: #333;
+}
+.group-row td{
+  background: #f3f3f3;
+  color: #333;
+  font-weight: 900;
+}
+.group-count{
+  color:#666;
+  font-weight:800;
+}
+
 </style>
 </head>
 
@@ -264,17 +353,55 @@
       <div class="stat-label">ore totali confermate</div>
       <a href="tlc.html#timbrature-section" class="btn-admin">📊 Vedi dettaglio</a>
     </div>
+
+    <!-- ✅ SOLO ADMIN: RUOLI -->
+    <div class="card" id="card-ruoli" style="display:none;">
+      <h2>🛡️ Ruoli</h2>
+      <p>Elenco utenti con privilegi (SOL / SOP / Admin / TLC Provinciale).</p>
+      <p><span class="stat-number" id="num-ruoli">0</span></p>
+      <p class="stat-label">utenti con ruolo speciale</p>
+      <button type="button" class="btn-admin" id="btn-apri-ruoli">👤 Visualizza ruoli</button>
+    </div>
   </div>
 </main>
+
+
+<!-- Popup Ruoli (solo Admin) -->
+<div id="ruoli-container" aria-hidden="true">
+  <div id="ruoli-box" role="dialog" aria-modal="true" aria-labelledby="ruoli-title">
+    <div id="ruoli-header">
+      <h3 id="ruoli-title">🛡️ Ruoli assegnati</h3>
+      <button id="ruoli-close" type="button" aria-label="Chiudi">&times;</button>
+    </div>
+    <div id="ruoli-content">
+      <p class="muted">Sono mostrati solo gli utenti con ruolo diverso da <b>volontario</b> (senza CF, solo comitato).</p>
+      <div id="ruoli-summary" class="ruoli-summary" aria-live="polite"></div>
+
+      <table id="ruoli-table" aria-label="Elenco ruoli">
+        <thead>
+          <tr>
+            <th>Volontario</th>
+            <th>Comitato</th>
+            <th>Ruolo</th>
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody id="ruoli-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const userId = localStorage.getItem("userId");
   const role = (localStorage.getItem("role") || "").toLowerCase().trim();
+  const isAdmin = (role === "amministratore" || role === "admin");
   const comitato = localStorage.getItem("comitato") || "";
 
   // ✅ Accesso: SOP, Amministratore e SOL
-  if (!userId || (role !== "sop" && role !== "amministratore" && role !== "sol")) {
+  if (!userId || (role !== "sop" && role !== "amministratore" && role !== "admin" && role !== "sol")) {
     alert("Accesso riservato a SOP / SOL / Amministratore");
     window.location.href = "login.html";
     return;
@@ -339,10 +466,10 @@ document.addEventListener("DOMContentLoaded", () => {
     { text: "📄 Documenti", href: "documenti.html" }
   ];
 
-  if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
+  if (["sop", "sol", "amministratore", "admin", "tlc_provinciale"].includes(role)) {
     items.push({ text: "📡 TLC", href: "tlc.html" });
   }
-  if (["sop", "sol", "amministratore"].includes(role)) {
+  if (["sop", "sol", "amministratore", "admin"].includes(role)) {
     items.push({ text: "⚙️ Admin", href: "admin.html" });
   }
 
@@ -367,12 +494,231 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("num-iscrizioni").textContent = iscrizioni.length;
 
   // 2. VOLONTARI ATTIVI
-  let volontari = JSON.parse(localStorage.getItem("volontari") || "[]");
+  let volontariAll = JSON.parse(localStorage.getItem("volontari") || "[]");
+  let volontari = volontariAll.slice();
   if (role === "sol") {
     const c = normalize(comitato);
     volontari = volontari.filter(v => normalize(v.comitato) === c);
   }
   document.getElementById("num-volontari").textContent = volontari.length;
+
+
+  /* ===========================
+     ✅ RUOLI (solo Admin)
+  =========================== */
+  const cardRuoli = document.getElementById("card-ruoli");
+  const btnApriRuoli = document.getElementById("btn-apri-ruoli");
+  const ruoliContainer = document.getElementById("ruoli-container");
+  const ruoliClose = document.getElementById("ruoli-close");
+  const ruoliBody = document.getElementById("ruoli-body");
+  const numRuoli = document.getElementById("num-ruoli");
+
+  function escapeHtml(text) {
+    if (text === null || text === undefined) return "";
+    return (text + "").replace(/[&<>"']/g, m => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[m]));
+  }
+
+  function formatRuolo(r) {
+    const x = normalize(r || "volontario");
+    if (!x || x === "volontario") return "VOLONTARIO";
+    return x.toUpperCase().replace(/_/g, " ");
+  }
+
+  function normalizeRoleValue(r) {
+  const x = normalize(r);
+  if (!x) return "volontario";
+  if (x === "admin") return "amministratore";
+  if (x === "tlc provinciale" || x === "tlc-provinciale" || x === "tlcprovinciale") return "tlc_provinciale";
+  return x;
+}
+
+function roleLabel(r) {
+  const x = normalizeRoleValue(r);
+  if (x === "amministratore") return "ADMIN";
+  if (x === "sop") return "SOP";
+  if (x === "sol") return "SOL";
+  if (x === "tlc_provinciale") return "TLC PROVINCIALE";
+  return "VOLONTARIO";
+}
+
+function roleBadgeHtml(r) {
+  const x = normalizeRoleValue(r);
+  const map = {
+    amministratore: { label: "ADMIN", bg: "#111" },
+    sop: { label: "SOP", bg: "#b71c1c" },
+    sol: { label: "SOL", bg: "#ff9800" },
+    tlc_provinciale: { label: "TLC PROV", bg: "#2196f3" }
+  };
+  const it = map[x];
+  if (!it) return '<span class="role-badge" style="background:#6c757d;">VOLONTARIO</span>';
+  return `<span class="role-badge" style="background:${it.bg};">${it.label}</span>`;
+}
+
+function getSpecialRuoliList() {
+  // Mostra solo ruoli speciali (non "volontario")
+  const allowed = new Set(["sol", "sop", "amministratore", "tlc_provinciale"]);
+
+  return (volontariAll || [])
+    .map(v => {
+      const cf = ((v.cf || v.userId || "") + "").toUpperCase();
+      const nome = `${v.nome || ""} ${v.cognome || ""}`.trim() || "—";
+      const com = (v.comitato || "—");
+
+      // supporta più campi possibili
+      const raw = normalizeRoleValue(v.ruolo || v.role || v.privilegio || v.permessi || "");
+      return {
+        cf,
+        nome,
+        comitato: com,
+        rawRuolo: raw,
+        ruoloLabel: roleLabel(raw)
+      };
+    })
+    .filter(x => x.cf && allowed.has(x.rawRuolo))
+    .sort((a, b) =>
+      a.rawRuolo.localeCompare(b.rawRuolo) ||
+      String(a.comitato).localeCompare(String(b.comitato)) ||
+      a.nome.localeCompare(b.nome)
+    );
+}
+
+
+  function saveVolontariAll() {
+    localStorage.setItem("volontari", JSON.stringify(volontariAll || []));
+  }
+
+  function updateVolontarioRuoloByCf(cfUpper, newRole) {
+    const cfU = (cfUpper || "").toUpperCase();
+    const r = normalize(newRole || "volontario");
+
+    const idx = (volontariAll || []).findIndex(v => ((v.cf || v.userId || "") + "").toUpperCase() === cfU);
+    if (idx === -1) { alert("Volontario non trovato."); return; }
+
+    volontariAll[idx].ruolo = (r === "admin") ? "amministratore" : r;
+    saveVolontariAll();
+
+    // refresh popup + badge count
+    renderRuoliPopup();
+    alert("✅ Ruolo aggiornato.");
+  }
+
+function renderRuoliPopup() {
+  const list = getSpecialRuoliList();
+  if (numRuoli) numRuoli.textContent = String(list.length);
+
+  if (!ruoliBody) return;
+
+  const summaryEl = document.getElementById("ruoli-summary");
+  const counts = { amministratore: 0, sop: 0, sol: 0, tlc_provinciale: 0 };
+  list.forEach(x => { if (counts[x.rawRuolo] != null) counts[x.rawRuolo]++; });
+
+  if (summaryEl) {
+    summaryEl.textContent = `ADMIN: ${counts.amministratore} • SOP: ${counts.sop} • SOL: ${counts.sol} • TLC PROV: ${counts.tlc_provinciale}`;
+  }
+
+  if (!list.length) {
+    ruoliBody.innerHTML = `<tr><td colspan="4" style="color:#666;">Nessun ruolo speciale assegnato.</td></tr>`;
+    return;
+  }
+
+  const roleOptions = [
+    { value: "volontario", label: "VOLONTARIO" },
+    { value: "sol", label: "SOL" },
+    { value: "sop", label: "SOP" },
+    { value: "amministratore", label: "ADMIN" },
+    { value: "tlc_provinciale", label: "TLC PROVINCIALE" }
+  ];
+
+  const groupOrder = ["amministratore", "sop", "sol", "tlc_provinciale"];
+  const groupTitles = {
+    amministratore: "👑 Amministratori",
+    sop: "🏛️ SOP",
+    sol: "🎯 SOL",
+    tlc_provinciale: "📡 TLC Provinciale"
+  };
+
+  const rows = [];
+
+  groupOrder.forEach(g => {
+    const group = list.filter(x => x.rawRuolo === g);
+    if (!group.length) return;
+
+    rows.push(`
+      <tr class="group-row">
+        <td colspan="4">${groupTitles[g]} <span class="group-count">(${group.length})</span></td>
+      </tr>
+    `);
+
+    group.forEach(v => {
+      const opts = roleOptions.map(o => {
+        const selected = (normalizeRoleValue(v.rawRuolo) === normalizeRoleValue(o.value)) ? "selected" : "";
+        return `<option value="${o.value}" ${selected}>${o.label}</option>`;
+      }).join("");
+
+      rows.push(`
+        <tr data-cf="${v.cf}">
+          <td>${escapeHtml(v.nome)}</td>
+          <td>${escapeHtml(v.comitato)}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              ${roleBadgeHtml(v.rawRuolo)}
+              <select class="ruolo-select" style="padding:8px 10px;border-radius:8px;font-weight:700;">
+                ${opts}
+              </select>
+            </div>
+          </td>
+          <td>
+            <button type="button" class="btn-admin btn-save-ruolo" style="padding:10px 14px;border-radius:10px;font-weight:800;background:#28a745;color:#fff;">
+              💾 Salva
+            </button>
+          </td>
+        </tr>
+      `);
+    });
+  });
+
+  ruoliBody.innerHTML = rows.join("");
+
+  ruoliBody.querySelectorAll(".btn-save-ruolo").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tr = btn.closest("tr");
+      const cf = (tr?.getAttribute("data-cf") || "").toUpperCase();
+      const sel = tr?.querySelector(".ruolo-select");
+      const newRole = (sel?.value || "volontario");
+      if (!cf) return;
+      updateVolontarioRuoloByCf(cf, newRole);
+    });
+  });
+}
+
+function openRuoli() {
+    renderRuoliPopup();
+    ruoliContainer?.classList.add("active");
+    ruoliContainer?.setAttribute("aria-hidden", "false");
+  }
+  function closeRuoli() {
+    ruoliContainer?.classList.remove("active");
+    ruoliContainer?.setAttribute("aria-hidden", "true");
+  }
+
+  if (isAdmin) {
+    if (cardRuoli) cardRuoli.style.display = "block";
+    renderRuoliPopup();
+    btnApriRuoli?.addEventListener("click", openRuoli);
+    ruoliClose?.addEventListener("click", closeRuoli);
+    ruoliContainer?.addEventListener("click", (e) => { if (e.target === ruoliContainer) closeRuoli(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && ruoliContainer?.classList.contains("active")) closeRuoli(); });
+  } else {
+    if (cardRuoli) cardRuoli.style.display = "none";
+  }
+
+
 
   // 3. MEZZI
   let mezzi = JSON.parse(localStorage.getItem("mezzi") || "[]");
