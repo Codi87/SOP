@@ -16,14 +16,15 @@
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* ✅ Layout: scroll SOLO nel main, sidebar ferma */
+  /* ✅ Layout come Admin: scroll SOLO nel main, sidebar ferma */
   html, body { height: 100%; }
   body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
+    height: 100%;
+    overflow: hidden; /* ✅ evita che scrolli tutta la pagina */
     background: linear-gradient(135deg, var(--grigio) 0%, #e8f0fe 100%);
-    overflow: hidden; /* ✅ evita scroll pagina + “spazio bianco sotto” */
   }
 
   /* ===== SIDEBAR IDENTICA A INDEX (tranne logo che resta TLC) ===== */
@@ -36,9 +37,9 @@
     flex-direction: column;
     padding-top: 20px;
     height: 100vh;
-    position: sticky;  /* ✅ resta ferma */
+    position: sticky; /* ✅ resta visibile */
     top: 0;
-    overflow: hidden;  /* lo scroll lo fa il menu */
+    overflow: hidden; /* lo scroll lo fa il menu */
     align-items: center;
   }
   .sidebar img {
@@ -53,7 +54,7 @@
     padding: 0;
     width: 100%;
     flex: 1 1 auto;
-    overflow-y: auto;                 /* ✅ scroll solo qui */
+    overflow-y: auto; /* ✅ scroll interno menu */
     overscroll-behavior: contain;
   }
   .menu li { width: 100%; }
@@ -81,14 +82,13 @@
   }
   #logout:hover { background-color: var(--rosso-cri); color: #fff; }
 
-  /* ===== MAIN: scroll interno (come pagina admin) ===== */
+  /* ===== MAIN: scroll interno ===== */
   .main {
     flex: 1 1 auto;
-    height: 100vh;        /* ✅ fondamentale */
-    overflow-y: auto;     /* ✅ scroll solo qui */
+    height: 100vh;        /* ✅ necessario per far scrollare solo il main */
+    overflow-y: auto;     /* ✅ scroll qui */
     padding: 30px;
     background: var(--bianco);
-    position: relative;
     width: 100%;
   }
 
@@ -274,7 +274,7 @@
 
   /* ===== RESPONSIVE identico a INDEX per sidebar/menu ===== */
   @media (max-width: 768px) {
-    body { flex-direction: column; overflow: auto; } /* ✅ su mobile torna scroll normale */
+    body { flex-direction: column; overflow: auto; } /* ✅ torna scroll normale */
     .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; position: relative; }
     .menu { overflow: visible; }
     .main { padding: 20px; height: auto; overflow: visible; }

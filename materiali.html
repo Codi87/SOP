@@ -288,6 +288,50 @@
     .menu { overflow: visible; }
     table { font-size: 0.95rem; }
   }
+
+
+  /* ============================
+     ✅ FIX: scroll SOLO nel main
+     Sidebar ferma + menu scrollabile
+  ============================ */
+  html, body{ height:100%; }
+  body{ overflow:hidden; }
+
+  .sidebar{
+    height:100vh;
+    position:sticky !important;
+    top:0;
+    overflow:hidden;
+  }
+  .menu{
+    flex:1 1 auto;
+    overflow-y:auto;
+    overscroll-behavior: contain;
+  }
+  .main{
+    flex:1 1 auto;
+    height:100vh;
+    overflow-y:auto;
+    margin-left:0 !important;
+    min-height:0;
+    width:auto;
+  }
+
+  @media (max-width:768px){
+    body{ overflow:auto; }
+    .sidebar{
+      height:auto;
+      position:relative !important;
+      overflow:visible;
+    }
+    .menu{ overflow:visible; }
+    .main{
+      height:auto;
+      overflow:visible;
+      min-height:auto;
+    }
+  }
+
 </style>
 </head>
 

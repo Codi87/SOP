@@ -4,10 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Gestione Eventi - CRI</title>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#b71c1c">
-
 <style>
   :root {
     --rosso-cri: #b71c1c;
@@ -16,7 +12,7 @@
     --blu-info: #007bff;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { box-sizing: border-box; }
 
   body {
     margin: 0;
@@ -26,49 +22,70 @@
     background: var(--grigio);
   }
 
-  /* ✅ SIDEBAR IDENTICA A index.html */
   .sidebar {
+    position: fixed;
+    left: 0; top: 0;
     width: 260px;
-    flex-shrink: 0;
+    height: 100vh;
     background: var(--rosso-cri);
     color: var(--bianco);
     display: flex;
     flex-direction: column;
     padding-top: 20px;
-    height: 100vh;
-    overflow: hidden;
+    z-index: 1000;
     align-items: center;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
+
   .sidebar img {
     width: 220px;
     margin-bottom: 20px;
     border-radius: 8px;
+    flex-shrink: 0;
   }
 
   .menu {
     list-style: none;
     padding: 0;
     width: 100%;
-    flex-grow: 1;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    flex: 1 1 auto;
   }
   .menu li { width: 100%; }
+
   .menu a {
     display: block;
     padding: 15px 20px;
     color: var(--bianco);
-    text-decoration: none;
     font-weight: bold;
+    text-decoration: none;
   }
-  .menu a:hover, .menu a.active { background: #9f1b1b; }
+
+  .menu a:hover,
+  .menu a.active {
+    background: #9f1b1b;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    width: 100%;
+    position: sticky;
+    bottom: 0;
+    padding: 14px 0 18px;
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(
+      to top,
+      rgba(183, 28, 28, 1) 0%,
+      rgba(183, 28, 28, 0.95) 70%,
+      rgba(183, 28, 28, 0) 100%
+    );
+  }
 
   #logout {
-    flex-shrink: 0;
-    margin: 12px auto 20px auto;
-    padding: 10px 20px;
+    padding: 12px 20px;
     width: 80%;
-    background-color: #fff;
+    background: var(--bianco);
     color: var(--rosso-cri);
     border: 2px solid var(--rosso-cri);
     border-radius: 6px;
@@ -76,15 +93,29 @@
     cursor: pointer;
     transition: background 0.3s, color 0.3s;
   }
-  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
+  #logout:hover {
+    background-color: var(--rosso-cri);
+    color: var(--bianco);
+  }
 
-  /* ✅ MAIN IDENTICO A index.html (layout/scroll) */
+  .sidebar::-webkit-scrollbar { width: 10px; }
+  .sidebar::-webkit-scrollbar-track { background: rgba(255,255,255,0.12); }
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.35);
+    border-radius: 999px;
+    border: 2px solid rgba(183,28,28,0.9);
+  }
+  .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.55); }
+  .sidebar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.45) rgba(255,255,255,0.12); }
+
   .main {
+    margin-left: 260px;
     flex-grow: 1;
-    padding: 30px;
     background: var(--bianco);
+    padding: 30px;
     overflow-y: auto;
-    position: relative;
+    min-height: 100vh;
+    width: 100%;
   }
 
   .main h1 {
@@ -92,7 +123,6 @@
     margin-top: 0;
   }
 
-  /* ====== STILI SPECIFICI EVENTI ====== */
   #search {
     width: 100%;
     padding: 10px;
@@ -152,9 +182,11 @@
   .reject-btn { background-color: #6c757d; color: #fff; }
   .manage-btn { background-color: #343a40; color: #fff; }
 
+  /* ✅ bottone iscrizione volontario */
   .signup-btn { background:#28a745; color:#fff; }
   .signup-btn[disabled] { opacity:.6; cursor:not-allowed; }
 
+  /* Modale form */
   #form-container {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -245,6 +277,7 @@
     margin-top: -2px;
   }
 
+  /* Popup info evento */
   #info-popup {
     position: fixed;
     top: 50%;
@@ -365,6 +398,7 @@
   .mini-actions .ok{ background:#28a745; color:#fff; }
   .mini-actions .no{ background:#6c757d; color:#fff; }
 
+  /* MODALE REQUISITI (Qualifiche + Patenti) */
   #req-popup {
     position: fixed;
     inset: 0;
@@ -464,9 +498,9 @@
 
   @media (max-width: 768px) {
     body { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
-    .menu { overflow: visible; }
-    .main { padding: 20px; }
+    .sidebar { position: relative; width: 100%; height: auto; overflow: visible; }
+    .sidebar-footer { position: relative; background: transparent; }
+    .main { margin-left: 0; padding: 20px; }
     .info-label { min-width: 150px; }
     .req-grid { grid-template-columns: 1fr; }
   }
@@ -477,7 +511,10 @@
 <aside class="sidebar" aria-label="Navigazione principale">
   <img id="logo-cri" src="logo.svg" alt="Logo Croce Rossa Italiana" />
   <ul class="menu" id="menu-sidebar" role="navigation" aria-label="Menu principale"></ul>
-  <button id="logout" type="button">Logout</button>
+
+  <div class="sidebar-footer">
+    <button id="logout" type="button">🚪 Logout</button>
+  </div>
 </aside>
 
 <main class="main">
@@ -552,12 +589,12 @@
       <fieldset style="margin: 10px 0; border: 1px solid #ccc; padding: 10px;">
         <legend>Estensione evento</legend>
         <p style="font-size:0.9rem; margin-top:0;">
-          Puoi estendere l'evento ad altri comitati SOL o alla SOP. Ogni destinatario dovrà approvare l'evento prima che i volontari del relativo comitato lo vedano. Se approvato dalla SOP, l'evento diventa visibile a tutti gli utenti registrati.
+          Seleziona uno o più comitati destinatari (CTRL/CMD + click per selezioni multiple), incluso SOP.
         </p>
         <div class="row">
-          <input type="text" id="destSol" name="destSol" placeholder="Altre SOL destinatarie (separate da virgola)" />
-          <input type="checkbox" id="destSop" name="destSop" />
-          <label for="destSop" style="flex:1 1 48%; display:flex; align-items:center;">&nbsp; Estendi evento alla SOP</label>
+          <select id="destinatariComitati" name="destinatariComitati" multiple style="flex:1 1 100%; min-height:110px;">
+            <!-- opzioni generate via JavaScript -->
+          </select>
         </div>
       </fieldset>
 
@@ -623,7 +660,7 @@ document.getElementById("logout").addEventListener("click", logout);
 function normalize(s){ return (s || "").toLowerCase().trim(); }
 
 /* ===========================
-   LOGO + MENU (IDENTICI A index.html)
+   LOGO + MENU
 =========================== */
 const logoImg = document.getElementById("logo-cri");
 let logoSrc = "logo.svg";
@@ -692,6 +729,84 @@ const searchInput = document.getElementById("search");
 const btnApriForm = document.getElementById("btn-apri-form");
 const btnChiudiForm = document.getElementById("btn-chiudi-form");
 const submitBtn = document.getElementById("submit-btn");
+
+const destinatariComitatiSelect = document.getElementById("destinatariComitati");
+
+// Elenco comitati (include SOP) per estendere gli eventi
+const COMITATI_PREDEFINITI = [
+  "SOP",
+  "Pesaro",
+  "Urbino",
+  "Fano",
+  "Pergola",
+  "Marotta-Mondolfo",
+  "Fossombrone",
+  "Cagli",
+  "Montelabbate",
+  "Fermignano",
+  "Sant'Angelo in Vado"
+];
+
+function collectComitatiEstensione() {
+  const map = new Map(); // key normalizzata -> display
+
+  const add = (name) => {
+    const s = (name || "").toString().trim();
+    if (!s) return;
+    const key = normalize(s);
+    if (!key) return;
+    const display = (key === "sop") ? "SOP" : s;
+    if (!map.has(key)) map.set(key, display);
+  };
+
+  COMITATI_PREDEFINITI.forEach(add);
+
+  // da anagrafica volontari
+  getVolontari().forEach(v => add(v.comitato));
+
+  // da eventi salvati (destinatari già usati)
+  getEventi().forEach(ev => {
+    (ev.destSol || []).forEach(add);
+    if (ev.destSop) add("SOP");
+    add(ev.comitatoCreatore);
+  });
+
+  return Array.from(map.entries())
+    .sort((a, b) => {
+      if (a[0] === "sop") return -1;
+      if (b[0] === "sop") return 1;
+      return a[1].localeCompare(b[1], "it", { sensitivity: "base" });
+    })
+    .map(([_, v]) => v);
+}
+
+function renderDestinatariOptions() {
+  if (!destinatariComitatiSelect) return;
+  const comitati = collectComitatiEstensione();
+  destinatariComitatiSelect.innerHTML = comitati
+    .map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`)
+    .join("");
+
+  // ✅ Multi-selezione senza CTRL/CMD: click sull'opzione = toggle selezione
+  // (utile soprattutto quando si devono scegliere più comitati)
+  if (!destinatariComitatiSelect.dataset.multiToggle) {
+    destinatariComitatiSelect.dataset.multiToggle = "1";
+
+    const toggleOpt = (ev) => {
+      const opt = ev.target;
+      if (!opt || opt.tagName !== "OPTION") return;
+      ev.preventDefault();
+      opt.selected = !opt.selected;
+      destinatariComitatiSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    };
+
+    destinatariComitatiSelect.addEventListener("mousedown", toggleOpt);
+    destinatariComitatiSelect.addEventListener("touchstart", toggleOpt, { passive: false });
+  }
+}
+
+// inizializza opzioni dropdown
+renderDestinatariOptions();
 const infoPopup = document.getElementById("info-popup");
 const infoContent = document.getElementById("info-content");
 const infoClose = document.getElementById("info-close");
@@ -718,23 +833,48 @@ let reqSnapshot = { qualifiche: [], patenti: [] };
    OPTIONS
 =========================== */
 const QUALIFICHE_OPTIONS = [
-  "AUTISTA SOCCORRITORE TSSA",
-  "SOCCORRITORE TSSA",
-  "TS",
-  "OPEM GENERICO",
-  "OPEM LOGISTA",
-  "HACCP",
-  "OPERATORE TLC",
+  "OPEM",
+  "CSA",
   "OPSA",
+  "TLC 1",
+  "TLC 2",
+  "UC-OC",
+  "ASP-C",
+  "CAE",
+  "CSP-A",
+  "CSP-D",
   "SMTS",
-  "MEDICO",
-  "INFERMIERE",
+  "AUTISTA SOCCORRITORE",
+  "SOCCORRITORE",
+  "TS",
+  "OSG",
+  "LOGISTA",
   "OPERATORE UAS (A1/A3-A2-STS)",
-  "OPERATORE SOCIALE GENERICO",
-  "MEDIATORE LINGUISTICO",
-  "CAE COORDINATORE ATTIVITA IN EMERGENZA",
-  "OPERATORE SOCIALE IN EMERGENZA"
+  "HACCP",
+  "OPSOCEM",
+  "MEDIATORE LINGUISTICO"
 ];
+
+const QUALIFICHE_DESC = {
+  "OPEM": "Operatore CRI Attività in Emergenza",
+  "CSA": "Corso Sicurezza Acquatica",
+  "OPSA": "Operatore Polivalente di Salvataggio in Acqua",
+  "TLC 1": "Operatore Telecomunicazioni",
+  "TLC 2": "Specialista Telecomunicazioni",
+  "UC-OC": "Operatore Cinofilo CRI",
+  "ASP-C": "Specializzazione per Operatore di Supporto Ristorazione in Emergenza",
+  "CAE": "Coordinatore Delle Attività di Emergenza",
+  "CSP-A": "Operatore di Sala Operativa",
+  "CSP-D": "Operatore Specializzato CRI in Logistica in Emergenza",
+  "SMTS": "Operatore Soccorso con Mezzi e Tecniche Speciali",
+  "AUTISTA SOCCORRITORE": "Autista Soccorritore Necessario TSSA",
+  "SOCCORRITORE": "Soccorritore Necessario TSSA",
+  "TS": "Corso Trasporti Sanitari",
+  "OSG": "Operatore Sociale Generico",
+  "LOGISTA": "Logista Generico Senza Corso",
+  "OPERATORE UAS (A1/A3-A2-STS)": "Operatore UAS Certificato Con Attestati",
+  "OPSOCEM": "Operatore Sociale CRI in Emergenza"
+};
 
 const PATENTI_OPTIONS = [
   "PATENTE 1","PATENTE 2","PATENTE 2B","PATENTE 3","PATENTE 4","PATENTE 5","PATENTE 5B",
@@ -827,6 +967,7 @@ function startOfToday() {
 }
 
 function getEventoEndDate(ev) {
+  // fine se presente, altrimenti inizio
   const d = ev.dataFine || ev.dataInizio;
   if (!d) return null;
   const dt = new Date(d);
@@ -834,6 +975,7 @@ function getEventoEndDate(ev) {
   return dt;
 }
 
+// ✅ evento chiuso se data fine/inizio < oggi
 function isEventoChiuso(ev) {
   const end = getEventoEndDate(ev);
   if (!end) return false;
@@ -868,8 +1010,10 @@ function buildRequisitiUI() {
   reqQualificheWrap.innerHTML = QUALIFICHE_OPTIONS.map((q, i) => {
     const id = `rq-q-${i}`;
     const label = (q === "OPERATORE UAS (A1/A3-A2-STS)") ? "OPERATORE UAS (Droni)" : q;
+    const desc = QUALIFICHE_DESC[q] || "";
+    const titleAttr = desc ? ` title="${escapeHtml(desc)}"` : "";
     return `
-      <label for="${id}">
+      <label for="${id}"${titleAttr}>
         <input type="checkbox" id="${id}" class="rq-qualifica" value="${escapeHtml(q)}">
         ${escapeHtml(label)}
       </label>
@@ -955,6 +1099,7 @@ reqSave.addEventListener("click", () => {
   let qualificheSel = getCheckedValues(".rq-qualifica");
   let patentiSel = getCheckedValues(".rq-patente");
 
+  // regola NESSUNA
   if (patentiSel.includes("NESSUNA") && patentiSel.length > 1) {
     patentiSel = patentiSel.filter(x => x !== "NESSUNA");
   }
@@ -1009,6 +1154,7 @@ function normalizeIscrizioniForEvento(ev) {
   return changed;
 }
 
+/* ✅ requisiti separati */
 function normalizeRequisitiEvento(ev) {
   let changed = false;
   if (!Array.isArray(ev.qualificheRichieste)) ev.qualificheRichieste = [];
@@ -1068,6 +1214,7 @@ function intersects(a, b) {
   return false;
 }
 
+// ✅ basta 1 qualifica richiesta O 1 patente richiesta (se impostate)
 function volontarioSoddisfaRequisiti(ev, vol) {
   normalizeRequisitiEvento(ev);
 
@@ -1077,11 +1224,14 @@ function volontarioSoddisfaRequisiti(ev, vol) {
   const volQ = (vol?.qualifiche || []);
   const volP = (vol?.patenti || []);
 
+  // se non richiede qualifiche -> ok
   const okQ = reqQ.length === 0 ? true : intersects(volQ, reqQ);
 
+  // se non richiede patenti o richiede "NESSUNA" -> ok
   const reqPclean = reqP.filter(x => x && x !== "NESSUNA");
   const okP = reqPclean.length === 0 ? true : intersects(volP, reqPclean);
 
+  // ✅ entrambe le categorie devono essere ok (se una categoria è vuota, è ok)
   return okQ && okP;
 }
 
@@ -1100,10 +1250,10 @@ function getVisibleEventi() {
     const closed = isEventoChiuso(ev);
 
     if (role === "sop" || role === "amministratore") return true;
-    if (role === "sol") return true;
+    if (role === "sol") return true; // ✅ SOL vede anche chiusi (memoria)
 
     if (role === "volontario") {
-      if (closed) return false;
+      if (closed) return false; // ✅ non visibile se chiuso
       if (!c) return false;
 
       if (isApprovedGlobally) return true;
@@ -1136,6 +1286,7 @@ function canManageIscrizioniForEvent(ev) {
   return creator === c || dest.includes(c) || globalApproved;
 }
 
+/* ✅ richiesta iscrizione volontario */
 function getMyIscrizione(ev, cf) {
   normalizeIscrizioniForEvento(ev);
   const cSol = normalize(comitato);
@@ -1164,11 +1315,13 @@ function richiediIscrizione(eventId) {
     return;
   }
 
+  // requisiti OR (basta 1)
   if (!volontarioSoddisfaRequisiti(ev, vol)) {
     alert("⛔ Non possiedi i requisiti richiesti (serve almeno 1 qualifica/patente richiesta).");
     return;
   }
 
+  // capienza
   const max = ev.maxPartecipanti || 0;
   if (max > 0) {
     const occupati = countOccupati(ev);
@@ -1276,6 +1429,7 @@ function showInfoPopup(evento) {
 <div><span class="info-label">Descrizione:</span><span class="info-value">${escapeHtml(evento.descrizione)}</span></div>
   `;
 
+  // se volontario -> bottone richiedi iscrizione (solo se aperto)
   let bloccoVol = "";
   if (role === "volontario") {
     const vol = getVolontarioByCf(cfUtente);
@@ -1495,10 +1649,13 @@ form.addEventListener("submit", e => {
 
   const eventi = getEventi();
 
-  const destSolRaw = form.destSol.value
-    .split(",")
-    .map(s => s.trim())
-    .filter(Boolean);
+  const destSel = document.getElementById("destinatariComitati");
+  const selectedComitati = destSel
+    ? Array.from(destSel.selectedOptions).map(o => (o.value || "").trim()).filter(Boolean)
+    : [];
+
+  const destSop = selectedComitati.some(c => normalize(c) === "sop");
+  const destSolRaw = selectedComitati.filter(c => normalize(c) !== "sop");
 
   const creatorLower = normalize(form.comitatoCreatore.value);
   const approvazioniBase = (editIndex === null ? {} : (eventi[editIndex].approvazioni || {}));
@@ -1522,7 +1679,7 @@ form.addEventListener("submit", e => {
     comitatoCreatore: form.comitatoCreatore.value.trim(),
     descrizione: form.descrizione.value.trim(),
     destSol: destSolRaw,
-    destSop: form.destSop.checked,
+    destSop: destSop,
     approvazioni: approvazioniBase,
     iscrizioni: editIndex === null ? [] : (eventi[editIndex].iscrizioni || [])
   };
@@ -1574,8 +1731,16 @@ window.editEvento = function(index) {
 
   form.comitatoCreatore.value = ev.comitatoCreatore || (comitato || "");
   form.descrizione.value = ev.descrizione || "";
-  form.destSol.value = (ev.destSol || []).join(", ");
-  form.destSop.checked = !!ev.destSop;
+      // Destinatari estensione (menu a discesa)
+    const destSel = document.getElementById("destinatariComitati");
+    if (destSel) {
+      renderDestinatariOptions(); // assicura che le opzioni esistano
+      const wanted = new Set([...(ev.destSol || [])].map(s => normalize(s)).filter(Boolean));
+      if (ev.destSop) wanted.add("sop");
+      Array.from(destSel.options).forEach(opt => {
+        opt.selected = wanted.has(normalize(opt.value));
+      });
+    }
 
   openDialog(formContainer, form.titolo);
 };

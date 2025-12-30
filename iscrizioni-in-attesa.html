@@ -16,7 +16,12 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
+  
+
+  html, body{ height:100%; 
+    overflow: hidden; /* ✅ scroll solo nel main */
+  }
+body {
     margin: 0;
     font-family: Arial, sans-serif;
     display: flex;
@@ -36,6 +41,8 @@
     height: 100vh;
     overflow: hidden;
     align-items: center;
+  
+    position: sticky;
   }
 
   .sidebar img {
@@ -86,6 +93,9 @@
     background: var(--bianco);
     padding: 30px;
     overflow-y: auto;
+  
+    height: 100vh;
+    flex: 1 1 auto;
   }
 
   .main h1 { color: var(--rosso-cri); margin-top: 0; margin-bottom: 10px; }
@@ -181,7 +191,6 @@
     z-index: 9999;
   }
   #info-popup.active { display: flex; }
-
   #info-box {
     background: #fff;
     color: #000;
@@ -353,9 +362,15 @@
   #edit-save:hover { background: #9f1b1b; }
 
   /* ===== MOBILE come INDEX ===== */
-  @media (max-width: 768px) {
-    body { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
+  @media (max-width: 768px){
+    body { flex-direction: column; 
+    .sidebar{ position: relative; height:auto; overflow: visible; width:100%; }
+
+    .menu{ overflow: visible; }
+
+    .main{ height:auto; overflow: visible; }
+}
+.sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
     .menu { overflow: visible; }
 
     table { font-size: 0.85rem; }
