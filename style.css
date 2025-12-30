@@ -1,0 +1,525 @@
+:root {
+  --rosso-cri: #b71c1c;
+  --rosso-cri-hover: #9f1b1b;
+  --bianco: #ffffff;
+  --grigio: #f5f5f5;
+  --blu-info: #007bff;
+
+  --ombra: 0 10px 30px rgba(0,0,0,0.18);
+  --bordi: #ccc;
+}
+
+/* Reset base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ✅ Body NON flex (evita conflitti con sidebar fixed tipo TLC) */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  background: var(--grigio);
+  color: #222;
+}
+
+/* ✅ Wrapper consigliato: se vuoi layout fisso con sidebar “normale”
+   <body><div class="layout">... */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--rosso-cri);
+  color: var(--bianco);
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  height: 100vh;
+  overflow-y: auto;
+  align-items: center;
+}
+
+.sidebar img {
+  width: 220px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+.menu li { width: 100%; }
+
+.menu a {
+  display: block;
+  padding: 15px 20px;
+  color: var(--bianco);
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.menu a:hover,
+.menu a.active {
+  background: var(--rosso-cri-hover);
+}
+
+/* ✅ Focus accessibile */
+.menu a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(183, 28, 28, 0.35);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Logout */
+#logout {
+  margin-top: auto;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  width: 80%;
+  background-color: #fff;
+  color: var(--rosso-cri);
+  border: 2px solid var(--rosso-cri);
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+
+#logout:hover {
+  background-color: var(--rosso-cri);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* Main */
+.main {
+  flex-grow: 1;
+  padding: 30px;
+  background: var(--bianco);
+  overflow-y: auto;
+  min-height: 100vh;
+}
+
+.main h1 {
+  color: var(--rosso-cri);
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+/* Search */
+#search {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--bordi);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#search:focus {
+  outline: none;
+  border-color: var(--rosso-cri);
+  box-shadow: 0 0 0 3px rgba(183, 28, 28, 0.12);
+}
+
+/* Primary add button */
+#btn-apri-form {
+  background: var(--rosso-cri);
+  color: var(--bianco);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+#btn-apri-form:hover {
+  background: var(--rosso-cri-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--ombra);
+}
+
+/* ✅ Tabella: wrapper per mobile (se vuoi) */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* TABELLA */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  max-width: 1200px;
+  margin-top: 20px;
+  background: #fff;
+}
+
+table th,
+table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+table th {
+  background: var(--rosso-cri);
+  color: var(--bianco);
+  font-weight: bold;
+}
+
+/* Action buttons */
+button.action-btn {
+  padding: 6px 10px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  margin: 0 2px;
+}
+
+button.action-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.95);
+}
+
+button.edit-btn {
+  background-color: #ffc107;
+  color: #000;
+}
+
+button.delete-btn {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+button.info-btn {
+  background-color: var(--blu-info);
+  color: #fff;
+}
+
+/* FORM MODALE */
+#form-container {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px); /* ✅ */
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#form-container.active {
+  display: flex;
+}
+
+#form-box {
+  background: var(--grigio);
+  max-width: 720px;
+  width: 95%;
+  border-radius: 10px;
+  padding: 25px 30px;
+  box-shadow: var(--ombra);
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+#btn-chiudi-form {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 2rem;
+  background: none;
+  border: none;
+  color: var(--rosso-cri);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+#btn-chiudi-form:hover {
+  transform: scale(1.08);
+}
+
+form h2 {
+  color: var(--rosso-cri);
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+form .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+form input,
+form select,
+form textarea {
+  flex: 1 1 48%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--bordi);
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+form textarea {
+  flex: 1 1 100%;
+  min-height: 70px;
+}
+
+form input:focus,
+form select:focus,
+form textarea:focus {
+  outline: none;
+  border-color: var(--rosso-cri);
+  box-shadow: 0 0 0 3px rgba(183, 28, 28, 0.12);
+}
+
+form input[type="date"] {
+  padding: 8px 10px;
+}
+
+/* Campo readonly */
+form input[readonly] {
+  background-color: #f8f9fa;
+  color: #495057;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
+}
+
+/* Qualifiche e Patenti */
+.qualifiche-container, .patenti-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 20px;
+  margin-bottom: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.qualifiche-container legend,
+.patenti-container legend {
+  font-weight: bold;
+  color: var(--rosso-cri);
+  padding: 0 5px;
+}
+
+.qualifiche-container label,
+.patenti-container label {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.qualifiche-container input[type="checkbox"],
+.patenti-container input[type="checkbox"] {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+/* Consenso GDPR */
+.consenso-container {
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #fff3cd;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
+}
+
+.consenso-container legend {
+  font-weight: bold;
+  color: var(--rosso-cri);
+  padding: 0 5px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.consenso-checkbox-wrapper {
+  margin-top: 10px;
+}
+
+.consenso-checkbox-wrapper label {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.consenso-checkbox-wrapper input[type="checkbox"] {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+/* Submit */
+form button[type="submit"] {
+  background: var(--rosso-cri);
+  color: var(--bianco);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  margin-top: 10px;
+  width: 100%;
+}
+
+form button[type="submit"]:hover {
+  background: var(--rosso-cri-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--ombra);
+}
+
+/* POPUP INFO */
+#info-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 720px;
+  max-width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--grigio);
+  border: 2px solid var(--rosso-cri);
+  border-radius: 10px;
+  padding: 25px 30px;
+  box-shadow: var(--ombra);
+  display: none;
+  z-index: 1100;
+  font-size: 1rem;
+}
+
+#info-popup.active {
+  display: block;
+}
+
+#info-popup h3 {
+  margin-top: 0;
+  color: var(--rosso-cri);
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+#info-content {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #333;
+}
+
+/* Etichette rosse nel popup */
+.info-label {
+  color: var(--rosso-cri) !important;
+  font-weight: bold !important;
+}
+
+#info-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--rosso-cri);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+#info-close:hover {
+  transform: scale(1.08);
+}
+
+/* RESPONSIVE MOBILE */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    padding: 15px;
+  }
+
+  .main {
+    padding: 20px;
+  }
+
+  form .row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  form input,
+  form select,
+  form textarea {
+    flex: 1 1 100%;
+  }
+
+  .qualifiche-container,
+  .patenti-container {
+    grid-template-columns: 1fr;
+  }
+
+  table {
+    font-size: 0.9rem;
+  }
+
+  button.action-btn {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    display: block;
+    width: 100%;
+    margin: 4px 0;
+  }
+
+  #form-box,
+  #info-popup {
+    width: 95%;
+    padding: 20px;
+  }
+}
+
+/* ANIMAZIONI */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+#form-container.active #form-box {
+  animation: fadeIn 0.2s ease;
+}
+
+#info-popup.active {
+  animation: fadeIn 0.2s ease;
+}
