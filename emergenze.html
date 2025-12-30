@@ -475,6 +475,50 @@
     .main{padding:20px}
     .info-label{min-width:150px}
   }
+
+
+  /* ============================
+     ✅ FIX: scroll SOLO nel main
+     Sidebar ferma + menu scrollabile
+  ============================ */
+  html, body{ height:100%; }
+  body{ overflow:hidden; }
+
+  .sidebar{
+    height:100vh;
+    position:sticky !important;
+    top:0;
+    overflow:hidden;
+  }
+  .menu{
+    flex:1 1 auto;
+    overflow-y:auto;
+    overscroll-behavior: contain;
+  }
+  .main{
+    flex:1 1 auto;
+    height:100vh;
+    overflow-y:auto;
+    margin-left:0 !important;
+    min-height:0;
+    width:auto;
+  }
+
+  @media (max-width:768px){
+    body{ overflow:auto; }
+    .sidebar{
+      height:auto;
+      position:relative !important;
+      overflow:visible;
+    }
+    .menu{ overflow:visible; }
+    .main{
+      height:auto;
+      overflow:visible;
+      min-height:auto;
+    }
+  }
+
 </style>
 </head>
 
@@ -546,16 +590,17 @@
         <textarea id="descrizione" name="descrizione" placeholder="Descrizione emergenza, attività, note operative *" required></textarea>
       </div>
 
-      <fieldset style="margin: 10px 0; border: 1px solid #ccc; padding: 10px; background:#fff; border-radius:10px;">
+            <fieldset style="margin: 10px 0; border: 1px solid #ccc; padding: 10px; background:#fff; border-radius:10px;">
         <legend><b>Estensione emergenza</b></legend>
         <p style="font-size:0.9rem; margin-top:0; color:#444;">
-          Puoi inviare l'emergenza ad altre SOL o alla SOP. Ogni destinatario dovrà <b>approvare</b> prima di poter aggiungere i propri mezzi/materiali/log.
-          Se la <b>SOP approva</b>, l'emergenza diventa visibile a tutte le SOL (sempre e solo a ruoli abilitati).
+          Seleziona uno o più destinatari. Puoi usare clic singolo per attivare/disattivare un'opzione.
+          Se non selezioni nulla, l’emergenza resta visibile solo al comitato creatore. Ogni destinatario dovrà <b>approvare</b> prima di poter aggiungere i propri mezzi/materiali/log.
         </p>
+
         <div class="row">
-          <input type="text" id="destSol" name="destSol" placeholder="Altre SOL destinatarie (separate da virgola)" />
-          <input type="checkbox" id="destSop" name="destSop" />
-          <label for="destSop" style="flex:1 1 48%; display:flex; align-items:center;">&nbsp; Invia emergenza alla SOP</label>
+          <select id="destinatariComitati" name="destinatariComitati" multiple style="flex:1 1 100%; min-height: 130px;">
+            <!-- popolato da JS -->
+          </select>
         </div>
       </fieldset>
 
@@ -565,7 +610,7 @@
           <option value="chiusa">Chiusa</option>
         </select>
         <div class="muted" style="flex:1 1 48%; display:flex; align-items:center;">
-          Nota: qui definisci i dati dell’emergenza. I contributi (mezzi/materiali/volontari/log) sono <b>per comitato</b>.
+          Nota: qui definisci i dati dell’emergenza. I contributi (mezzi/materiali/volontari/log)
         </div>
       </div>
 
@@ -684,6 +729,9 @@ const userId = localStorage.getItem("userId") || "";
 const role = (localStorage.getItem("role") || "").toLowerCase().trim();
 const comitato = localStorage.getItem("comitato") || "";
 
+// ✅ Permesso eliminazione emergenza: SOLO SOP e Amministratore
+const isSopOrAdmin = (role === "sop" || role === "amministratore");
+
 if (!userId) {
   alert("Devi effettuare il login");
   window.location.href = "login.html";
@@ -694,6 +742,57 @@ if (role === "volontario") {
 }
 
 function normalize(s){ return (s || "").toLowerCase().trim(); }
+
+
+  /* =========================
+     ESTENSIONE (multi-comitato) — come eventi
+  ========================= */
+  const comitatiList = [
+    "SOP",
+    "Pesaro",
+    "Urbino",
+    "Fano",
+    "Pergola",
+    "Marotta-Mondolfo",
+    "Fossombrone",
+    "Cagli",
+    "Montelabbate",
+    "Fermignano",
+    "Sant'Angelo in Vado"
+  ];
+
+  const destinatariSelect = document.getElementById("destinatariComitati");
+
+  function fillDestinatariOptions(){
+    if (!destinatariSelect) return;
+    destinatariSelect.innerHTML = comitatiList
+      .map(c => `<option value="${c}">${c}</option>`)
+      .join("");
+  }
+
+  fillDestinatariOptions();
+
+  // ✅ Permette multi-selezione senza Ctrl/Cmd (clic = toggle dell'opzione)
+  if (destinatariSelect){
+    destinatariSelect.addEventListener("mousedown", (e) => {
+      const opt = e.target;
+      if (opt && opt.tagName === "OPTION"){
+        e.preventDefault();
+        opt.selected = !opt.selected;
+      }
+    });
+  }
+
+  function getDestinatariFromSelect(){
+    if (!destinatariSelect) return [];
+    return Array.from(destinatariSelect.selectedOptions).map(o => o.value);
+  }
+
+  function setDestinatariSelection(destSolArr, destSopBool){
+    if (!destinatariSelect) return;
+    const set = new Set([...(destSolArr || []), ...(destSopBool ? ["SOP"] : [])].map(x => String(x)));
+    Array.from(destinatariSelect.options).forEach(o => { o.selected = set.has(o.value); });
+  }
 function escapeHtml(text) {
   if (text === null || text === undefined) return "";
   return String(text).replace(/[&<>"']/g, m => ({
@@ -2092,8 +2191,9 @@ form.addEventListener("submit", (e) => {
 
   const emergenze = getEmergenze();
 
-  const destSolRaw = (form.destSol.value || "")
-    .split(",").map(s => s.trim()).filter(Boolean);
+  const destList = getDestinatariFromSelect();
+
+  const destSolRaw = destList.filter(x => x !== "SOP");
 
   const creatorLower = normalize(form.comitatoCreatore.value);
 
@@ -2106,7 +2206,7 @@ form.addEventListener("submit", (e) => {
     if (!approvazioniBase[k]) approvazioniBase[k] = "pending";
   });
 
-  const toSop = !!form.destSop.checked;
+  const toSop = destList.includes("SOP");
   if (toSop && !approvazioniBase.SOP) approvazioniBase.SOP = "pending";
   if (!toSop && approvazioniBase.SOP && approvazioniBase.SOP === "pending") delete approvazioniBase.SOP;
   if (!toSop && approvazioniBase.ALL) delete approvazioniBase.ALL;
@@ -2441,8 +2541,7 @@ window.editEmergenza = function(index){
   form.comitatoCreatore.value = em.comitatoCreatore || (comitato || "");
   form.descrizione.value = em.descrizione || "";
   form.stato.value = em.stato || "attiva";
-  form.destSol.value = (em.destSol || []).join(", ");
-  form.destSop.checked = !!em.destSop;
+  setDestinatariSelection(em.destSol || [], !!em.destSop);
 
   toggleForm(true);
 };
@@ -2454,8 +2553,9 @@ window.deleteEmergenza = function(index){
 
   ensureEmergenzaShape(em);
 
-  if (!canManageEmergenzaMetadata(em)) {
-    alert("Non hai i permessi per eliminare questa emergenza.");
+  // ✅ Eliminazione emergenza consentita SOLO a SOP e Amministratore
+  if (!isSopOrAdmin) {
+    alert("❌ Solo SOP o Amministratore possono eliminare un'emergenza.");
     return;
   }
 
@@ -2502,7 +2602,7 @@ function renderEmergenze(){
       const actions = `
         <button type="button" class="action-btn info-btn" onclick="showInfoPopupByIndex(${globalIndex})">ℹ️ Info</button>
         ${canEdit ? `<button type="button" class="action-btn edit-btn" onclick="editEmergenza(${globalIndex})">✏️ Modifica</button>` : ""}
-        ${canEdit ? `<button type="button" class="action-btn delete-btn" onclick="deleteEmergenza(${globalIndex})">🗑️ Elimina</button>` : ""}
+        ${isSopOrAdmin ? `<button type="button" class="action-btn delete-btn" onclick="deleteEmergenza(${globalIndex})">🗑️ Elimina</button>` : ""}
       `;
 
       const row = document.createElement("tr");
