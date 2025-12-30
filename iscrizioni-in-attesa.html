@@ -24,15 +24,17 @@
     background: var(--grigio);
   }
 
+  /* ===== SIDEBAR come INDEX ===== */
   .sidebar {
     width: 260px;
+    flex-shrink: 0;
     background: var(--rosso-cri);
     color: var(--bianco);
     display: flex;
     flex-direction: column;
-    padding: 20px 0;
+    padding-top: 20px;
     height: 100vh;
-    overflow-y: auto;
+    overflow: hidden;
     align-items: center;
   }
 
@@ -47,23 +49,28 @@
     padding: 0;
     width: 100%;
     flex-grow: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .menu li { width: 100%; }
+
   .menu a {
     display: block;
     padding: 15px 20px;
     color: var(--bianco);
-    font-weight: bold;
     text-decoration: none;
+    font-weight: bold;
   }
+
   .menu a:hover, .menu a.active { background: #9f1b1b; }
 
   #logout {
-    margin: 20px auto 0;
+    flex-shrink: 0;
+    margin: 12px auto 20px auto;
     padding: 10px 20px;
     width: 80%;
-    background: var(--bianco);
+    background-color: #fff;
     color: var(--rosso-cri);
     border: 2px solid var(--rosso-cri);
     border-radius: 6px;
@@ -71,7 +78,8 @@
     cursor: pointer;
     transition: background 0.3s, color 0.3s;
   }
-  #logout:hover { background: var(--rosso-cri); color: var(--bianco); }
+
+  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
 
   .main {
     flex-grow: 1;
@@ -344,9 +352,12 @@
   }
   #edit-save:hover { background: #9f1b1b; }
 
+  /* ===== MOBILE come INDEX ===== */
   @media (max-width: 768px) {
     body { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; padding: 15px; }
+    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
+    .menu { overflow: visible; }
+
     table { font-size: 0.85rem; }
     .action-btn {
       padding: 6px 10px;
@@ -365,7 +376,8 @@
 </style>
 </head>
 <body>
-<aside class="sidebar">
+
+<aside class="sidebar" aria-label="Navigazione principale">
   <img id="logo-cri" src="logo.svg" alt="Logo CRI">
   <ul class="menu" id="menu-sidebar"></ul>
   <button id="logout" type="button">Logout</button>
@@ -541,13 +553,11 @@
     window.location.href = "login.html";
   });
 
-  // LOGO dinamico
+  // LOGO dinamico (come index: aggiunge tlc_provinciale per sicurezza)
   const logoImg = document.getElementById("logo-cri");
   let logoSrc = "logo.svg";
 
-  if (role === "sop" || role === "amministratore") {
-    logoSrc = "logo-sop.svg";
-  } else if (role === "sol") {
+  if (role === "sol") {
     const c = normalize(comitato);
     const map = {
       "pesaro": "logo-pesaro.svg",
@@ -564,14 +574,19 @@
       "sant-angelo-in-vado": "logo-santangeloinvado.svg"
     };
     logoSrc = map[c] || "logo-sop.svg";
+  } else if (role === "sop" || role === "amministratore" || role === "tlc_provincinciale" || role === "tlc_provinciale") {
+    logoSrc = "logo-sop.svg";
   }
   logoImg.src = logoSrc;
   logoImg.onerror = () => { logoImg.src = "logo-sop.svg"; };
 
-  // MENU
-  const menuItems = [
+  // ===== MENU come INDEX (voci + condizioni) =====
+  const menuEl = document.getElementById("menu-sidebar");
+  menuEl.innerHTML = "";
+
+  const items = [
     { text: "🏠 Home", href: "index.html" },
-    { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html", active: true },
+    { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html" },
     { text: "👥 Volontari", href: "volontari.html" },
     { text: "🚗 Mezzi", href: "mezzi.html" },
     { text: "📦 Materiali", href: "materiali.html" },
@@ -579,17 +594,29 @@
     { text: "📅 Eventi", href: "eventi.html" },
     { text: "📄 Documenti", href: "documenti.html" }
   ];
-  if (role === "sop" || role === "amministratore" || role === "sol") {
-    menuItems.push({ text: "⚙️ Admin", href: "admin.html" });
+
+  if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
+    items.push({ text: "📡 TLC", href: "tlc.html" });
   }
-  const menuEl = document.getElementById("menu-sidebar");
-  menuEl.innerHTML = "";
-  menuItems.forEach(item => {
+
+  if (["sop", "sol", "amministratore"].includes(role)) {
+    items.push({ text: "⚙️ Admin", href: "admin.html" });
+  }
+
+  const current = (location.pathname.split("/").pop() || "").toLowerCase();
+
+  items.forEach(({ text, href }) => {
     const li = document.createElement("li");
     const a = document.createElement("a");
-    a.href = item.href;
-    a.textContent = item.text;
-    if (item.active) a.classList.add("active");
+    a.href = href;
+    a.textContent = text;
+
+    // active robusto
+    const hrefLower = (href || "").toLowerCase();
+    if (current && current === hrefLower) a.classList.add("active");
+    if (!current && hrefLower === "iscrizioni-in-attesa.html") a.classList.add("active");
+    if (current && current.includes("iscrizioni-in-attesa") && hrefLower === "iscrizioni-in-attesa.html") a.classList.add("active");
+
     li.appendChild(a);
     menuEl.appendChild(li);
   });
