@@ -21,35 +21,38 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  /* ✅ layout: scroll SOLO nel main (sidebar ferma) */
+  html, body { height: 100%; }
   body {
-    margin: 0;
     font-family: Arial, sans-serif;
     display: flex;
-    min-height: 100vh;
-    height: 100vh;
-    overflow: hidden;
     background: var(--grigio);
+    overflow: hidden; /* ✅ evita lo scroll della pagina: scrolla solo il main */
   }
 
-  /* ✅ SIDEBAR IDENTICA A index.html */
+  /* ✅ SIDEBAR IDENTICA A index.html, ma FISSA */
   .sidebar {
+    position: fixed;
+    left: 0; top: 0;
     width: 260px;
-    flex-shrink: 0;
+    height: 100vh;
     background: var(--rosso-cri);
     color: var(--bianco);
     display: flex;
     flex-direction: column;
     padding-top: 20px;
-    height: 100vh;
-    overflow: hidden;
+    overflow: hidden;     /* ✅ niente scroll sulla sidebar intera */
     align-items: center;
+    z-index: 1000;
   }
   .sidebar img {
     width: 220px;
     margin-bottom: 20px;
     border-radius: 8px;
+    flex-shrink: 0;
   }
 
+  /* ✅ scroll SOLO nel menu (quando ci passi sopra col mouse) */
   .menu {
     list-style: none;
     padding: 0;
@@ -57,6 +60,7 @@
     flex-grow: 1;
     overflow-y: auto;
     overscroll-behavior: contain;
+    overflow-x: hidden;
   }
   .menu li { width: 100%; }
   .menu a {
@@ -83,15 +87,15 @@
   }
   #logout:hover { background-color: var(--rosso-cri); color: #fff; }
 
-  /* ✅ MAIN come index (scroll/layout) */
+  /* ✅ MAIN: scroll interno */
   .main {
-    flex-grow: 1;
+    margin-left: 260px;      /* spazio sidebar fissa */
+    width: calc(100% - 260px);
+    height: 100vh;
     padding: 30px;
     background: var(--bianco);
-    overflow-y: auto;
+    overflow-y: auto;        /* ✅ scroll qui */
     position: relative;
- 
-    height: 100vh;
   }
 
   .main h1 {
@@ -100,7 +104,7 @@
     font-size: 2rem;
   }
 
-  /* ====== GRAFICA CONTENUTO (come "prima", più carina) ====== */
+  /* ====== GRAFICA CONTENUTO ====== */
   .cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -185,97 +189,90 @@
   }
 
   @media (max-width: 768px) {
-    body { flex-direction: column; height: auto; overflow: auto; }
-    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
+    body { flex-direction: column; overflow: auto; } /* su mobile scroll normale */
+    .sidebar { position: relative; width: 100%; height: auto; padding: 15px; overflow: visible; }
     .menu { overflow: visible; }
-    .main { padding: 20px; }
+    .main { margin-left: 0; width: 100%; height: auto; padding: 20px; overflow: visible; }
     .cards { grid-template-columns: 1fr; gap: 18px; }
   }
 
-  /* ✅ Popup Ruoli (solo Admin) */
-  button.btn-admin { border: none; cursor: pointer; }
-  #ruoli-container {
-    position: fixed;
-    inset: 0;
+  /* =========================
+     POPUP RUOLI (solo Admin)
+  ========================= */
+  #ruoli-popup{
+    position:fixed; inset:0;
     background: rgba(0,0,0,0.55);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1300;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index: 3000;
   }
-  #ruoli-container.active { display: flex; }
-
-  #ruoli-box {
-    background: #fff;
-    width: 920px;
+  #ruoli-popup.active{ display:flex; }
+  #ruoli-box{
+    background:#fff;
+    width: 980px;
     max-width: 95%;
-    max-height: 90vh;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    border-radius: 12px;
+    overflow:hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
   }
-  #ruoli-header {
+  #ruoli-header{
     background: var(--rosso-cri);
-    color: #fff;
-    padding: 18px 22px;
-    display: flex;
-    align-items: center;
+    color:#fff;
+    padding: 16px 20px;
+    display:flex;
+    align-items:flex-start;
     justify-content: space-between;
-    gap: 10px;
+    gap: 14px;
   }
-  #ruoli-header h3 { margin: 0; font-size: 1.2rem; }
-  #ruoli-close {
+  #ruoli-close{
     background: rgba(255,255,255,0.2);
-    border: none;
-    color: #fff;
-    font-size: 1.6rem;
-    width: 42px;
-    height: 42px;
-    border-radius: 999px;
-    cursor: pointer;
+    border:none;
+    color:#fff;
+    font-size:1.6rem;
+    width:40px;
+    height:40px;
+    border-radius:999px;
+    cursor:pointer;
+    flex: 0 0 auto;
   }
-  #ruoli-close:hover { background: rgba(255,255,255,0.28); }
-
-  #ruoli-content {
-    padding: 18px 22px;
-    overflow-y: auto;
-    max-height: calc(90vh - 120px);
+  #ruoli-close:hover{ background: rgba(255,255,255,0.28); }
+  #ruoli-content{
+    padding: 18px 20px 20px;
+    max-height: 75vh;
+    overflow:auto;
   }
-
-  #ruoli-table { width: 100%; border-collapse: collapse; }
-  #ruoli-table th, #ruoli-table td { border: 1px solid #e0e0e0; padding: 10px; text-align: left; vertical-align: top; }
-  #ruoli-table th { background: #f3f3f3; color: #333; }
-  .role-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 999px;
+  .ruoli-table{
+    width:100%;
+    border-collapse: collapse;
+    min-width: 720px;
+  }
+  .ruoli-table th, .ruoli-table td{
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align:left;
+    vertical-align: middle;
+  }
+  .ruoli-table th{ background:#f3f3f3; color:#333; }
+  .select-role{
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  .btn-small{
+    padding: 8px 12px;
+    border:none;
+    border-radius: 8px;
+    cursor:pointer;
     font-weight: 800;
-    font-size: 0.85rem;
-    color: #fff;
-    background: #111;
-    white-space: nowrap;
+    margin-right: 8px;
   }
-  .muted { color: #666; }
-
-.ruoli-summary{
-  margin: 10px 0 14px;
-  padding: 10px 12px;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  background: #fafafa;
-  font-weight: 800;
-  color: #333;
-}
-.group-row td{
-  background: #f3f3f3;
-  color: #333;
-  font-weight: 900;
-}
-.group-count{
-  color:#666;
-  font-weight:800;
-}
-
+  .btn-save{ background:#28a745; color:#fff; }
+  .btn-reset{ background:#6c757d; color:#fff; }
+  @media (max-width: 768px){
+    .ruoli-table{ min-width: 0; }
+  }
 </style>
 </head>
 
@@ -354,54 +351,62 @@
       <a href="tlc.html#timbrature-section" class="btn-admin">📊 Vedi dettaglio</a>
     </div>
 
-    <!-- ✅ SOLO ADMIN: RUOLI -->
+    <!-- ✅ RUOLI INFONDO (solo Admin) -->
     <div class="card" id="card-ruoli" style="display:none;">
       <h2>🛡️ Ruoli</h2>
-      <p>Elenco utenti con privilegi (SOL / SOP / Admin / TLC Provinciale).</p>
-      <p><span class="stat-number" id="num-ruoli">0</span></p>
-      <p class="stat-label">utenti con ruolo speciale</p>
-      <button type="button" class="btn-admin" id="btn-apri-ruoli">👤 Visualizza ruoli</button>
+      <p>Gestisci i ruoli assegnati (SOL / SOP / Admin / TLC Provinciale).</p>
+      <div class="stat-number" id="num-ruoli-speciali">0</div>
+      <div class="stat-label">utenti con ruolo speciale</div>
+      <button type="button" class="btn-admin" id="btn-apri-ruoli" style="border:none;cursor:pointer;">👥 Apri gestione ruoli</button>
     </div>
   </div>
 </main>
 
-
-<!-- Popup Ruoli (solo Admin) -->
-<div id="ruoli-container" aria-hidden="true">
+<!-- POPUP RUOLI (solo Admin) -->
+<div id="ruoli-popup" aria-hidden="true">
   <div id="ruoli-box" role="dialog" aria-modal="true" aria-labelledby="ruoli-title">
     <div id="ruoli-header">
-      <h3 id="ruoli-title">🛡️ Ruoli assegnati</h3>
+      <div>
+        <h3 id="ruoli-title" style="margin:0;font-size:1.2rem;">🛡️ Gestione Ruoli</h3>
+        <div id="ruoli-summary" style="margin-top:6px;font-weight:700;"></div>
+      </div>
       <button id="ruoli-close" type="button" aria-label="Chiudi">&times;</button>
     </div>
-    <div id="ruoli-content">
-      <p class="muted">Sono mostrati solo gli utenti con ruolo diverso da <b>volontario</b> (senza CF, solo comitato).</p>
-      <div id="ruoli-summary" class="ruoli-summary" aria-live="polite"></div>
 
-      <table id="ruoli-table" aria-label="Elenco ruoli">
-        <thead>
-          <tr>
-            <th>Volontario</th>
-            <th>Comitato</th>
-            <th>Ruolo</th>
-            <th>Azioni</th>
-          </tr>
-        </thead>
-        <tbody id="ruoli-body"></tbody>
-      </table>
+    <div id="ruoli-content">
+      <p style="margin:0 0 12px;color:#666;">
+        Qui vedi tutti gli utenti con ruoli speciali e puoi modificarli. (Non mostriamo il CF.)
+      </p>
+
+      <div style="overflow:auto;">
+        <table class="ruoli-table" aria-label="Ruoli assegnati">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Comitato</th>
+              <th>Ruolo</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="ruoli-body"></tbody>
+        </table>
+      </div>
+
+      <div id="ruoli-empty-hint" style="display:none;margin-top:12px;color:#666;">
+        Nessun ruolo speciale trovato nei dati attuali. Se i ruoli sono gestiti da un file di login esterno, inviamelo e lo colleghiamo.
+      </div>
     </div>
   </div>
 </div>
-
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const userId = localStorage.getItem("userId");
   const role = (localStorage.getItem("role") || "").toLowerCase().trim();
-  const isAdmin = (role === "amministratore" || role === "admin");
   const comitato = localStorage.getItem("comitato") || "";
 
   // ✅ Accesso: SOP, Amministratore e SOL
-  if (!userId || (role !== "sop" && role !== "amministratore" && role !== "admin" && role !== "sol")) {
+  if (!userId || (role !== "sop" && role !== "amministratore" && role !== "sol")) {
     alert("Accesso riservato a SOP / SOL / Amministratore");
     window.location.href = "login.html";
     return;
@@ -466,10 +471,10 @@ document.addEventListener("DOMContentLoaded", () => {
     { text: "📄 Documenti", href: "documenti.html" }
   ];
 
-  if (["sop", "sol", "amministratore", "admin", "tlc_provinciale"].includes(role)) {
+  if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
     items.push({ text: "📡 TLC", href: "tlc.html" });
   }
-  if (["sop", "sol", "amministratore", "admin"].includes(role)) {
+  if (["sop", "sol", "amministratore"].includes(role)) {
     items.push({ text: "⚙️ Admin", href: "admin.html" });
   }
 
@@ -483,9 +488,231 @@ document.addEventListener("DOMContentLoaded", () => {
     menu.appendChild(li);
   });
 
-  // ====== STATISTICHE ======
+  /* =========================
+     RUOLI (solo Admin)
+  ========================= */
+  const safeParse = (key, fallback) => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw);
+    } catch { return fallback; }
+  };
+  const escapeHtml = (t) => (t == null ? "" : String(t).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m])));
 
-  // 1. ISCRIZIONI IN ATTESA
+  function normalizeRoleValue(r) {
+    const x = normalize(r);
+    if (!x) return "volontario";
+    if (x === "admin") return "amministratore";
+    if (x === "tlc provinciale" || x === "tlc-provinciale" || x === "tlcprovinciale") return "tlc_provinciale";
+    return x;
+  }
+
+  const ruoloMapKey = "cri_ruoli_map";
+  function loadRuoliMap() { return safeParse(ruoloMapKey, {}) || {}; }
+  function saveRuoliMap(m) { localStorage.setItem(ruoloMapKey, JSON.stringify(m || {})); }
+
+  function pickId(obj) {
+    return ((obj?.cf || obj?.userId || obj?.username || obj?.email || obj?.id || "") + "").toUpperCase().trim();
+  }
+  function pickNome(obj) {
+    const n = `${obj?.nome || ""} ${obj?.cognome || ""}`.trim();
+    return n || (obj?.nomeCompleto || obj?.name || obj?.displayName || "—");
+  }
+  function pickComitato(obj) {
+    return obj?.comitato || obj?.comitatoCreatore || obj?.comitatoEvento || obj?.comitato_volontario || obj?.comitatoVolontario || obj?.comitatoOrigine || obj?.comitato_origine || "—";
+  }
+  function pickRawRole(obj) {
+    return obj?.ruolo || obj?.role || obj?.ruoloSistema || obj?.ruoloUtente || obj?.privilegio || obj?.permessi || "";
+  }
+
+  function scanLocalStorageArraysForUsers() {
+    const out = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k) continue;
+      if (/^(mezzi|materiali|eventi|emergenze|timbrature|volontari|volontari-pubblici|cri_ruoli_map)/i.test(k)) continue;
+
+      const val = safeParse(k, null);
+      if (!Array.isArray(val)) continue;
+      const cand = val.filter(x => x && typeof x === "object" && (pickId(x) || pickRawRole(x) || x.nome || x.cognome || x.comitato));
+      if (!cand.length) continue;
+      if (!cand.some(x => normalizeRoleValue(pickRawRole(x)) !== "volontario")) continue;
+      out.push(...cand);
+    }
+    return out;
+  }
+
+  function collectRoleHolders() {
+    const volontariAll = safeParse("volontari", []) || [];
+    const rolesMap = loadRuoliMap();
+
+    const candidates = [
+      ...volontariAll,
+      ...scanLocalStorageArraysForUsers(),
+      { userId, nomeCompleto: localStorage.getItem("nomeCompleto") || "", comitato, role }
+    ];
+
+    const byId = new Map();
+    candidates.forEach(obj => {
+      const id = pickId(obj);
+      if (!id) return;
+
+      const mapEntry = rolesMap[id] || {};
+      const raw = normalizeRoleValue(mapEntry.ruolo || pickRawRole(obj) || "");
+      const nome = mapEntry.nome || pickNome(obj);
+      const com = mapEntry.comitato || pickComitato(obj);
+
+      const prev = byId.get(id);
+      if (!prev) byId.set(id, { id, nome, comitato: com, rawRuolo: raw });
+      else {
+        const prevSpecial = prev.rawRuolo !== "volontario";
+        const nowSpecial = raw !== "volontario";
+        if (nowSpecial && !prevSpecial) byId.set(id, { id, nome, comitato: com, rawRuolo: raw });
+      }
+    });
+
+    const allowed = new Set(["sol", "sop", "amministratore", "tlc_provinciale"]);
+    return Array.from(byId.values())
+      .filter(x => allowed.has(x.rawRuolo))
+      .sort((a,b) =>
+        a.rawRuolo.localeCompare(b.rawRuolo) ||
+        String(a.comitato).localeCompare(String(b.comitato)) ||
+        a.nome.localeCompare(b.nome)
+      );
+  }
+
+  const cardRuoli = document.getElementById("card-ruoli");
+  const btnApriRuoli = document.getElementById("btn-apri-ruoli");
+  const numRuoliEl = document.getElementById("num-ruoli-speciali");
+
+  const ruoliPopup = document.getElementById("ruoli-popup");
+  const ruoliClose = document.getElementById("ruoli-close");
+  const ruoliBody = document.getElementById("ruoli-body");
+  const ruoliSummary = document.getElementById("ruoli-summary");
+  const ruoliEmptyHint = document.getElementById("ruoli-empty-hint");
+
+  function openRuoli() {
+    ruoliPopup.classList.add("active");
+    ruoliPopup.setAttribute("aria-hidden", "false");
+  }
+  function closeRuoli() {
+    ruoliPopup.classList.remove("active");
+    ruoliPopup.setAttribute("aria-hidden", "true");
+  }
+
+  function updateRoleForId(id, newRole) {
+    const rolesMap = loadRuoliMap();
+    const rid = (id || "").toUpperCase().trim();
+    const r = normalizeRoleValue(newRole);
+
+    if (r === "volontario") {
+      delete rolesMap[rid];
+    } else {
+      const volontariAll = safeParse("volontari", []) || [];
+      const v = volontariAll.find(x => pickId(x) === rid) || null;
+
+      rolesMap[rid] = {
+        ruolo: r,
+        nome: pickNome(v || { userId: rid }),
+        comitato: v ? pickComitato(v) : (rolesMap[rid]?.comitato || comitato || "—")
+      };
+    }
+    saveRuoliMap(rolesMap);
+
+    // compat: aggiorna anche volontari[] se esiste
+    const volontariAll = safeParse("volontari", []) || [];
+    const idx = volontariAll.findIndex(x => pickId(x) === rid);
+    if (idx !== -1) {
+      if (r === "volontario") {
+        delete volontariAll[idx].ruolo;
+        delete volontariAll[idx].role;
+      } else {
+        volontariAll[idx].ruolo = r;
+        volontariAll[idx].role = r;
+      }
+      localStorage.setItem("volontari", JSON.stringify(volontariAll));
+    }
+  }
+
+  function renderRuoliPopup() {
+    const list = collectRoleHolders();
+    if (numRuoliEl) numRuoliEl.textContent = String(list.length);
+
+    const counts = { amministratore: 0, sop: 0, sol: 0, tlc_provinciale: 0 };
+    list.forEach(x => { if (counts[x.rawRuolo] != null) counts[x.rawRuolo]++; });
+    if (ruoliSummary) {
+      ruoliSummary.textContent = `ADMIN: ${counts.amministratore} • SOP: ${counts.sop} • SOL: ${counts.sol} • TLC PROV: ${counts.tlc_provinciale}`;
+    }
+
+    if (!list.length) {
+      ruoliBody.innerHTML = `<tr><td colspan="4" style="color:#666;">Nessun ruolo speciale assegnato.</td></tr>`;
+      if (ruoliEmptyHint) ruoliEmptyHint.style.display = "block";
+      return;
+    }
+    if (ruoliEmptyHint) ruoliEmptyHint.style.display = "none";
+
+    const roleOptions = [
+      { value: "volontario", label: "Volontario (nessun privilegio)" },
+      { value: "sol", label: "SOL" },
+      { value: "sop", label: "SOP" },
+      { value: "amministratore", label: "Amministratore" },
+      { value: "tlc_provinciale", label: "TLC Provinciale" }
+    ];
+
+    ruoliBody.innerHTML = list.map(u => {
+      const current = normalizeRoleValue(u.rawRuolo);
+      const opts = roleOptions.map(o => {
+        const selected = current === normalizeRoleValue(o.value) ? "selected" : "";
+        return `<option value="${o.value}" ${selected}>${o.label}</option>`;
+      }).join("");
+
+      return `
+        <tr data-id="${escapeHtml(u.id)}" data-original="${escapeHtml(current)}">
+          <td>${escapeHtml(u.nome)}</td>
+          <td>${escapeHtml(u.comitato)}</td>
+          <td><select class="select-role">${opts}</select></td>
+          <td>
+            <button type="button" class="btn-small btn-save" data-action="save">Salva</button>
+            <button type="button" class="btn-small btn-reset" data-action="reset">Reset</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    ruoliBody.querySelectorAll("button[data-action]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tr = btn.closest("tr");
+        if (!tr) return;
+        const id = tr.getAttribute("data-id");
+        const sel = tr.querySelector("select");
+        if (!sel) return;
+
+        const action = btn.getAttribute("data-action");
+        if (action === "reset") {
+          sel.value = tr.getAttribute("data-original") || "volontario";
+          return;
+        }
+
+        updateRoleForId(id, sel.value);
+        renderRuoliPopup();
+      });
+    });
+  }
+
+  // Attiva card + popup solo se amministratore
+  if (role === "amministratore") {
+    cardRuoli.style.display = "block";
+    btnApriRuoli.addEventListener("click", () => { renderRuoliPopup(); openRuoli(); });
+    ruoliClose.addEventListener("click", closeRuoli);
+    ruoliPopup.addEventListener("click", (e) => { if (e.target === ruoliPopup) closeRuoli(); });
+  } else {
+    cardRuoli.style.display = "none";
+  }
+
+  // ====== STATISTICHE ======
   let iscrizioni = JSON.parse(localStorage.getItem("volontari-pubblici") || "[]");
   if (role === "sol") {
     const c = normalize(comitato);
@@ -493,234 +720,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   document.getElementById("num-iscrizioni").textContent = iscrizioni.length;
 
-  // 2. VOLONTARI ATTIVI
-  let volontariAll = JSON.parse(localStorage.getItem("volontari") || "[]");
-  let volontari = volontariAll.slice();
+  let volontari = JSON.parse(localStorage.getItem("volontari") || "[]");
   if (role === "sol") {
     const c = normalize(comitato);
     volontari = volontari.filter(v => normalize(v.comitato) === c);
   }
   document.getElementById("num-volontari").textContent = volontari.length;
 
-
-  /* ===========================
-     ✅ RUOLI (solo Admin)
-  =========================== */
-  const cardRuoli = document.getElementById("card-ruoli");
-  const btnApriRuoli = document.getElementById("btn-apri-ruoli");
-  const ruoliContainer = document.getElementById("ruoli-container");
-  const ruoliClose = document.getElementById("ruoli-close");
-  const ruoliBody = document.getElementById("ruoli-body");
-  const numRuoli = document.getElementById("num-ruoli");
-
-  function escapeHtml(text) {
-    if (text === null || text === undefined) return "";
-    return (text + "").replace(/[&<>"']/g, m => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;"
-    }[m]));
-  }
-
-  function formatRuolo(r) {
-    const x = normalize(r || "volontario");
-    if (!x || x === "volontario") return "VOLONTARIO";
-    return x.toUpperCase().replace(/_/g, " ");
-  }
-
-  function normalizeRoleValue(r) {
-  const x = normalize(r);
-  if (!x) return "volontario";
-  if (x === "admin") return "amministratore";
-  if (x === "tlc provinciale" || x === "tlc-provinciale" || x === "tlcprovinciale") return "tlc_provinciale";
-  return x;
-}
-
-function roleLabel(r) {
-  const x = normalizeRoleValue(r);
-  if (x === "amministratore") return "ADMIN";
-  if (x === "sop") return "SOP";
-  if (x === "sol") return "SOL";
-  if (x === "tlc_provinciale") return "TLC PROVINCIALE";
-  return "VOLONTARIO";
-}
-
-function roleBadgeHtml(r) {
-  const x = normalizeRoleValue(r);
-  const map = {
-    amministratore: { label: "ADMIN", bg: "#111" },
-    sop: { label: "SOP", bg: "#b71c1c" },
-    sol: { label: "SOL", bg: "#ff9800" },
-    tlc_provinciale: { label: "TLC PROV", bg: "#2196f3" }
-  };
-  const it = map[x];
-  if (!it) return '<span class="role-badge" style="background:#6c757d;">VOLONTARIO</span>';
-  return `<span class="role-badge" style="background:${it.bg};">${it.label}</span>`;
-}
-
-function getSpecialRuoliList() {
-  // Mostra solo ruoli speciali (non "volontario")
-  const allowed = new Set(["sol", "sop", "amministratore", "tlc_provinciale"]);
-
-  return (volontariAll || [])
-    .map(v => {
-      const cf = ((v.cf || v.userId || "") + "").toUpperCase();
-      const nome = `${v.nome || ""} ${v.cognome || ""}`.trim() || "—";
-      const com = (v.comitato || "—");
-
-      // supporta più campi possibili
-      const raw = normalizeRoleValue(v.ruolo || v.role || v.privilegio || v.permessi || "");
-      return {
-        cf,
-        nome,
-        comitato: com,
-        rawRuolo: raw,
-        ruoloLabel: roleLabel(raw)
-      };
-    })
-    .filter(x => x.cf && allowed.has(x.rawRuolo))
-    .sort((a, b) =>
-      a.rawRuolo.localeCompare(b.rawRuolo) ||
-      String(a.comitato).localeCompare(String(b.comitato)) ||
-      a.nome.localeCompare(b.nome)
-    );
-}
-
-
-  function saveVolontariAll() {
-    localStorage.setItem("volontari", JSON.stringify(volontariAll || []));
-  }
-
-  function updateVolontarioRuoloByCf(cfUpper, newRole) {
-    const cfU = (cfUpper || "").toUpperCase();
-    const r = normalize(newRole || "volontario");
-
-    const idx = (volontariAll || []).findIndex(v => ((v.cf || v.userId || "") + "").toUpperCase() === cfU);
-    if (idx === -1) { alert("Volontario non trovato."); return; }
-
-    volontariAll[idx].ruolo = (r === "admin") ? "amministratore" : r;
-    saveVolontariAll();
-
-    // refresh popup + badge count
-    renderRuoliPopup();
-    alert("✅ Ruolo aggiornato.");
-  }
-
-function renderRuoliPopup() {
-  const list = getSpecialRuoliList();
-  if (numRuoli) numRuoli.textContent = String(list.length);
-
-  if (!ruoliBody) return;
-
-  const summaryEl = document.getElementById("ruoli-summary");
-  const counts = { amministratore: 0, sop: 0, sol: 0, tlc_provinciale: 0 };
-  list.forEach(x => { if (counts[x.rawRuolo] != null) counts[x.rawRuolo]++; });
-
-  if (summaryEl) {
-    summaryEl.textContent = `ADMIN: ${counts.amministratore} • SOP: ${counts.sop} • SOL: ${counts.sol} • TLC PROV: ${counts.tlc_provinciale}`;
-  }
-
-  if (!list.length) {
-    ruoliBody.innerHTML = `<tr><td colspan="4" style="color:#666;">Nessun ruolo speciale assegnato.</td></tr>`;
-    return;
-  }
-
-  const roleOptions = [
-    { value: "volontario", label: "VOLONTARIO" },
-    { value: "sol", label: "SOL" },
-    { value: "sop", label: "SOP" },
-    { value: "amministratore", label: "ADMIN" },
-    { value: "tlc_provinciale", label: "TLC PROVINCIALE" }
-  ];
-
-  const groupOrder = ["amministratore", "sop", "sol", "tlc_provinciale"];
-  const groupTitles = {
-    amministratore: "👑 Amministratori",
-    sop: "🏛️ SOP",
-    sol: "🎯 SOL",
-    tlc_provinciale: "📡 TLC Provinciale"
-  };
-
-  const rows = [];
-
-  groupOrder.forEach(g => {
-    const group = list.filter(x => x.rawRuolo === g);
-    if (!group.length) return;
-
-    rows.push(`
-      <tr class="group-row">
-        <td colspan="4">${groupTitles[g]} <span class="group-count">(${group.length})</span></td>
-      </tr>
-    `);
-
-    group.forEach(v => {
-      const opts = roleOptions.map(o => {
-        const selected = (normalizeRoleValue(v.rawRuolo) === normalizeRoleValue(o.value)) ? "selected" : "";
-        return `<option value="${o.value}" ${selected}>${o.label}</option>`;
-      }).join("");
-
-      rows.push(`
-        <tr data-cf="${v.cf}">
-          <td>${escapeHtml(v.nome)}</td>
-          <td>${escapeHtml(v.comitato)}</td>
-          <td>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-              ${roleBadgeHtml(v.rawRuolo)}
-              <select class="ruolo-select" style="padding:8px 10px;border-radius:8px;font-weight:700;">
-                ${opts}
-              </select>
-            </div>
-          </td>
-          <td>
-            <button type="button" class="btn-admin btn-save-ruolo" style="padding:10px 14px;border-radius:10px;font-weight:800;background:#28a745;color:#fff;">
-              💾 Salva
-            </button>
-          </td>
-        </tr>
-      `);
-    });
-  });
-
-  ruoliBody.innerHTML = rows.join("");
-
-  ruoliBody.querySelectorAll(".btn-save-ruolo").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tr = btn.closest("tr");
-      const cf = (tr?.getAttribute("data-cf") || "").toUpperCase();
-      const sel = tr?.querySelector(".ruolo-select");
-      const newRole = (sel?.value || "volontario");
-      if (!cf) return;
-      updateVolontarioRuoloByCf(cf, newRole);
-    });
-  });
-}
-
-function openRuoli() {
-    renderRuoliPopup();
-    ruoliContainer?.classList.add("active");
-    ruoliContainer?.setAttribute("aria-hidden", "false");
-  }
-  function closeRuoli() {
-    ruoliContainer?.classList.remove("active");
-    ruoliContainer?.setAttribute("aria-hidden", "true");
-  }
-
-  if (isAdmin) {
-    if (cardRuoli) cardRuoli.style.display = "block";
-    renderRuoliPopup();
-    btnApriRuoli?.addEventListener("click", openRuoli);
-    ruoliClose?.addEventListener("click", closeRuoli);
-    ruoliContainer?.addEventListener("click", (e) => { if (e.target === ruoliContainer) closeRuoli(); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && ruoliContainer?.classList.contains("active")) closeRuoli(); });
-  } else {
-    if (cardRuoli) cardRuoli.style.display = "none";
-  }
-
-
-
-  // 3. MEZZI
   let mezzi = JSON.parse(localStorage.getItem("mezzi") || "[]");
   if (role === "sol") {
     const c = normalize(comitato);
@@ -728,7 +734,6 @@ function openRuoli() {
   }
   document.getElementById("num-mezzi").textContent = mezzi.length;
 
-  // 4. MATERIALI
   let materiali = JSON.parse(localStorage.getItem("materiali") || "[]");
   if (role === "sol") {
     const c = normalize(comitato);
@@ -736,7 +741,6 @@ function openRuoli() {
   }
   document.getElementById("num-materiali").textContent = materiali.length;
 
-  // 5. EMERGENZE
   let emergenze = JSON.parse(localStorage.getItem("emergenze") || "[]");
   if (role === "sol") {
     const c = normalize(comitato);
@@ -744,7 +748,6 @@ function openRuoli() {
   }
   document.getElementById("num-emergenze").textContent = emergenze.length;
 
-  // 6. EVENTI
   let eventi = JSON.parse(localStorage.getItem("eventi") || "[]");
   if (role === "sol") {
     const c = normalize(comitato);
@@ -752,12 +755,10 @@ function openRuoli() {
   }
   document.getElementById("num-eventi").textContent = eventi.length;
 
-  // 7. TIMBRATURE TLC IN ATTESA
   let timbratureTlc = JSON.parse(localStorage.getItem("timbrature-tlc") || "[]");
   const timbratureInAttesa = timbratureTlc.filter(t => (t.stato || "") === "attesa").length;
   document.getElementById("num-timbrature-tlc").textContent = timbratureInAttesa;
 
-  // 8. TOTALE ORE TLC APPROVATE
   function calcolaOre(inizio, fine) {
     if (!inizio || !fine) return 0;
     const [h1, m1] = String(inizio).split(':').map(Number);
