@@ -12,6 +12,8 @@
     --blu-info: #007bff;
   }
 
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -20,15 +22,17 @@
     background: var(--grigio);
   }
 
+  /* ===== SIDEBAR + MENU come INDEX ===== */
   .sidebar {
     width: 260px;
+    flex-shrink: 0;
     background: var(--rosso-cri);
     color: var(--bianco);
     display: flex;
     flex-direction: column;
-    padding: 20px 0;
+    padding-top: 20px;
     height: 100vh;
-    overflow-y: auto;
+    overflow: hidden;
     align-items: center;
   }
 
@@ -43,18 +47,18 @@
     padding: 0;
     width: 100%;
     flex-grow: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
-  .menu li {
-    width: 100%;
-  }
+  .menu li { width: 100%; }
 
   .menu a {
     display: block;
     padding: 15px 20px;
     color: var(--bianco);
-    font-weight: bold;
     text-decoration: none;
+    font-weight: bold;
   }
 
   .menu a:hover,
@@ -63,10 +67,11 @@
   }
 
   #logout {
-    margin: 20px auto 0 auto;
+    flex-shrink: 0;
+    margin: 12px auto 20px auto;
     padding: 10px 20px;
     width: 80%;
-    background: var(--bianco);
+    background-color: #fff;
     color: var(--rosso-cri);
     border: 2px solid var(--rosso-cri);
     border-radius: 6px;
@@ -74,11 +79,7 @@
     cursor: pointer;
     transition: background 0.3s, color 0.3s;
   }
-
-  #logout:hover {
-    background-color: var(--rosso-cri);
-    color: var(--bianco);
-  }
+  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
 
   .main {
     flex-grow: 1;
@@ -255,20 +256,9 @@
     font-size: 0.9rem;
   }
 
-  .edit-btn {
-    background-color: #ffc107;
-    color: #000;
-  }
-
-  .delete-btn {
-    background-color: #dc3545;
-    color: #fff;
-  }
-
-  .info-btn {
-    background-color: var(--blu-info);
-    color: #fff;
-  }
+  .edit-btn { background-color: #ffc107; color: #000; }
+  .delete-btn { background-color: #dc3545; color: #fff; }
+  .info-btn { background-color: var(--blu-info); color: #fff; }
 
   /* ✅ POPUP INFO MIGLIORATO */
   #info-popup {
@@ -287,9 +277,7 @@
     overflow: hidden;
   }
 
-  #info-popup.active {
-    display: block;
-  }
+  #info-popup.active { display: block; }
 
   #info-popup h3 {
     margin: 0;
@@ -317,9 +305,7 @@
     margin-bottom: 5px;
   }
 
-  #info-content > div:nth-child(even) {
-    background: #f8f9fa;
-  }
+  #info-content > div:nth-child(even) { background: #f8f9fa; }
 
   .info-label {
     color: var(--rosso-cri);
@@ -328,10 +314,7 @@
     flex-shrink: 0;
   }
 
-  .info-value {
-    color: #333;
-    flex: 1;
-  }
+  .info-value { color: #333; flex: 1; }
 
   #info-close {
     position: absolute;
@@ -355,13 +338,21 @@
     background: rgba(255,255,255,0.3);
     transform: rotate(90deg);
   }
+
+  /* ===== MOBILE come INDEX ===== */
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
+    .menu { overflow: visible; }
+  }
 </style>
 </head>
 <body>
+
 <aside class="sidebar" aria-label="Navigazione principale">
   <img id="logo-cri" src="logo.svg" alt="Logo Croce Rossa Italiana" />
   <ul class="menu" id="menu-sidebar" role="navigation" aria-label="Menu principale"></ul>
-  <button id="logout" type="button">🚪 Logout</button>
+  <button id="logout" type="button">Logout</button>
 </aside>
 
 <main class="main">
@@ -481,12 +472,7 @@
         </legend>
         <div class="consenso-checkbox-wrapper">
           <label>
-            <input
-              type="checkbox"
-              id="consensoGdpr"
-              name="consensoGdpr"
-              required
-            />
+            <input type="checkbox" id="consensoGdpr" name="consensoGdpr" required />
             Ho letto l'informativa privacy e acconsento al trattamento dei dati personali.
           </label>
         </div>
@@ -513,49 +499,56 @@
 
 <script>
 const userId = localStorage.getItem("userId");
-const role = localStorage.getItem("role");
-const comitato = localStorage.getItem("comitato");
+const role = (localStorage.getItem("role") || "").toLowerCase().trim();
+const comitato = localStorage.getItem("comitato") || "";
 
 if (!userId) {
   alert("Devi effettuare il login");
   window.location.href = "login.html";
 }
 
-// LOGOUT
+/* ===== LOGOUT ===== */
 function logout() {
   localStorage.clear();
   window.location.href = "login.html";
 }
 document.getElementById("logout").onclick = logout;
 
-// LOGO dinamico
+/* ===== LOGO come INDEX ===== */
 const logoImg = document.getElementById("logo-cri");
 let logoSrc = "logo.svg";
 
-if (role === "sop" || role === "amministratore") {
-  logoSrc = "logo-sop.svg";
-} else if (role === "sol") {
-  const c = (comitato || "").toLowerCase();
-  if (c === "pesaro") logoSrc = "logo-pesaro.svg";
-  else if (c === "urbino") logoSrc = "logo-urbino.svg";
-  else if (c === "fano") logoSrc = "logo-fano.svg";
-  else if (c === "pergola") logoSrc = "logo-pergola.svg";
-  else if (c === "marotta-mondolfo") logoSrc = "logo-marotta-mondolfo.svg";
-  else if (c === "fossombrone") logoSrc = "logo-fossombrone.svg";
-  else if (c === "cagli") logoSrc = "logo-cagli.svg";
-  else if (c === "montelabbate") logoSrc = "logo-montelabbate.svg";
-  else if (c === "fermignano") logoSrc = "logo-fermignano.svg";
-  else if (c === "sant'angelo in vado" || c === "santangelo in vado" || c === "sant-angelo-in-vado") {
-    logoSrc = "logo-santangeloinvado.svg";
-  } else {
-    logoSrc = "logo-sop.svg";
-  }
-}
-logoImg.src = logoSrc;
+const normalize = (s) => (s || "").toString().toLowerCase().trim();
 
-// MENU laterale CON ICONE
+if (role === "sol") {
+  const c = normalize(comitato);
+  const map = {
+    "pesaro": "logo-pesaro.svg",
+    "urbino": "logo-urbino.svg",
+    "fano": "logo-fano.svg",
+    "pergola": "logo-pergola.svg",
+    "marotta-mondolfo": "logo-marotta-mondolfo.svg",
+    "fossombrone": "logo-fossombrone.svg",
+    "cagli": "logo-cagli.svg",
+    "montelabbate": "logo-montelabbate.svg",
+    "fermignano": "logo-fermignano.svg",
+    "sant'angelo in vado": "logo-santangeloinvado.svg",
+    "santangelo in vado": "logo-santangeloinvado.svg",
+    "sant-angelo-in-vado": "logo-santangeloinvado.svg"
+  };
+  logoSrc = map[c] || "logo-sop.svg";
+} else if (role === "sop" || role === "amministratore" || role === "tlc_provinciale") {
+  logoSrc = "logo-sop.svg";
+}
+
+logoImg.src = logoSrc;
+logoImg.onerror = () => { logoImg.src = "logo-sop.svg"; };
+
+/* ===== MENU come INDEX (con TLC + Admin) ===== */
 const menu = document.getElementById("menu-sidebar");
-const menuItems = [
+menu.innerHTML = "";
+
+const items = [
   { text: "🏠 Home", href: "index.html" },
   { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html" },
   { text: "👥 Volontari", href: "volontari.html" },
@@ -566,17 +559,28 @@ const menuItems = [
   { text: "📄 Documenti", href: "documenti.html" }
 ];
 
-// SOP, Amministratore e SOL vedono Admin
-if (role === "sop" || role === "amministratore" || role === "sol") {
-  menuItems.push({ text: "⚙️ Admin", href: "admin.html" });
+if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
+  items.push({ text: "📡 TLC", href: "tlc.html" });
 }
 
-menuItems.forEach(({ text, href }) => {
+if (["sop", "sol", "amministratore"].includes(role)) {
+  items.push({ text: "⚙️ Admin", href: "admin.html" });
+}
+
+const current = (location.pathname.split("/").pop() || "").toLowerCase();
+
+items.forEach(({ text, href }) => {
   const li = document.createElement("li");
   const a = document.createElement("a");
   a.href = href;
   a.textContent = text;
-  if (text.includes("Volontari")) a.classList.add("active");
+
+  // active robusto su questa pagina
+  const hrefLower = (href || "").toLowerCase();
+  if (current && current === hrefLower) a.classList.add("active");
+  if (!current && hrefLower === "volontari.html") a.classList.add("active");
+  if (current && current.includes("volontari") && hrefLower === "volontari.html") a.classList.add("active");
+
   li.appendChild(a);
   menu.appendChild(li);
 });
@@ -692,9 +696,9 @@ function getVisibleVolontari() {
   if (role === "sop" || role === "amministratore") return locali;
 
   if (role === "sol") {
-    const c = (comitato || "").toLowerCase();
+    const c = normalize(comitato);
     if (!c) return locali;
-    return locali.filter(v => (v.comitato || "").toLowerCase() === c);
+    return locali.filter(v => normalize(v.comitato) === c);
   }
   return locali;
 }
@@ -708,28 +712,27 @@ function showInfoPopup(volontario) {
       dataFormatted = parts[2] + "/" + parts[1] + "/" + parts[0];
     }
   }
-  
-  // ✅ Layout migliorato con div strutturate
+
   const dettagli = `
-<div><span class="info-label">Nome:</span><span class="info-value">${volontario.nome || ''}</span></div>
-<div><span class="info-label">Cognome:</span><span class="info-value">${volontario.cognome || ''}</span></div>
-<div><span class="info-label">Codice Fiscale:</span><span class="info-value">${volontario.cf || ''}</span></div>
-<div><span class="info-label">📧 Email:</span><span class="info-value">${volontario.email || 'Non inserita'}</span></div>
-<div><span class="info-label">📱 Telefono:</span><span class="info-value">${volontario.telefono || ''}</span></div>
-<div><span class="info-label">🚨 Contatto Emergenza:</span><span class="info-value">${volontario.contattoEmergenza || ''}</span></div>
-<div><span class="info-label">Luogo di nascita:</span><span class="info-value">${volontario.luogoNascita || ''}</span></div>
-<div><span class="info-label">Data di nascita:</span><span class="info-value">${dataFormatted || ''}</span></div>
-<div><span class="info-label">Stato:</span><span class="info-value">${volontario.stato || 'Italia'}</span></div>
-<div><span class="info-label">🏠 Indirizzo:</span><span class="info-value">${volontario.indirizzo || ''}</span></div>
-<div><span class="info-label">Comune:</span><span class="info-value">${volontario.comune || ''}</span></div>
-<div><span class="info-label">Provincia:</span><span class="info-value">${volontario.provincia || ''}</span></div>
-<div><span class="info-label">CAP:</span><span class="info-value">${volontario.cap || ''}</span></div>
-<div><span class="info-label">Comitato:</span><span class="info-value">${volontario.comitato || ''}</span></div>
-<div><span class="info-label">Intolleranze:</span><span class="info-value">${volontario.intolleranze || "Nessuna"}</span></div>
-<div><span class="info-label">Allergie:</span><span class="info-value">${volontario.allergie || "Nessuna"}</span></div>
-<div><span class="info-label">Codice MGO:</span><span class="info-value">${volontario.codiceMGO || "Non inserito"}</span></div>
-<div><span class="info-label">📋 Qualifiche:</span><span class="info-value">${volontario.qualifiche ? volontario.qualifiche.join(", ") : "Nessuna"}</span></div>
-<div><span class="info-label">🚗 Patenti:</span><span class="info-value">${(volontario.patenti || []).join(", ") || "Nessuna"}</span></div>
+<div><span class="info-label">Nome:</span><span class="info-value">${escapeHtml(volontario.nome || '')}</span></div>
+<div><span class="info-label">Cognome:</span><span class="info-value">${escapeHtml(volontario.cognome || '')}</span></div>
+<div><span class="info-label">Codice Fiscale:</span><span class="info-value">${escapeHtml(volontario.cf || '')}</span></div>
+<div><span class="info-label">📧 Email:</span><span class="info-value">${escapeHtml(volontario.email || 'Non inserita')}</span></div>
+<div><span class="info-label">📱 Telefono:</span><span class="info-value">${escapeHtml(volontario.telefono || '')}</span></div>
+<div><span class="info-label">🚨 Contatto Emergenza:</span><span class="info-value">${escapeHtml(volontario.contattoEmergenza || '')}</span></div>
+<div><span class="info-label">Luogo di nascita:</span><span class="info-value">${escapeHtml(volontario.luogoNascita || '')}</span></div>
+<div><span class="info-label">Data di nascita:</span><span class="info-value">${escapeHtml(dataFormatted || '')}</span></div>
+<div><span class="info-label">Stato:</span><span class="info-value">${escapeHtml(volontario.stato || 'Italia')}</span></div>
+<div><span class="info-label">🏠 Indirizzo:</span><span class="info-value">${escapeHtml(volontario.indirizzo || '')}</span></div>
+<div><span class="info-label">Comune:</span><span class="info-value">${escapeHtml(volontario.comune || '')}</span></div>
+<div><span class="info-label">Provincia:</span><span class="info-value">${escapeHtml(volontario.provincia || '')}</span></div>
+<div><span class="info-label">CAP:</span><span class="info-value">${escapeHtml(volontario.cap || '')}</span></div>
+<div><span class="info-label">Comitato:</span><span class="info-value">${escapeHtml(volontario.comitato || '')}</span></div>
+<div><span class="info-label">Intolleranze:</span><span class="info-value">${escapeHtml(volontario.intolleranze || "Nessuna")}</span></div>
+<div><span class="info-label">Allergie:</span><span class="info-value">${escapeHtml(volontario.allergie || "Nessuna")}</span></div>
+<div><span class="info-label">Codice MGO:</span><span class="info-value">${escapeHtml(volontario.codiceMGO || "Non inserito")}</span></div>
+<div><span class="info-label">📋 Qualifiche:</span><span class="info-value">${escapeHtml((volontario.qualifiche ? volontario.qualifiche.join(", ") : "Nessuna"))}</span></div>
+<div><span class="info-label">🚗 Patenti:</span><span class="info-value">${escapeHtml(((volontario.patenti || []).join(", ") || "Nessuna"))}</span></div>
 <div><span class="info-label">Consenso GDPR:</span><span class="info-value">${volontario.consensoGdpr ? "✅ SI" : "❌ NO"}</span></div>
   `;
   infoContent.innerHTML = dettagli;
@@ -743,8 +746,8 @@ function hideInfoPopup() {
 infoClose.addEventListener("click", hideInfoPopup);
 
 function escapeHtml(text) {
-  if (!text) return "";
-  return text.replace(/[&<>"']/g, match => {
+  if (text === null || text === undefined) return "";
+  return String(text).replace(/[&<>"']/g, match => {
     const escapeMap = {
       "&": "&amp;",
       "<": "&lt;",
@@ -759,10 +762,10 @@ function escapeHtml(text) {
 function renderVolontari() {
   const filter = searchInput.value.trim().toLowerCase();
   list.innerHTML = "";
-  
+
   const visibili = getVisibleVolontari();
   const tutti = JSON.parse(localStorage.getItem("volontari") || "[]");
-  
+
   visibili
     .filter(v =>
       (v.nome || '').toLowerCase().includes(filter) ||
@@ -771,9 +774,8 @@ function renderVolontari() {
       (v.email || '').toLowerCase().includes(filter)
     )
     .forEach(v => {
-      // ✅ Trova l'indice globale
       const globalIndex = tutti.findIndex(vol => vol.cf === v.cf);
-      
+
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${escapeHtml(v.nome)}</td>
