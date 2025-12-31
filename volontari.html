@@ -39,7 +39,8 @@
     align-items: center;
     position: sticky;
     top: 0;
-  }
+    min-height: 0; /* ✅ permette ai figli scrollabili di funzionare */
+}
 
   .sidebar img {
     width: 220px;
@@ -54,7 +55,8 @@
     flex-grow: 1;
     overflow-y: auto;
     overscroll-behavior: contain;
-  }
+    -webkit-overflow-scrolling: touch;
+}
 
   .menu li { width: 100%; }
 
@@ -94,7 +96,10 @@
     position: relative;
     height: 100vh;
     flex: 1 1 auto;
-  }
+    min-height: 0; /* ✅ necessario per scroll su mobile in flex */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
 
   .main h1 {
     color: var(--rosso-cri);
@@ -152,7 +157,8 @@
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
-  }
+    -webkit-overflow-scrolling: touch;
+}
 
   #btn-chiudi-form {
     position: absolute;
@@ -310,7 +316,8 @@
     color: #333;
     max-height: calc(90vh - 100px);
     overflow-y: auto;
-  }
+    -webkit-overflow-scrolling: touch;
+}
 
   /* ✅ Righe info con sfondo alternato */
   #info-content > div {
@@ -372,7 +379,8 @@
 
   /* ===== MOBILE come INDEX ===== */
   @media (max-width: 768px){
-    body { flex-direction: column; }
+    html, body{ height:auto; overflow:auto; }
+body { flex-direction: column; }
     .sidebar{ position: relative; height:auto; overflow: visible; width:100%; padding: 15px; }
     .menu{ overflow: visible; }
     .main{ height:auto; overflow: visible; padding: 20px; }

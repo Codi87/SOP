@@ -43,7 +43,8 @@ body {
     align-items: center;
   
     position: sticky;
-  }
+    min-height: 0; /* ✅ permette ai figli scrollabili di funzionare */
+}
 
   .sidebar img {
     width: 220px;
@@ -58,7 +59,8 @@ body {
     flex-grow: 1;
     overflow-y: auto;
     overscroll-behavior: contain;
-  }
+    -webkit-overflow-scrolling: touch;
+}
 
   .menu li { width: 100%; }
 
@@ -96,7 +98,10 @@ body {
   
     height: 100vh;
     flex: 1 1 auto;
-  }
+    min-height: 0; /* ✅ necessario per scroll su mobile in flex */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
 
   .main h1 { color: var(--rosso-cri); margin-top: 0; margin-bottom: 10px; }
 
@@ -238,7 +243,8 @@ body {
     color: #333;
     max-height: calc(90vh - 88px);
     overflow-y: auto;
-  }
+    -webkit-overflow-scrolling: touch;
+}
   #info-content .row {
     display: flex;
     padding: 10px 12px;
@@ -279,7 +285,8 @@ body {
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
-  }
+    -webkit-overflow-scrolling: touch;
+}
 
   #edit-close {
     position: absolute;
@@ -363,31 +370,26 @@ body {
 
   /* ===== MOBILE come INDEX ===== */
   @media (max-width: 768px){
-    body { flex-direction: column; 
-    .sidebar{ position: relative; height:auto; overflow: visible; width:100%; }
-
-    .menu{ overflow: visible; }
-
-    .main{ height:auto; overflow: visible; }
-}
-.sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; }
-    .menu { overflow: visible; }
-
-    table { font-size: 0.85rem; }
-    .action-btn {
-      padding: 6px 10px;
-      font-size: 0.85rem;
-      margin: 2px 0;
-      display: block;
-      width: 100%;
-      white-space: normal;
-    }
-    #info-content .row { flex-direction: column; }
-    .info-label { min-width: auto; }
-    #edit-form input { flex: 1 1 100%; }
-    .qualifiche-container,
-    .patenti-container { grid-template-columns: 1fr; }
+  html, body{ height:auto; overflow:auto; }
+html, body{ height:auto; overflow:auto; }
+  body{ flex-direction: column; }
+  .sidebar{ position: relative; top: 0; width:100%; height:auto; padding: 15px; overflow: visible; }
+  .menu{ overflow: visible; }
+  .main{ height:auto; overflow: visible; padding: 20px; min-height: 0; -webkit-overflow-scrolling: touch; }
+  table{ font-size: 0.85rem; display:block; width:100%; overflow-x:auto; -webkit-overflow-scrolling: touch; }
+  .action-btn{
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    margin: 2px 0;
+    display: block;
+    width: 100%;
+    white-space: normal;
   }
+  #info-content .row{ flex-direction: column; }
+  .info-label{ min-width: auto; }
+  #edit-form input{ flex: 1 1 100%; }
+  .qualifiche-container, .patenti-container{ grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
