@@ -1,0 +1,29 @@
+/* Shared tiny fixes only (no visual overrides) */
+
+/* Fix iOS/Safari scroll issues when using flex + overflow containers */
+.layout-admin .main{ min-height: 0; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.layout-admin .sidebar{ min-height: 0; }
+.layout-admin .menu{ -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 768px){
+  html, body{ height:auto; overflow:auto; }
+}
+
+/* Tooltip qualifiche (condiviso) */
+#qualifica-tooltip{
+  position: fixed;
+  z-index: 2000;
+  display: none;
+  max-width: 320px;
+  background: rgba(0,0,0,0.88);
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+  pointer-events: none;
+}
+
+/* Mostra/nascondi elementi basati su qualifiche (gestito via JS) */
+.layout-admin [data-qualifiche]{ display:none; }

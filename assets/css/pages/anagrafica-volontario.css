@@ -1,0 +1,206 @@
+:root {
+    --rosso-cri: #b71c1c;
+    --bianco: #ffffff;
+    --grigio: #f5f5f5;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    min-height: 100vh;
+    background: var(--grigio);
+  }
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--rosso-cri);
+    color: var(--bianco);
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+    height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 1000;
+    align-items: center;
+  }
+  .sidebar img {
+    width: 220px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+  }
+  .menu { list-style: none; padding: 0; width: 100%; }
+  .menu li { width: 100%; }
+  .menu a {
+    display: block;
+    padding: 15px 20px;
+    color: var(--bianco);
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .menu a:hover, .menu a.active { background: #9f1b1b; }
+
+  #logout {
+    margin-top: auto;
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    width: 80%;
+    background-color: #fff;
+    color: var(--rosso-cri);
+    border: 2px solid var(--rosso-cri);
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
+
+  .main {
+    flex-grow: 1;
+    padding: 30px;
+    padding-left: 290px;
+    background: var(--bianco);
+    overflow-y: auto;
+    min-height: 100vh;
+  }
+  .main h1 {
+    color: var(--rosso-cri);
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .note {
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  .row { display: flex; gap: 15px; margin-bottom: 15px; }
+
+  input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  input:focus { outline: none; border-color: var(--rosso-cri); }
+
+  input[readonly] {
+    background-color: #f8f9fa;
+    color: #495057;
+    cursor: not-allowed;
+  }
+
+  .btn {
+    background: var(--rosso-cri);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-top: 10px;
+    transition: background 0.3s;
+  }
+  .btn:hover { background: #9f1b1b; }
+
+  .btn-secondary { background: #6c757d; }
+  .btn-secondary:hover { background: #5a6268; }
+
+  .success {
+    background: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border: 1px solid #c3e6cb;
+  }
+  .error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+  }
+
+  .section {
+    background: var(--grigio);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .section h2 {
+    color: var(--rosso-cri);
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+
+  .qualifiche-container, .patenti-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+
+  .qualifiche-container legend, .patenti-container legend {
+    font-weight: bold;
+    color: var(--rosso-cri);
+    padding: 0 5px;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-bottom: 5px;
+  }
+
+  label input[type="checkbox"] {
+    margin-right: 8px;
+    width: auto;
+    flex: none;
+  }
+
+  /* checkbox disabilitati: più chiaro */
+  input[type="checkbox"][disabled] {
+    opacity: .6;
+    cursor: not-allowed;
+  }
+
+  .pending-box {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1ecf1;
+    background: #e3f2fd;
+    color: #0c5460;
+    line-height: 1.55;
+  }
+  .pending-box b { color: #0b3d4a; }
+
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    .sidebar {
+      position: relative;
+      width: 100%;
+      height: auto;
+      padding: 15px;
+    }
+    .main { padding-left: 30px; }
+    .row { flex-direction: column; gap: 10px; }
+    .qualifiche-container, .patenti-container { grid-template-columns: 1fr; }
+  }

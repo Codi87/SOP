@@ -1,0 +1,325 @@
+:root{
+    --rosso-cri:#b71c1c;
+    --bianco:#ffffff;
+    --grigio:#f5f5f5;
+
+    --blu:#2196f3;
+
+    --role-admin:#b71c1c;
+    --role-sop:#ef6c00;
+    --role-tlc:#1976d2;
+    --role-sol:#f9a825;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  /* ✅ Layout: scroll SOLO nel main, sidebar ferma */
+  html, body{ height:100%; }
+  body{
+    font-family: Arial, sans-serif;
+    background: var(--grigio);
+    display:flex;
+    overflow:hidden; /* ✅ evita lo “spazio bianco” sotto */
+  }
+
+  /* ✅ SIDEBAR IDENTICA A index.html (con scroll interno menu) */
+  .sidebar{
+    width:260px;
+    flex-shrink:0;
+    background: var(--rosso-cri);
+    color: var(--bianco);
+    display:flex;
+    flex-direction:column;
+    padding-top:20px;
+    height:100vh;
+    position:sticky;
+    top:0;
+    overflow:hidden; /* lo scroll lo fa il menu */
+    align-items:center;
+  }
+  .sidebar img{
+    width:220px;
+    margin-bottom:20px;
+    border-radius:8px;
+    flex-shrink:0;
+  }
+
+  .menu{
+    list-style:none;
+    padding:0;
+    width:100%;
+    flex-grow: 1;
+    overflow-y:auto;                 /* ✅ scroll solo qui */
+    overscroll-behavior: contain;
+  }
+  .menu li{ width:100%; }
+  .menu a{
+    display:block;
+    padding:15px 20px;
+    color:var(--bianco);
+    text-decoration:none;
+    font-weight:bold;
+  }
+  .menu a:hover, .menu a.active{ background:#9f1b1b; }
+
+  
+  #logout{
+    flex-shrink:0;
+    margin:12px auto 20px auto;
+    padding:10px 20px;
+    width:80%;
+    background:#fff;
+    color:var(--rosso-cri);
+    border:2px solid var(--rosso-cri);
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+    transition: background .3s, color .3s;
+  }
+  #logout:hover{ background: var(--rosso-cri); color:#fff; }
+
+  /* ✅ MAIN: scroll interno */
+  .main{
+    flex-grow: 1;
+    height:100vh;
+    overflow-y:auto;
+    background: var(--bianco);
+    padding:30px;
+  }
+
+  .main h1{
+    color: var(--rosso-cri);
+    margin:0 0 20px 0;
+    font-size:2rem;
+  }
+
+  /* ====== Cards uniformi ====== */
+  .cards{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap:25px;
+    align-items: stretch;
+  }
+
+  .card{
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.10);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform .2s ease, box-shadow .2s ease;
+    position: relative;
+    overflow: hidden;
+
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height: 305px; /* ✅ tutte uguali */
+  }
+  .card::before{
+    content:'';
+    position:absolute;
+    top:0; left:0; right:0;
+    height:5px;
+    background: linear-gradient(90deg, var(--rosso-cri), var(--blu));
+  }
+  .card:hover{
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.13);
+  }
+
+  .card h2{
+    margin:0;
+    color: var(--rosso-cri);
+    font-size: 1.35rem;
+    font-weight: 800;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    line-height: 1.2;
+  }
+
+  .card-desc{
+    margin:0;
+    line-height:1.7;
+    color:#444;
+    min-height: 60px; /* ✅ allinea numeri/bottoni */
+  }
+
+  .stat-number{
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(45deg, var(--rosso-cri), var(--blu));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height:1;
+    margin-top: 2px;
+    min-height: 3.2rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-label{
+    font-size: 1rem;
+    color:#666;
+    font-weight:700;
+    margin: 0;
+  }
+
+  .btn-admin{
+    margin-top:auto; /* ✅ tutti i bottoni in fondo */
+    align-self:flex-start;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height: 44px;
+    padding: 12px 22px;
+    background: linear-gradient(45deg, var(--rosso-cri), #d32f2f);
+    color:#fff;
+    border-radius:999px;
+    text-decoration:none;
+    font-weight:800;
+    font-size:0.95rem;
+    border:0;
+    cursor:pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
+    box-shadow: 0 4px 15px rgba(183,28,28,0.25);
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    white-space: nowrap; /* ✅ evita “spostamenti” del bottone */
+  }
+  .btn-admin:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(183,28,28,0.35);
+  }
+
+  /* =========================
+     POPUP RUOLI (solo Admin)
+  ========================= */
+  #ruoli-popup{
+    position:fixed; inset:0;
+    background: rgba(0,0,0,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index: 3000;
+  }
+  #ruoli-popup.active{ display:flex; }
+
+  #ruoli-box{
+    background:#fff;
+    width: 980px;
+    max-width: 95%;
+    border-radius: 12px;
+    overflow:hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+  }
+
+  #ruoli-header{
+    background: var(--rosso-cri);
+    color:#fff;
+    padding: 16px 20px;
+    display:flex;
+    align-items:flex-start;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  #ruoli-close{
+    background: rgba(255,255,255,0.2);
+    border:none;
+    color:#fff;
+    font-size:1.6rem;
+    width:40px;
+    height:40px;
+    border-radius:999px;
+    cursor:pointer;
+    flex: 0 0 auto;
+  }
+  #ruoli-close:hover{ background: rgba(255,255,255,0.28); }
+
+  #ruoli-content{
+    padding: 18px 20px 20px;
+    max-height: 75vh;
+    overflow:auto;
+  }
+
+  .ruoli-table{
+    width:100%;
+    border-collapse: collapse;
+    min-width: 760px;
+  }
+  .ruoli-table th, .ruoli-table td{
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align:left;
+    vertical-align: middle;
+  }
+  .ruoli-table th{ background:#f3f3f3; color:#333; }
+
+  .role-badge{
+    display:inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 900;
+    font-size: .85rem;
+    border: 2px solid transparent;
+    line-height:1.2;
+    white-space: nowrap;
+  }
+  .rb-admin{ background: rgba(183,28,28,.12); border-color: rgba(183,28,28,.35); color: var(--role-admin); }
+  .rb-sop{ background: rgba(239,108,0,.14); border-color: rgba(239,108,0,.35); color: var(--role-sop); }
+  .rb-tlc{ background: rgba(25,118,210,.14); border-color: rgba(25,118,210,.35); color: var(--role-tlc); }
+  .rb-sol{ background: rgba(249,168,37,.18); border-color: rgba(249,168,37,.45); color: var(--role-sol); }
+
+  .ruolo-row{ border-left: 6px solid transparent; }
+  .ruolo-row.amministratore{ border-left-color: var(--role-admin); }
+  .ruolo-row.sop{ border-left-color: var(--role-sop); }
+  .ruolo-row.tlc_provinciale{ border-left-color: var(--role-tlc); }
+  .ruolo-row.sol{ border-left-color: var(--role-sol); }
+
+  .select-role{
+    padding: 8px 10px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    font-weight: 900;
+    font-family: inherit;
+    cursor: pointer;
+    background:#fff;
+  }
+  .select-role.role-amministratore{ background: rgba(183,28,28,0.12); border-color: rgba(183,28,28,0.40); color: #8a1010; }
+  .select-role.role-sop{ background: rgba(239,108,0,0.14); border-color: rgba(239,108,0,0.45); color: #b44b00; }
+  .select-role.role-tlc_provinciale{ background: rgba(25,118,210,0.14); border-color: rgba(25,118,210,0.45); color: #0b63b8; }
+  .select-role.role-sol{ background: rgba(249,168,37,0.18); border-color: rgba(249,168,37,0.55); color: #9a6f00; }
+
+  .btn-small{
+    padding: 8px 12px;
+    border:none;
+    border-radius: 10px;
+    cursor:pointer;
+    font-weight: 900;
+    background:#28a745;
+    color:#fff;
+  }
+  .btn-small:hover{ filter: brightness(1.05); }
+
+  @media (max-width: 768px){
+    body{ flex-direction: column; overflow:auto; }
+    .sidebar{
+      width:100%;
+      height:auto;
+      padding:15px;
+      position:relative;
+      overflow: visible;
+    }
+    .menu{ overflow: visible; }
+    .main{
+      height:auto;
+      overflow: visible;
+      padding:20px;
+    }
+    .cards{ grid-template-columns: 1fr; gap:18px; }
+    .ruoli-table{ min-width: 0; }
+    .btn-admin{ white-space: normal; } /* su mobile può andare a capo */
+  }

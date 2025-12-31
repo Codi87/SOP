@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Eventi - Area Volontario</title>
+<link href="assets/css/app.css" rel="stylesheet"/> <link href="assets/css/pages/eventi-volontario.css" rel="stylesheet"/>
+</head>
+<body class="layout-admin">
+<aside class="sidebar">
+<img alt="Logo Croce Rossa Italiana" id="logo-volontario" src="logo-cri.svg"/>
+<ul class="menu">
+<li><a href="index-volontario.html">🏠 Home</a></li>
+<li><a href="anagrafica-volontario.html">📋 Mia Anagrafica</a></li>
+<li><a class="active" href="eventi-volontario.html">📅 Eventi</a></li>
+<li data-qualifiche="TLC 1,TLC 2"><a href="tlc.html">📡 TLC</a></li></ul>
+<button id="logout" type="button">Logout</button>
+</aside>
+<main class="main">
+<h1>📅 Eventi del tuo Comitato</h1>
+<div class="card">
+<h2>Eventi disponibili</h2>
+<p>
+        Qui vengono mostrati tutti gli eventi visibili per il tuo comitato, futuri e approvati.
+        Se possiedi <b>almeno uno</b> dei requisiti richiesti puoi inviare la richiesta di iscrizione (poi la SOL approva).
+      </p>
+<ul class="info-list" id="lista-eventi">
+<li class="empty-state">Caricamento eventi in corso...</li>
+</ul>
+</div>
+<div class="card">
+<h2>Azioni</h2>
+<p>⬅ <a href="index-volontario.html">Torna alla Home volontario</a></p>
+</div>
+</main>
+<!-- Popup info evento -->
+<div aria-labelledby="info-title" aria-modal="true" id="info-popup" role="dialog">
+<button aria-label="Chiudi dettagli evento" id="info-close">×</button>
+<h3 id="info-title">ℹ️ Dettagli Evento</h3>
+<div id="info-content"></div>
+</div>
+<script defer="True" src="assets/js/common.js"></script><script defer="" src="assets/js/pages/eventi-volontario.js"></script>
+</body>
+</html>

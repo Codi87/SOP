@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="80" viewBox="0 0 220 80">
+  <rect width="220" height="80" fill="white"/>
+  <g transform="translate(18,12)">
+    <rect x="20" y="0" width="20" height="56" fill="#d50000"/>
+    <rect x="0" y="18" width="60" height="20" fill="#d50000"/>
+  </g>
+  <text x="95" y="38" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#111">CRI</text>
+  <text x="95" y="60" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#111">Fano</text>
+</svg>

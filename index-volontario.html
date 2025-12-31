@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Area Volontario - CRI</title>
+<link href="assets/css/app.css" rel="stylesheet"/> <link href="assets/css/pages/index-volontario.css" rel="stylesheet"/>
+</head>
+<body class="layout-admin">
+<aside class="sidebar">
+<img alt="Logo Croce Rossa Italiana" id="logo-volontario" src="logo-cri.svg"/>
+<ul class="menu">
+<li><a class="active" href="index-volontario.html">🏠 Home</a></li>
+<li><a href="anagrafica-volontario.html">📋 Mia Anagrafica</a></li>
+<li><a href="eventi-volontario.html">📅 Eventi</a></li>
+<li data-qualifiche="TLC 1,TLC 2"><a href="tlc.html">📡 TLC</a></li></ul>
+<button id="logout" type="button">Logout</button>
+</aside>
+<main class="main">
+<h1 id="benvenuto">Benvenuto Volontario</h1>
+<div class="cards-container">
+<!-- Card Info Personali -->
+<div class="card">
+<h2>👤 I Tuoi Dati</h2>
+<ul class="info-list">
+<li><span class="info-label">Nome:</span> <span id="info-nome">-</span></li>
+<li><span class="info-label">Codice Fiscale:</span> <span id="info-cf">-</span></li>
+<li><span class="info-label">Comitato:</span> <span id="info-comitato">-</span></li>
+<li><span class="info-label">Telefono:</span> <span id="info-telefono">-</span></li>
+<li><span class="info-label">Email:</span> <span id="info-email">-</span></li>
+</ul>
+</div>
+<!-- Card Qualifiche -->
+<div class="card">
+<h2>📋 Le Tue Qualifiche</h2>
+<p id="qualifiche-text">Nessuna qualifica registrata</p>
+</div>
+<!-- Card Patenti -->
+<div class="card">
+<h2>🚗 Le Tue Patenti</h2>
+<p id="patenti-text">Nessuna patente registrata</p>
+</div>
+<!-- Card Eventi Comitato -->
+<div class="card">
+<h2>📅 Eventi del tuo Comitato</h2>
+<ul class="info-list" id="eventi-comitato">
+<li class="empty-state">
+          Nessun evento visibile al momento
+        </li>
+</ul>
+</div>
+</div>
+<!-- Card Azioni Rapide -->
+<div class="card">
+<h2>⚡ Azioni Rapide</h2>
+<p>
+      📝 <a href="anagrafica-volontario.html" style="color: var(--rosso-cri); font-weight: bold;">Modifica la tua anagrafica</a> per aggiornare i tuoi dati personali, qualifiche e patenti.
+    </p>
+<p style="margin-top: 10px;">
+      🔒 <a href="anagrafica-volontario.html#password" style="color: var(--rosso-cri); font-weight: bold;">Cambia password</a> per mantenere il tuo account sicuro.
+    </p>
+</div>
+</main>
+<script defer="True" src="assets/js/common.js"></script><script defer="" src="assets/js/pages/index-volontario.js"></script>
+</body>
+</html>

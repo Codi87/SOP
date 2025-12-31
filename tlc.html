@@ -1,683 +1,88 @@
 <!DOCTYPE html>
+
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Telecomunicazioni CRI</title>
-<style>
-  :root {
-    --rosso-cri: #b71c1c;
-    --bianco: #ffffff;
-    --grigio: #f5f5f5;
-    --verde: #4caf50;
-    --arancione: #ff9800;
-    --rosso: #f44336;
-    --blu: #2196f3;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  /* ✅ Layout come Admin: scroll SOLO nel main, sidebar ferma */
-  html, body { height: 100%; }
-  body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    height: 100%;
-    overflow: hidden; /* ✅ evita che scrolli tutta la pagina */
-    background: linear-gradient(135deg, var(--grigio) 0%, #e8f0fe 100%);
-  }
-
-  /* ===== SIDEBAR IDENTICA A INDEX (tranne logo che resta TLC) ===== */
-  .sidebar {
-    width: 260px;
-    flex-shrink: 0;
-    background: var(--rosso-cri);
-    color: var(--bianco);
-    display: flex;
-    flex-direction: column;
-    padding-top: 20px;
-    height: 100vh;
-    position: sticky; /* ✅ resta visibile */
-    top: 0;
-    overflow: hidden; /* lo scroll lo fa il menu */
-    align-items: center;
-  }
-  .sidebar img {
-    width: 220px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    flex-shrink: 0;
-  }
-
-  .menu {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-    flex: 1 1 auto;
-    overflow-y: auto; /* ✅ scroll interno menu */
-    overscroll-behavior: contain;
-  }
-  .menu li { width: 100%; }
-  .menu a {
-    display: block;
-    padding: 15px 20px;
-    color: var(--bianco);
-    text-decoration: none;
-    font-weight: bold;
-  }
-  .menu a:hover, .menu a.active { background: #9f1b1b; }
-
-  #logout {
-    flex-shrink: 0;
-    margin: 12px auto 20px auto;
-    padding: 10px 20px;
-    width: 80%;
-    background-color: #fff;
-    color: var(--rosso-cri);
-    border: 2px solid var(--rosso-cri);
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s, color 0.3s;
-  }
-  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
-
-  /* ===== MAIN: scroll interno ===== */
-  .main {
-    flex: 1 1 auto;
-    height: 100vh;        /* ✅ necessario per far scrollare solo il main */
-    overflow-y: auto;     /* ✅ scroll qui */
-    padding: 30px;
-    background: var(--bianco);
-    width: 100%;
-  }
-
-  .main h1 {
-    color: var(--rosso-cri);
-    margin: 0 0 15px 0;
-    font-size: 2.2rem;
-    font-weight: 700;
-  }
-  #welcome-tlc {
-    color: #666;
-    font-weight: 500;
-    margin-bottom: 20px;
-    font-size: 1.05rem;
-  }
-
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 25px;
-    margin-bottom: 30px;
-  }
-  .card {
-    background: rgba(255,255,255,0.95);
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-  }
-  .card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--rosso-cri), var(--blu));
-  }
-  .card h2 {
-    margin: 0 0 15px 0;
-    color: var(--rosso-cri);
-    font-size: 1.3rem;
-    font-weight: 700;
-  }
-
-  .statistiche-ore { text-align: center; padding: 10px 0; }
-  .numero-ore {
-    font-size: 3rem;
-    font-weight: 800;
-    background: linear-gradient(45deg, var(--rosso-cri), var(--blu));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 10px 0;
-    line-height: 1;
-  }
-  .label-ore { color: #666; font-size: 1.1rem; font-weight: 500; }
-
-  .timbrature-container {
-    background: linear-gradient(145deg, rgba(255,255,255,0.9), var(--grigio));
-    border-radius: 25px;
-    padding: 35px;
-    box-shadow: 0 15px 50px rgba(0,0,0,0.1);
-    margin-top: 10px;
-    border: 1px solid rgba(255,255,255,0.3);
-  }
-  .timbrature-container h3 { color: var(--rosso-cri); margin-bottom: 20px; font-size: 1.6rem; font-weight: 700; }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 18px;
-    margin-bottom: 20px;
-  }
-  .form-group { display: flex; flex-direction: column; }
-  .form-group label { color: #555; font-weight: 600; margin-bottom: 8px; }
-  .form-group input, .form-group select {
-    padding: 14px;
-    border: 2px solid #e1e5e9;
-    border-radius: 12px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background: #fff;
-  }
-  .form-group input:focus, .form-group select:focus {
-    outline: none; border-color: var(--rosso-cri);
-    box-shadow: 0 0 0 3px rgba(183,28,28,0.1);
-  }
-
-  .btn-submit {
-    grid-column: 1 / -1;
-    padding: 16px 40px;
-    background: linear-gradient(45deg, var(--rosso-cri), #d32f2f);
-    color: white;
-    border: none;
-    border-radius: 25px;
-    font-size: 1.05rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(183,28,28,0.25); }
-
-  .toolbar {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin: 10px 0 20px 0;
-  }
-  .toolbar .pill {
-    background: #fff;
-    border: 1px solid #e1e5e9;
-    border-radius: 999px;
-    padding: 10px 14px;
-    font-weight: 700;
-    color: #444;
-  }
-
-  .totali-section {
-    background: linear-gradient(45deg, var(--verde), #66bb6a);
-    color: white;
-    text-align: center;
-    padding: 18px;
-    border-radius: 20px;
-    margin: 15px 0 20px 0;
-    font-size: 1.15rem;
-    font-weight: 800;
-  }
-
-  .timbrature-list { list-style: none; display: grid; gap: 18px; }
-  .timbratura-item {
-    background: white;
-    border-radius: 20px;
-    padding: 22px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-    border-left: 6px solid var(--arancione);
-  }
-  .timbratura-item:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); }
-  .timbratura-item.approvato { border-left-color: var(--verde); }
-  .timbratura-item.rifiutato { border-left-color: var(--rosso); }
-
-  .timbratura-tipo { font-size: 1.2rem; font-weight: 800; color: var(--rosso-cri); margin-bottom: 8px; }
-  .timbratura-dettagli { color: #666; margin-bottom: 12px; font-size: 0.98rem; line-height: 1.5; }
-
-  .badge {
-    display: inline-block;
-    padding: 8px 14px;
-    border-radius: 999px;
-    color: white;
-    font-weight: 800;
-    font-size: 0.85rem;
-    margin-right: 10px;
-  }
-  .badge.attesa { background: linear-gradient(45deg, var(--arancione), #ff8f00); }
-  .badge.approvato { background: linear-gradient(45deg, var(--verde), #45a049); }
-  .badge.rifiutato { background: linear-gradient(45deg, var(--rosso), #d32f2f); }
-
-  .btn-azione {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 999px;
-    font-weight: 800;
-    cursor: pointer;
-    margin: 6px 8px 0 0;
-    transition: all 0.2s ease;
-    font-size: 0.9rem;
-  }
-  .btn-azione.approva { background: linear-gradient(45deg, var(--verde), #45a049); color: white; }
-  .btn-azione.rifiuta { background: linear-gradient(45deg, var(--rosso), #d32f2f); color: white; }
-  .btn-azione:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(0,0,0,0.15); }
-
-  .note-box {
-    background: #fff3cd;
-    border-left: 5px solid #ffc107;
-    color: #856404;
-    padding: 14px 16px;
-    border-radius: 14px;
-    font-weight: 700;
-    margin-bottom: 18px;
-  }
-
-  /* ===== RESPONSIVE identico a INDEX per sidebar/menu ===== */
-  @media (max-width: 768px) {
-    body { flex-direction: column; overflow: auto; } /* ✅ torna scroll normale */
-    .sidebar { width: 100%; height: auto; padding: 15px; overflow: visible; position: relative; }
-    .menu { overflow: visible; }
-    .main { padding: 20px; height: auto; overflow: visible; }
-    .cards { grid-template-columns: 1fr; gap: 18px; }
-    .form-grid { grid-template-columns: 1fr; }
-  }
-</style>
+<link href="assets/css/app.css" rel="stylesheet"/> <link href="assets/css/pages/tlc.css" rel="stylesheet"/>
 </head>
-<body>
-
-<aside class="sidebar" aria-label="Navigazione principale">
-  <!-- ✅ Logo sempre TLC (come richiesto) -->
-  <img id="logo-cri" src="logo-tlc.svg" alt="Logo TLC CRI" />
-  <ul class="menu" id="menu-sidebar"></ul>
-  <button id="logout" type="button">Logout</button>
+<body class="layout-admin">
+<aside aria-label="Navigazione principale" class="sidebar">
+<!-- ✅ Logo sempre TLC (come richiesto) -->
+<img alt="Logo TLC CRI" id="logo-cri" src="logo-tlc.svg"/>
+<ul class="menu" id="menu-sidebar"></ul>
+<button id="logout" type="button">Logout</button>
 </aside>
-
 <main class="main">
-  <h1>📡 Dashboard TLC</h1>
-  <div id="welcome-tlc"></div>
-
-  <div class="cards">
-    <div class="card">
-      <h2>⏱️ Ore TLC approvate</h2>
-      <div class="statistiche-ore">
-        <div class="numero-ore" id="ore-tlc-svolte">0</div>
-        <div class="label-ore" id="ore-label">ore totali approvate</div>
-      </div>
-    </div>
-
-    <div class="card" id="card-info-ruolo">
-      <h2>👤 Ruolo</h2>
-      <div id="ruolo-info" style="color:#444; line-height:1.7;"></div>
-    </div>
-  </div>
-
-  <div class="timbrature-container" id="timbrature-section">
-    <h3 id="timbrature-title">⏱️ Timbrature TLC</h3>
-
-    <div class="note-box" id="note-box" style="display:none;"></div>
-
-    <!-- SOLO VOLONTARIO: inserimento -->
-    <div id="inserimento-timbratura" style="display:none;">
-      <h4 style="color: var(--rosso-cri); margin-bottom: 16px;">➕ Nuova Timbratura</h4>
-      <form id="form-timbratura-tlc" class="form-grid">
-        <div class="form-group">
-          <label>📅 Data</label>
-          <input type="date" id="data-tlc" required />
-        </div>
-        <div class="form-group">
-          <label>🕐 Inizio</label>
-          <input type="time" id="ora-inizio-tlc" required />
-        </div>
-        <div class="form-group">
-          <label>🕔 Fine</label>
-          <input type="time" id="ora-fine-tlc" required />
-        </div>
-        <div class="form-group">
-          <label>📍 Luogo</label>
-          <input type="text" id="luogo-tlc" placeholder="Es: Sala Radio Pesaro" required />
-        </div>
-        <div class="form-group">
-          <label>🏷️ Tipo</label>
-          <input type="text" id="tipo-tlc" placeholder="Es: Turno Sala Radio" required />
-        </div>
-        <button type="submit" class="btn-submit">➕ Aggiungi Timbratura</button>
-      </form>
-    </div>
-
-    <!-- SOLO ADMIN/TLC PROV: filtro -->
-    <div class="toolbar" id="toolbar-admin" style="display:none;">
-      <span class="pill">🔎 Filtro</span>
-      <div class="form-group" style="min-width:220px;">
-        <label style="margin-bottom:6px;">Comitato</label>
-        <select id="filtro-comitato">
-          <option value="ALL">Tutti</option>
-        </select>
-      </div>
-      <div class="form-group" style="min-width:220px;">
-        <label style="margin-bottom:6px;">Stato</label>
-        <select id="filtro-stato">
-          <option value="ALL">Tutti</option>
-          <option value="attesa">Attesa</option>
-          <option value="approvato">Approvato</option>
-          <option value="rifiutato">Rifiutato</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="totali-section" id="totale-ore-tlc">0 ore totali approvate</div>
-
-    <ul class="timbrature-list" id="lista-timbrature-tlc"></ul>
-  </div>
+<h1>📡 Dashboard TLC</h1>
+<div id="welcome-tlc"></div>
+<div class="cards">
+<div class="card">
+<h2>⏱️ Ore TLC approvate</h2>
+<div class="statistiche-ore">
+<div class="numero-ore" id="ore-tlc-svolte">0</div>
+<div class="label-ore" id="ore-label">ore totali approvate</div>
+</div>
+</div>
+<div class="card" id="card-info-ruolo">
+<h2>👤 Ruolo</h2>
+<div id="ruolo-info" style="color:#444; line-height:1.7;"></div>
+</div>
+</div>
+<div class="timbrature-container" id="timbrature-section">
+<h3 id="timbrature-title">⏱️ Timbrature TLC</h3>
+<div class="note-box" id="note-box" style="display:none;"></div>
+<!-- SOLO VOLONTARIO: inserimento -->
+<div id="inserimento-timbratura" style="display:none;">
+<h4 style="color: var(--rosso-cri); margin-bottom: 16px;">➕ Nuova Timbratura</h4>
+<form class="form-grid" id="form-timbratura-tlc">
+<div class="form-group">
+<label>📅 Data</label>
+<input id="data-tlc" required="" type="date"/>
+</div>
+<div class="form-group">
+<label>🕐 Inizio</label>
+<input id="ora-inizio-tlc" required="" type="time"/>
+</div>
+<div class="form-group">
+<label>🕔 Fine</label>
+<input id="ora-fine-tlc" required="" type="time"/>
+</div>
+<div class="form-group">
+<label>📍 Luogo</label>
+<input id="luogo-tlc" placeholder="Es: Sala Radio Pesaro" required="" type="text"/>
+</div>
+<div class="form-group">
+<label>🏷️ Tipo</label>
+<input id="tipo-tlc" placeholder="Es: Turno Sala Radio" required="" type="text"/>
+</div>
+<button class="btn-submit" type="submit">➕ Aggiungi Timbratura</button>
+</form>
+</div>
+<!-- SOLO ADMIN/TLC PROV: filtro -->
+<div class="toolbar" id="toolbar-admin" style="display:none;">
+<span class="pill">🔎 Filtro</span>
+<div class="form-group" style="min-width:220px;">
+<label style="margin-bottom:6px;">Comitato</label>
+<select id="filtro-comitato">
+<option value="ALL">Tutti</option>
+</select>
+</div>
+<div class="form-group" style="min-width:220px;">
+<label style="margin-bottom:6px;">Stato</label>
+<select id="filtro-stato">
+<option value="ALL">Tutti</option>
+<option value="attesa">Attesa</option>
+<option value="approvato">Approvato</option>
+<option value="rifiutato">Rifiutato</option>
+</select>
+</div>
+</div>
+<div class="totali-section" id="totale-ore-tlc">0 ore totali approvate</div>
+<ul class="timbrature-list" id="lista-timbrature-tlc"></ul>
+</div>
 </main>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const userId = (localStorage.getItem("userId") || "").toUpperCase();
-  const role = (localStorage.getItem("role") || "").toLowerCase();
-  const comitatoOperatore = (localStorage.getItem("comitato") || "");
-
-  if (!userId) {
-    alert("Devi effettuare il login");
-    window.location.href = "login.html";
-    return;
-  }
-
-  // ✅ In TLC: logo sempre TLC per tutti (come richiesto)
-  const logoImg = document.getElementById("logo-cri");
-  if (logoImg) {
-    logoImg.src = "logo-tlc.svg";
-    logoImg.onerror = () => { logoImg.src = "logo.svg"; };
-  }
-
-  // ---- Dati base ----
-  const volontari = JSON.parse(localStorage.getItem("volontari") || "[]");
-  const me = volontari.find(v => (v.cf || "").toUpperCase() === userId) || null;
-  const mieQualifiche = me?.qualifiche || [];
-
-  const isVolontario = role === "volontario";
-  const isOperatoreTlcVol = isVolontario && mieQualifiche.includes("OPERATORE TLC");
-
-  // ✅ Approva solo: amministratore o tlc provinciale
-  const approverRoles = ["amministratore", "tlc_provinciale"];
-  const viewerRoles = ["sop", "sol"];
-  const isApprover = approverRoles.includes(role);
-  const isViewer = viewerRoles.includes(role);
-
-  const canViewTlc = isApprover || isViewer || isOperatoreTlcVol;
-  if (!canViewTlc) {
-    alert("Accesso negato: non hai i permessi TLC");
-    window.location.href = isVolontario ? "index-volontario.html" : "index.html";
-    return;
-  }
-
-  // ---- Menu (ALLINEATO A INDEX + Admin per ruoli abilitati) ----
-  const menu = document.getElementById("menu-sidebar");
-  menu.innerHTML = "";
-
-  const menuVol = [
-    { text: "🏠 Home", href: "index-volontario.html" },
-    { text: "📋 Anagrafica", href: "anagrafica-volontario.html" },
-    { text: "📅 Eventi", href: "eventi-volontario.html" },
-    { text: "📡 TLC", href: "tlc.html" }
-  ];
-
-  const items = [];
-
-  if (isVolontario) {
-    items.push(...menuVol);
-  } else {
-    // stesso ordine/voci di index
-    items.push(
-      { text: "🏠 Home", href: "index.html" },
-      { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html" },
-      { text: "👥 Volontari", href: "volontari.html" },
-      { text: "🚗 Mezzi", href: "mezzi.html" },
-      { text: "📦 Materiali", href: "materiali.html" },
-      { text: "🚨 Emergenze", href: "emergenze.html" },
-      { text: "📅 Eventi", href: "eventi.html" },
-      { text: "📄 Documenti", href: "documenti.html" }
-    );
-
-    // TLC: come index
-    if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
-      items.push({ text: "📡 TLC", href: "tlc.html" });
-    }
-
-    // ✅ Admin: aggiunto come richiesto, con gli stessi requisiti di index
-    if (["sop", "sol", "amministratore"].includes(role)) {
-      items.push({ text: "⚙️ Admin", href: "admin.html" });
-    }
-  }
-
-  items.forEach(it => {
-    const li = document.createElement("li");
-    const a = document.createElement("a");
-    a.href = it.href;
-    a.textContent = it.text;
-    if (it.href === "tlc.html") a.classList.add("active");
-    li.appendChild(a);
-    menu.appendChild(li);
-  });
-
-  // ✅ Logout identico a index
-  document.getElementById("logout").addEventListener("click", () => {
-    localStorage.clear();
-    window.location.href = "login.html";
-  });
-
-  // ---- UI header ----
-  const welcome = document.getElementById("welcome-tlc");
-  const ruoloInfo = document.getElementById("ruolo-info");
-  const noteBox = document.getElementById("note-box");
-
-  if (isApprover) {
-    welcome.textContent = `Benvenuto - Area TLC (Approvatore ore)`;
-    ruoloInfo.innerHTML = `<strong>Ruolo:</strong> ${role.toUpperCase()}<br><strong>Permessi:</strong> approva/rifiuta timbrature`;
-    noteBox.style.display = "block";
-    noteBox.textContent = "✅ Puoi approvare o rifiutare le timbrature TLC in stato 'attesa'.";
-  } else if (isViewer) {
-    welcome.textContent = `Benvenuto - Area TLC (Visualizzazione)`;
-    ruoloInfo.innerHTML = `<strong>Ruolo:</strong> ${role.toUpperCase()}<br><strong>Permessi:</strong> sola visualizzazione`;
-    noteBox.style.display = "block";
-    noteBox.textContent = "ℹ️ Puoi vedere le timbrature, ma non puoi approvare ore (solo Amministratore / TLC Provinciale).";
-  } else {
-    const name = `${me?.nome || ""} ${me?.cognome || ""}`.trim() || "Operatore";
-    welcome.textContent = `Benvenuto ${name} - Area Telecomunicazioni CRI`;
-    ruoloInfo.innerHTML = `<strong>Ruolo:</strong> VOLONTARIO<br><strong>Qualifica:</strong> OPERATORE TLC`;
-  }
-
-  const inserimento = document.getElementById("inserimento-timbratura");
-  const toolbarAdmin = document.getElementById("toolbar-admin");
-  inserimento.style.display = (isOperatoreTlcVol ? "block" : "none");
-  toolbarAdmin.style.display = (isApprover ? "flex" : "none");
-
-  function loadTimbrature() { return JSON.parse(localStorage.getItem("timbrature-tlc") || "[]"); }
-  function saveTimbrature(arr) { localStorage.setItem("timbrature-tlc", JSON.stringify(arr)); }
-
-  function minutesBetween(inizio, fine) {
-    if (!inizio || !fine) return 0;
-    const [h1, m1] = inizio.split(":").map(Number);
-    const [h2, m2] = fine.split(":").map(Number);
-    let start = h1 * 60 + m1;
-    let end = h2 * 60 + m2;
-    let diff = end - start;
-    if (diff < 0) diff += 24 * 60;
-    return diff;
-  }
-  function formatHM(min) {
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    return `${h}h ${String(m).padStart(2,"0")}m`;
-  }
-  function getComitatoByCf(cfUpper) {
-    const v = volontari.find(x => (x.cf || "").toUpperCase() === (cfUpper || "").toUpperCase());
-    return v?.comitato || "";
-  }
-  function getNomeByCf(cfUpper) {
-    const v = volontari.find(x => (x.cf || "").toUpperCase() === (cfUpper || "").toUpperCase());
-    if (!v) return cfUpper;
-    return `${v.nome || ""} ${v.cognome || ""}`.trim() || cfUpper;
-  }
-
-  function buildComitatoFilter() {
-    const sel = document.getElementById("filtro-comitato");
-    if (!sel) return;
-    const comitati = Array.from(new Set(volontari.map(v => (v.comitato || "").trim()).filter(Boolean))).sort();
-    sel.innerHTML = `<option value="ALL">Tutti</option>` + comitati.map(c => `<option value="${c}">${c}</option>`).join("");
-  }
-  if (isApprover) buildComitatoFilter();
-
-  const lista = document.getElementById("lista-timbrature-tlc");
-  const totale = document.getElementById("totale-ore-tlc");
-  const oreBox = document.getElementById("ore-tlc-svolte");
-  const oreLabel = document.getElementById("ore-label");
-  const titolo = document.getElementById("timbrature-title");
-
-  function getVisibleTimbrature(all) {
-    if (isOperatoreTlcVol) return all.filter(t => (t.utente || "").toUpperCase() === userId);
-
-    if (isViewer) {
-      const c = (comitatoOperatore || "").toLowerCase();
-      if (!c || c === "tutti") return all;
-      return all.filter(t => ((t.comitato || getComitatoByCf(t.utente)) || "").toLowerCase() === c);
-    }
-
-    if (isApprover) {
-      const filtroCom = (document.getElementById("filtro-comitato")?.value || "ALL");
-      const filtroStato = (document.getElementById("filtro-stato")?.value || "ALL");
-      return all.filter(t => {
-        const com = (t.comitato || getComitatoByCf(t.utente) || "");
-        const okCom = (filtroCom === "ALL") ? true : com === filtroCom;
-        const okStato = (filtroStato === "ALL") ? true : (t.stato === filtroStato);
-        return okCom && okStato;
-      });
-    }
-    return all;
-  }
-
-  function calcApprovedMinutes(allVisible) {
-    return allVisible
-      .filter(t => t.stato === "approvato")
-      .reduce((sum, t) => sum + minutesBetween(t.inizio, t.fine), 0);
-  }
-
-  function render() {
-    const all = loadTimbrature();
-
-    if (isOperatoreTlcVol) titolo.textContent = "⏱️ Le mie timbrature TLC";
-    else if (isApprover) titolo.textContent = "⏱️ Timbrature TLC - Approvazioni";
-    else titolo.textContent = "⏱️ Timbrature TLC - Visualizzazione";
-
-    const vis = getVisibleTimbrature(all);
-
-    const approvedMin = calcApprovedMinutes(vis);
-    oreBox.textContent = (approvedMin / 60).toFixed(2);
-    oreLabel.textContent = "ore totali approvate";
-    totale.textContent = `${(approvedMin / 60).toFixed(2)} ore totali approvate (${formatHM(approvedMin)})`;
-
-    if (!vis.length) {
-      lista.innerHTML = `
-        <li class="timbratura-item attesa">
-          <div class="timbratura-tipo">Nessuna timbratura</div>
-          <div class="timbratura-dettagli">Non ci sono dati da mostrare.</div>
-          <span class="badge attesa">VUOTO</span>
-        </li>`;
-      return;
-    }
-
-    const sorted = [...vis].sort((a,b) => String(b.data||"").localeCompare(String(a.data||"")));
-
-    lista.innerHTML = sorted.map(t => {
-      const com = t.comitato || getComitatoByCf(t.utente);
-      const nome = getNomeByCf((t.utente || "").toUpperCase());
-      const min = minutesBetween(t.inizio, t.fine);
-      const hm = formatHM(min);
-      const statoClass = t.stato || "attesa";
-
-      const headerExtra = (isOperatoreTlcVol)
-        ? ``
-        : `<div style="margin-top:6px;color:#555;font-weight:700;">👤 ${nome} • 🏢 ${com || "—"}</div>`;
-
-      const azioni = (isApprover && statoClass === "attesa")
-        ? `
-          <button class="btn-azione approva" type="button" onclick="approvaTimbratura(${t.id})">✅ Approva</button>
-          <button class="btn-azione rifiuta" type="button" onclick="rifiutaTimbratura(${t.id})">❌ Rifiuta</button>
-        `
-        : ``;
-
-      return `
-        <li class="timbratura-item ${statoClass}">
-          <div class="timbratura-tipo">${t.tipo || "Timbratura TLC"}</div>
-          ${headerExtra}
-          <div class="timbratura-dettagli">
-            📍 ${t.luogo || ""} <br>
-            📅 ${t.data || ""} • 🕐 ${t.inizio || ""} - ${t.fine || ""} • ⏱️ ${hm}
-          </div>
-          <span class="badge ${statoClass}">${String(statoClass).toUpperCase()}</span>
-          ${azioni}
-        </li>
-      `;
-    }).join("");
-  }
-
-  window.approvaTimbratura = function(id) {
-    if (!isApprover) return;
-    const all = loadTimbrature();
-    const idx = all.findIndex(t => t.id === id);
-    if (idx === -1) return;
-    all[idx].stato = "approvato";
-    saveTimbrature(all);
-    render();
-  };
-
-  window.rifiutaTimbratura = function(id) {
-    if (!isApprover) return;
-    const all = loadTimbrature();
-    const idx = all.findIndex(t => t.id === id);
-    if (idx === -1) return;
-    all[idx].stato = "rifiutato";
-    saveTimbrature(all);
-    render();
-  };
-
-  const form = document.getElementById("form-timbratura-tlc");
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      if (!isOperatoreTlcVol) return;
-
-      const data = document.getElementById("data-tlc").value;
-      const inizio = document.getElementById("ora-inizio-tlc").value;
-      const fine = document.getElementById("ora-fine-tlc").value;
-      const luogo = document.getElementById("luogo-tlc").value.trim();
-      const tipo = document.getElementById("tipo-tlc").value.trim();
-
-      if (!data || !inizio || !fine || !luogo || !tipo) return;
-
-      const nuovo = {
-        id: Date.now(),
-        utente: userId,
-        comitato: me?.comitato || "",
-        data, inizio, fine, luogo, tipo,
-        stato: "attesa"
-      };
-
-      const all = loadTimbrature();
-      all.push(nuovo);
-      saveTimbrature(all);
-      form.reset();
-      render();
-    });
-  }
-
-  if (isApprover) {
-    document.getElementById("filtro-comitato")?.addEventListener("change", render);
-    document.getElementById("filtro-stato")?.addEventListener("change", render);
-  }
-
-  render();
-});
-</script>
-
+<script defer="True" src="assets/js/common.js"></script><script defer="" src="assets/js/pages/tlc.js"></script>
 </body>
 </html>

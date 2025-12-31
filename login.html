@@ -1,344 +1,39 @@
 <!DOCTYPE html>
+
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Login - CRI Pesaro-Urbino</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #b71c1c 0%, #d32f2f 100%);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-  }
-
-  .login-box {
-    background: white;
-    color: #333;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    text-align: center;
-    width: 100%;
-    max-width: 380px;
-  }
-
-  .login-box img {
-    width: 200px;
-    margin-bottom: 15px;
-  }
-
-  .login-box h2 {
-    font-size: 1.3rem;
-    font-weight: bold;
-    color: #b71c1c;
-    margin: 5px 0;
-  }
-
-  .login-box h3 {
-    font-size: 1rem;
-    color: #666;
-    margin-bottom: 20px;
-  }
-
-  .input-group {
-    margin-bottom: 15px;
-    text-align: left;
-  }
-
-  .input-group label {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 5px;
-  }
-
-  input[type="text"], input[type="password"] {
-    width: 100%;
-    padding: 12px;
-    border-radius: 6px;
-    border: 2px solid #e0e0e0;
-    font-size: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  input[type="text"]:focus, input[type="password"]:focus {
-    outline: none;
-    border-color: #b71c1c;
-    box-shadow: 0 0 0 3px rgba(183,28,28,0.12);
-  }
-
-  /* ✅ evita rosso subito all'apertura: solo dopo che l'utente ha scritto */
-  input:invalid:not(:placeholder-shown) {
-    border-color: #dc3545;
-  }
-
-  .checkbox-label {
-    display: flex;
-    align-items: center;
-    font-size: 0.9rem;
-    justify-content: center;
-    margin: 15px 0;
-    color: #666;
-  }
-
-  .checkbox-label input {
-    margin-right: 8px;
-    width: auto;
-  }
-
-  button {
-    width: 100%;
-    padding: 14px;
-    margin-top: 10px;
-    background: #b71c1c;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.2s;
-  }
-
-  button:hover {
-    background: #9f1b1b;
-    transform: translateY(-1px);
-  }
-
-  button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  #errore {
-    color: #dc3545;
-    background: #f8d7da;
-    border: 1px solid #f5c6cb;
-    padding: 10px;
-    border-radius: 6px;
-    margin-top: 15px;
-    font-size: 0.9rem;
-    display: none;
-  }
-
-  #errore.show { display: block; }
-
-  .help-text {
-    font-size: 0.85rem;
-    color: #999;
-    margin-top: 15px;
-  }
-
-  .help-text strong { color: #b71c1c; }
-
-  @media (max-width: 480px) {
-    .login-box { padding: 30px 20px; }
-    .login-box img { width: 160px; }
-  }
-</style>
+<link href="assets/css/app.css" rel="stylesheet"/>  <link rel="stylesheet" href="assets/css/pages/login.css">
 </head>
 <body>
-
 <div class="login-box">
-  <img src="logo-sop.svg" alt="Logo CRI Pesaro-Urbino" onerror="this.style.display='none'" />
-  <h2>🔐 Accesso Riservato</h2>
-  <h3>CRI Pesaro-Urbino</h3>
-
-  <form id="loginForm" autocomplete="on">
-    <div class="input-group">
-      <label for="username">Nome utente o Codice Fiscale</label>
-      <input
-        type="text"
-        id="username"
-        name="username"
-        placeholder="es. mario.rossi o RSSMRA85M01H501Z"
-        autocomplete="username"
-        required
-        aria-label="Nome utente"
-      />
-    </div>
-
-    <div class="input-group">
-      <label for="password">Password</label>
-      <input
-        type="password"
-        id="password"
-        name="password"
-        placeholder="Inserisci password"
-        autocomplete="current-password"
-        required
-        aria-label="Password"
-      />
-    </div>
-
-    <label class="checkbox-label">
-      <input type="checkbox" id="ricorda" /> Ricorda credenziali
+<img alt="Logo CRI Pesaro-Urbino" onerror="this.style.display='none'" src="logo-sop.svg"/>
+<h2>🔐 Accesso Riservato</h2>
+<h3>CRI Pesaro-Urbino</h3>
+<form autocomplete="on" id="loginForm">
+<div class="input-group">
+<label for="username">Nome utente o Codice Fiscale</label>
+<input aria-label="Nome utente" autocomplete="username" id="username" name="username" placeholder="es. mario.rossi o RSSMRA85M01H501Z" required="" type="text"/>
+</div>
+<div class="input-group">
+<label for="password">Password</label>
+<input aria-label="Password" autocomplete="current-password" id="password" name="password" placeholder="Inserisci password" required="" type="password"/>
+</div>
+<label class="checkbox-label">
+<input id="ricorda" type="checkbox"/> Ricorda credenziali
     </label>
-
-    <button type="submit" id="btn-login">🔓 Accedi</button>
-
-    <div id="errore" role="alert" aria-live="polite"></div>
-
-    <div class="help-text">
-      <strong>Volontari:</strong> usate il CF come username<br>
-      <strong>SOL/SOP:</strong> usate il vostro ID
+<button id="btn-login" type="submit">🔓 Accedi</button>
+<div aria-live="polite" id="errore" role="alert"></div>
+<div class="help-text">
+<strong>Volontari:</strong> usate il CF come username<br/>
+<strong>SOL/SOP:</strong> usate il vostro ID
     </div>
-  </form>
+</form>
 </div>
 
-<script>
-  // ✅ Seed UNA VOLTA SOLA (evita duplicazioni)
-  const SEED_KEY = "cri_seed_v1";
-  if (!localStorage.getItem(SEED_KEY)) {
-
-    const utenti = [
-      { id: "admin", nome: "Admin", cognome: "CRI", password: "adminpass", role: "amministratore", comitato: "Tutti" },
-      { id: "sop", nome: "SOP", cognome: "Provinciale", password: "soppass", role: "sop", comitato: "Tutti" },
-      { id: "tlc.prov", nome:"TLC", cognome:"Provinciale", password:"tlcpass", role:"tlc_provinciale", comitato:"Tutti" },
-
-      { id: "sol.pesaro", nome: "SOL", cognome: "Pesaro", password: "solpass", role: "sol", comitato: "Pesaro" },
-      { id: "sol.urbino", nome: "SOL", cognome: "Urbino", password: "solpass", role: "sol", comitato: "Urbino" },
-      { id: "sol.fano", nome: "SOL", cognome: "Fano", password: "solpass", role: "sol", comitato: "Fano" },
-      { id: "sol.pergola", nome: "SOL", cognome: "Pergola", password: "solpass", role: "sol", comitato: "Pergola" },
-      { id: "sol.marotta-mondolfo", nome: "SOL", cognome: "Marotta-Mondolfo", password: "solpass", role: "sol", comitato: "Marotta-Mondolfo" },
-      { id: "sol.fossombrone", nome: "SOL", cognome: "Fossombrone", password: "solpass", role: "sol", comitato: "Fossombrone" },
-      { id: "sol.cagli", nome: "SOL", cognome: "Cagli", password: "solpass", role: "sol", comitato: "Cagli" },
-      { id: "sol.montelabbate", nome: "SOL", cognome: "Montelabbate", password: "solpass", role: "sol", comitato: "Montelabbate" },
-      { id: "sol.fermignano", nome: "SOL", cognome: "Fermignano", password: "solpass", role: "sol", comitato: "Fermignano" },
-      { id: "sol.santangeloinvado", nome: "SOL", cognome: "Sant'Angelo in Vado", password: "solpass", role: "sol", comitato: "Sant'Angelo in Vado" }
-    ];
-    localStorage.setItem("utenti", JSON.stringify(utenti));
-
-    // volontario demo (se non già presente)
-    const volontari = JSON.parse(localStorage.getItem("volontari")) || [];
-    const demoCf = "RSSMRA85M01H501Z";
-    const giàPresente = volontari.some(v => (v.cf || "").toUpperCase() === demoCf);
-
-    if (!giàPresente) {
-      volontari.push({
-        cf: demoCf,
-        username: "mario.rossi",
-        password: "cri2025",
-        nome: "Mario",
-        cognome: "Rossi",
-        comitato: "Pesaro",
-        qualifiche: [] // opzionale
-      });
-      localStorage.setItem("volontari", JSON.stringify(volontari));
-    }
-
-    localStorage.setItem(SEED_KEY, "1");
-  }
-
-  // Compila credenziali ricordate
-  window.addEventListener("load", () => {
-    const ricordaUser = localStorage.getItem("ricorda_username");
-    const ricordaPass = localStorage.getItem("ricorda_password");
-    if (ricordaUser) document.getElementById("username").value = ricordaUser;
-    if (ricordaPass) document.getElementById("password").value = ricordaPass;
-    if (ricordaUser || ricordaPass) document.getElementById("ricorda").checked = true;
-  });
-
-  function showError(message) {
-    const erroreDiv = document.getElementById("errore");
-    erroreDiv.textContent = message;
-    erroreDiv.classList.add("show");
-    setTimeout(() => erroreDiv.classList.remove("show"), 5000);
-  }
-
-  function setButtonLoading(isLoading) {
-    const btnLogin = document.getElementById("btn-login");
-    if (isLoading) {
-      btnLogin.disabled = true;
-      btnLogin.textContent = "⏳ Verifica in corso...";
-    } else {
-      btnLogin.disabled = false;
-      btnLogin.textContent = "🔓 Accedi";
-    }
-  }
-
-  document.getElementById("loginForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    setButtonLoading(true);
-
-    const userInput = document.getElementById("username").value.trim();
-    const pass = document.getElementById("password").value;
-
-    if (!userInput || !pass) {
-      showError("❌ Compila entrambi i campi");
-      setButtonLoading(false);
-      return;
-    }
-
-    const userLower = userInput.toLowerCase();
-    const userUpper = userInput.toUpperCase();
-
-    // 1) SOP/SOL/AMMINISTRATORE (match su id)
-    const utenti = JSON.parse(localStorage.getItem("utenti")) || [];
-    const utente = utenti.find(u => (u.id || "").toLowerCase() === userLower);
-
-    if (utente && utente.password === pass) {
-      localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("role", utente.role);
-      localStorage.setItem("userId", utente.id);
-      localStorage.setItem("comitato", utente.comitato);
-      localStorage.setItem("nomeCompleto", `${utente.nome} ${utente.cognome}`);
-      localStorage.removeItem("cf"); // ✅ non è un volontario
-
-      if (document.getElementById("ricorda").checked) {
-        localStorage.setItem("ricorda_username", userInput);
-        localStorage.setItem("ricorda_password", pass);
-      } else {
-        localStorage.removeItem("ricorda_username");
-        localStorage.removeItem("ricorda_password");
-      }
-
-      window.location.href = "index.html";
-      return;
-    }
-
-    // 2) VOLONTARI (CF prioritario, altrimenti username)
-    const volontari = JSON.parse(localStorage.getItem("volontari")) || [];
-    const volontario = volontari.find(v => {
-      const cf = (v.cf || "").toUpperCase();
-      const un = (v.username || "").toLowerCase();
-      return (cf && cf === userUpper) || (un && un === userLower);
-    });
-
-    if (volontario && volontario.password === pass) {
-      localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("role", "volontario");
-      localStorage.setItem("userId", (volontario.cf || "").toUpperCase()); // CF come userId
-      localStorage.setItem("cf", (volontario.cf || "").toUpperCase());     // ✅ serve ad app.js
-      localStorage.setItem("nomeCompleto", `${volontario.nome} ${volontario.cognome}`);
-      localStorage.setItem("comitato", volontario.comitato || "");
-
-      if (document.getElementById("ricorda").checked) {
-        localStorage.setItem("ricorda_username", userInput);
-        localStorage.setItem("ricorda_password", pass);
-      } else {
-        localStorage.removeItem("ricorda_username");
-        localStorage.removeItem("ricorda_password");
-      }
-
-      window.location.href = "index-volontario.html";
-      return;
-    }
-
-    // 3) Credenziali non valide
-    showError("❌ Credenziali non valide. Riprova.");
-    setButtonLoading(false);
-  });
-</script>
-
+<script defer="True" src="assets/js/common.js"></script><script src="assets/js/pages/login.js" defer></script>
 </body>
 </html>

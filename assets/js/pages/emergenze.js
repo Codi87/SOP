@@ -1,0 +1,1904 @@
+/* ===========================
+   SESSIONE / PERMESSI
+=========================== */
+const userId = localStorage.getItem("userId") || "";
+const role = (localStorage.getItem("role") || "").toLowerCase().trim();
+const comitato = localStorage.getItem("comitato") || "";
+
+// ✅ Permesso eliminazione emergenza: SOLO SOP e Amministratore
+const isSopOrAdmin = (role === "sop" || role === "amministratore");
+
+if (!userId) {
+  alert("Devi effettuare il login");
+  window.location.href = "login.html";
+}
+if (role === "volontario") {
+  alert("Accesso non consentito: la sezione Emergenze è riservata a SOL/SOP/Amministratore/TLC Provinciale.");
+  window.location.href = "index.html";
+}
+
+function normalize(s){ return (s || "").toLowerCase().trim(); }
+
+
+  /* =========================
+     ESTENSIONE (multi-comitato) — come eventi
+  ========================= */
+  const comitatiList = [
+    "SOP",
+    "Pesaro",
+    "Urbino",
+    "Fano",
+    "Pergola",
+    "Marotta-Mondolfo",
+    "Fossombrone",
+    "Cagli",
+    "Montelabbate",
+    "Fermignano",
+    "Sant'Angelo in Vado"
+  ];
+
+  const destinatariSelect = document.getElementById("destinatariComitati");
+
+  function fillDestinatariOptions(){
+    if (!destinatariSelect) return;
+    destinatariSelect.innerHTML = comitatiList
+      .map(c => `<option value="${c}">${c}</option>`)
+      .join("");
+  }
+
+  fillDestinatariOptions();
+
+  // ✅ Permette multi-selezione senza Ctrl/Cmd (clic = toggle dell'opzione)
+  if (destinatariSelect){
+    destinatariSelect.addEventListener("mousedown", (e) => {
+      const opt = e.target;
+      if (opt && opt.tagName === "OPTION"){
+        e.preventDefault();
+        opt.selected = !opt.selected;
+      }
+    });
+  }
+
+  function getDestinatariFromSelect(){
+    if (!destinatariSelect) return [];
+    return Array.from(destinatariSelect.selectedOptions).map(o => o.value);
+  }
+
+  function setDestinatariSelection(destSolArr, destSopBool){
+    if (!destinatariSelect) return;
+    const set = new Set([...(destSolArr || []), ...(destSopBool ? ["SOP"] : [])].map(x => String(x)));
+    Array.from(destinatariSelect.options).forEach(o => { o.selected = set.has(o.value); });
+  }
+function escapeHtml(text) {
+  if (text === null || text === undefined) return "";
+  return String(text).replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+function formatDate(dateStr){
+  if (!dateStr) return "";
+  const p = dateStr.split("-");
+  if (p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`;
+  return dateStr;
+}
+function toLocaleDT(iso){
+  if (!iso) return "";
+  try{ return new Date(iso).toLocaleString(); }catch{ return iso; }
+}
+
+/* ✅ helper per PDF/Excel: comitati da approvazioni */
+function titleCaseComitato(name){
+  const s = (name || "").toString().trim();
+  if (!s) return "";
+  if (s.toUpperCase() === "SOP") return "SOP";
+  if (s.toUpperCase() === "ALL") return "ALL";
+  return s
+    .split(/[\s-]+/g)
+    .filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+function approvalsToCommitteeList(approvazioni){
+  const a = approvazioni && typeof approvazioni === "object" ? approvazioni : {};
+  const keys = Object.keys(a).filter(k => k !== "ALL"); // ALL è flag interno
+  const normalized = keys.map(k => (k === "SOP" ? "SOP" : normalize(k)));
+  const unique = Array.from(new Set(normalized)).filter(Boolean);
+  unique.sort((x,y) => x.localeCompare(y, "it"));
+  return unique.length ? unique.map(titleCaseComitato).join(", ") : "—";
+}
+
+/* LOGOUT */
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+document.getElementById("logout").addEventListener("click", logout);
+
+/* ===========================
+   LOGO + MENU (UGUALE A index.html)
+=========================== */
+const logoImg = document.getElementById("logo-cri");
+let logoSrc = "logo.svg";
+
+if (role === "sol") {
+  const c = normalize(comitato);
+  const map = {
+    "pesaro": "logo-pesaro.svg",
+    "urbino": "logo-urbino.svg",
+    "fano": "logo-fano.svg",
+    "pergola": "logo-pergola.svg",
+    "marotta-mondolfo": "logo-marotta-mondolfo.svg",
+    "fossombrone": "logo-fossombrone.svg",
+    "cagli": "logo-cagli.svg",
+    "montelabbate": "logo-montelabbate.svg",
+    "fermignano": "logo-fermignano.svg",
+    "sant'angelo in vado": "logo-santangeloinvado.svg",
+    "santangelo in vado": "logo-santangeloinvado.svg",
+    "sant-angelo-in-vado": "logo-santangeloinvado.svg"
+  };
+  logoSrc = map[c] || "logo-sop.svg";
+} else if (role === "sop" || role === "amministratore" || role === "tlc_provinciale") {
+  logoSrc = "logo-sop.svg";
+}
+logoImg.src = logoSrc;
+logoImg.onerror = () => { logoImg.src = "logo-sop.svg"; };
+
+const menu = document.getElementById("menu-sidebar");
+menu.innerHTML = "";
+
+const items = [
+  { text: "🏠 Home", href: "index.html" },
+  { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html" },
+  { text: "👥 Volontari", href: "volontari.html" },
+  { text: "🚗 Mezzi", href: "mezzi.html" },
+  { text: "📦 Materiali", href: "materiali.html" },
+  { text: "🚨 Emergenze", href: "emergenze.html" },
+  { text: "📅 Eventi", href: "eventi.html" },
+  { text: "📄 Documenti", href: "documenti.html" }
+];
+
+if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
+  items.push({ text: "📡 TLC", href: "tlc.html" });
+}
+if (["sop", "sol", "amministratore"].includes(role)) {
+  items.push({ text: "⚙️ Admin", href: "admin.html" });
+}
+
+items.forEach(({ text, href }) => {
+  const li = document.createElement("li");
+  const a = document.createElement("a");
+  a.href = href;
+  a.textContent = text;
+  if (href === "emergenze.html") a.classList.add("active");
+  li.appendChild(a);
+  menu.appendChild(li);
+});
+
+/* ===========================
+   DOM
+=========================== */
+const formContainer = document.getElementById("form-container");
+const form = document.getElementById("emergenze-form");
+const list = document.getElementById("emergenze-list");
+const searchInput = document.getElementById("search");
+const btnApriForm = document.getElementById("btn-apri-form");
+const btnChiudiForm = document.getElementById("btn-chiudi-form");
+const submitBtn = document.getElementById("submit-btn");
+
+const infoPopup = document.getElementById("info-popup");
+const infoContent = document.getElementById("info-content");
+const infoClose = document.getElementById("info-close");
+
+/* Risorse modal */
+const resContainer = document.getElementById("res-container");
+const resClose = document.getElementById("res-close");
+const resSearch = document.getElementById("res-search");
+const btnClearRes = document.getElementById("btn-clear-res");
+const btnSelectAllMezzi = document.getElementById("btn-select-all-mezzi");
+const btnSelectAllVol = document.getElementById("btn-select-all-vol");
+const chips = document.getElementById("selected-chips");
+const mezziCards = document.getElementById("mezzi-cards");
+const materialiCards = document.getElementById("materiali-cards");
+const volontariCards = document.getElementById("volontari-cards");
+const tabMezzi = document.getElementById("tab-mezzi");
+const tabMateriali = document.getElementById("tab-materiali");
+const tabVolontari = document.getElementById("tab-volontari");
+const panelMezzi = document.getElementById("panel-mezzi");
+const panelMateriali = document.getElementById("panel-materiali");
+const panelVolontari = document.getElementById("panel-volontari");
+const btnSaveRes = document.getElementById("btn-save-res");
+const btnCancelRes = document.getElementById("btn-cancel-res");
+const resCommitteeRow = document.getElementById("res-committee-row");
+const resCommitteeSelect = document.getElementById("resCommitteeSelect");
+
+/* Log modal */
+const logContainer = document.getElementById("log-container");
+const logForm = document.getElementById("log-form");
+const logClose = document.getElementById("log-close");
+const logStart = document.getElementById("logStart");
+const logEnd = document.getElementById("logEnd");
+const logAttivita = document.getElementById("logAttivita");
+const logResponsabile = document.getElementById("logResponsabile");
+const logNote = document.getElementById("logNote");
+const logVolontari = document.getElementById("logVolontari");
+const logMezzi = document.getElementById("logMezzi");
+const logMaterialiWrap = document.getElementById("logMaterialiWrap");
+const logSubmit = document.getElementById("log-submit");
+
+let editIndex = null;
+
+let currentInfoId = null;
+let currentContribCom = null;
+let currentLogEditId = null;
+let resTargetComitatoLower = null;
+
+/* ===========================
+   ACCESSIBILITÀ MODALI + STACK
+=========================== */
+const dialogStack = [];
+
+function getFocusableElements(container) {
+  return container.querySelectorAll(
+    'a[href], button:not([disabled]), textarea, input:not([disabled]), select, [tabindex]:not([tabindex="-1"])'
+  );
+}
+function trapFocus(container, event) {
+  const focusable = getFocusableElements(container);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.key === "Tab") {
+    if (event.shiftKey) {
+      if (document.activeElement === first) { last.focus(); event.preventDefault(); }
+    } else {
+      if (document.activeElement === last) { first.focus(); event.preventDefault(); }
+    }
+  }
+}
+function topDialog(){
+  return dialogStack.length ? dialogStack[dialogStack.length - 1].container : null;
+}
+function openDialog(container, firstFocusElement) {
+  const existingIdx = dialogStack.findIndex(x => x.container === container);
+  const lastFocused = document.activeElement;
+
+  if (existingIdx !== -1) {
+    const entry = dialogStack.splice(existingIdx, 1)[0];
+    entry.lastFocused = lastFocused;
+    dialogStack.push(entry);
+  } else {
+    dialogStack.push({ container, lastFocused });
+  }
+
+  container.classList.add("active");
+  container.setAttribute("aria-hidden", "false");
+
+  const base = 2000;
+  container.style.zIndex = String(base + dialogStack.length * 10);
+
+  if (firstFocusElement) firstFocusElement.focus();
+  else {
+    const focusable = getFocusableElements(container);
+    if (focusable.length) focusable[0].focus();
+  }
+
+  if (dialogStack.length === 1) {
+    document.addEventListener("keydown", dialogKeydownHandler);
+  }
+}
+function closeDialog(container) {
+  const idx = dialogStack.findIndex(x => x.container === container);
+  let lastFocused = null;
+
+  if (idx !== -1) {
+    lastFocused = dialogStack[idx].lastFocused || null;
+    dialogStack.splice(idx, 1);
+  }
+
+  container.classList.remove("active");
+  container.setAttribute("aria-hidden", "true");
+  container.style.zIndex = "";
+
+  if (dialogStack.length === 0) {
+    document.removeEventListener("keydown", dialogKeydownHandler);
+    if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
+    return;
+  }
+
+  const t = topDialog();
+  if (t) {
+    const focusable = getFocusableElements(t);
+    if (focusable.length) focusable[0].focus();
+  } else if (lastFocused && typeof lastFocused.focus === "function") {
+    lastFocused.focus();
+  }
+}
+function dialogKeydownHandler(e) {
+  const t = topDialog();
+  if (!t) return;
+
+  trapFocus(t, e);
+
+  if (e.key === "Escape") {
+    if (t === formContainer) toggleForm(false);
+    else if (t === infoPopup) hideInfoPopup();
+    else if (t === resContainer) closeResModal();
+    else if (t === logContainer) closeLogModal();
+  }
+}
+
+[formContainer, resContainer, logContainer].forEach(overlay => {
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      if (overlay === formContainer) toggleForm(false);
+      if (overlay === resContainer) closeResModal();
+      if (overlay === logContainer) closeLogModal();
+    }
+  });
+});
+
+/* ===========================
+   STORAGE
+=========================== */
+function getEmergenze(){ return JSON.parse(localStorage.getItem("emergenze") || "[]"); }
+function setEmergenze(arr){ localStorage.setItem("emergenze", JSON.stringify(arr)); }
+function getMezzi(){ return JSON.parse(localStorage.getItem("mezzi") || "[]"); }
+function getMateriali(){ return JSON.parse(localStorage.getItem("materiali") || "[]"); }
+function getVolontari(){ return JSON.parse(localStorage.getItem("volontari") || "[]"); }
+
+function ensureEmergenzaShape(em){
+  if (!em || typeof em !== "object") return;
+  if (!Array.isArray(em.destSol)) em.destSol = [];
+  if (typeof em.destSop !== "boolean") em.destSop = !!em.destSop;
+
+  if (!em.approvazioni || typeof em.approvazioni !== "object") em.approvazioni = {};
+  if (!em.contributi || typeof em.contributi !== "object") em.contributi = {};
+
+  Object.keys(em.contributi).forEach(k => {
+    const c = em.contributi[k] || {};
+    if (!Array.isArray(c.mezziUsati)) c.mezziUsati = [];
+    if (!Array.isArray(c.materialiUsati)) c.materialiUsati = [];
+    if (!Array.isArray(c.volontariUsati)) c.volontariUsati = [];
+    if (!Array.isArray(c.logInterventi)) c.logInterventi = [];
+
+    c.volontariUsati = c.volontariUsati
+      .filter(v => v && typeof v === "object")
+      .map(v => ({
+        cf: (v.cf || "").toUpperCase(),
+        nome: v.nome || "",
+        cognome: v.cognome || "",
+        comitato: v.comitato || ""
+      }))
+      .filter(v => v.cf);
+
+    c.logInterventi = c.logInterventi
+      .filter(x => x && typeof x === "object")
+      .map(x => ({
+        id: x.id ?? Date.now(),
+        startISO: x.startISO || "",
+        endISO: x.endISO || "",
+        attivita: x.attivita || "",
+        responsabile: x.responsabile || "",
+        note: x.note || "",
+        volontari: Array.isArray(x.volontari) ? x.volontari.map(v => (v||"").toUpperCase()).filter(Boolean) : [],
+        mezzi: Array.isArray(x.mezzi) ? x.mezzi : [],
+        materiali: Array.isArray(x.materiali) ? x.materiali : []
+      }));
+    em.contributi[k] = c;
+  });
+}
+
+function normalizeAllEmergenze(){
+  const arr = getEmergenze();
+  let changed = false;
+  arr.forEach(em => {
+    const before = JSON.stringify(em);
+    ensureEmergenzaShape(em);
+    if (JSON.stringify(em) !== before) changed = true;
+  });
+  if (changed) setEmergenze(arr);
+}
+
+/* ===========================
+   BADGE / STATUS
+=========================== */
+function severitaBadge(s){
+  if (s === "S1") return '<span class="badge badge-s1">S1</span>';
+  if (s === "S2") return '<span class="badge badge-s2">S2</span>';
+  if (s === "S3") return '<span class="badge badge-s3">S3</span>';
+  return '<span class="badge badge-s1">—</span>';
+}
+function statoBadge(s){
+  if (s === "chiusa") return '<span class="badge badge-chiusa">Chiusa</span>';
+  return '<span class="badge badge-attiva">Attiva</span>';
+}
+function approvalBadge(st){
+  if (st === "approved") return '<span class="badge badge-approved">Approvato</span>';
+  if (st === "rejected") return '<span class="badge badge-rejected">Rifiutato</span>';
+  return '<span class="badge badge-pending">In attesa</span>';
+}
+
+/* ===========================
+   VISIBILITÀ / PERMESSI
+=========================== */
+function getVisibleEmergenze(){
+  const all = getEmergenze();
+  const c = normalize(comitato);
+
+  if (["sop","amministratore","tlc_provinciale"].includes(role)) return all;
+
+  if (role === "sol") {
+    return all.filter(em => {
+      ensureEmergenzaShape(em);
+      const creator = normalize(em.comitatoCreatore);
+      const dest = (em.destSol || []).map(x => normalize(x));
+      const globalApproved = em.approvazioni?.ALL === "approved";
+      return creator === c || dest.includes(c) || globalApproved;
+    });
+  }
+  return [];
+}
+
+function canManageEmergenzaMetadata(em){
+  const c = normalize(comitato);
+  const creator = normalize(em.comitatoCreatore);
+  return (["sop","amministratore"].includes(role) || (role === "sol" && c && c === creator));
+}
+
+function canSeeEmergenza(em){
+  if (["sop","amministratore","tlc_provinciale"].includes(role)) return true;
+  if (role === "sol") {
+    const c = normalize(comitato);
+    const creator = normalize(em.comitatoCreatore);
+    const dest = (em.destSol || []).map(x => normalize(x));
+    const globalApproved = em.approvazioni?.ALL === "approved";
+    return creator === c || dest.includes(c) || globalApproved;
+  }
+  return false;
+}
+
+function canApproveForCurrentRole(em){
+  const c = normalize(comitato);
+  const creator = normalize(em.comitatoCreatore);
+  const dest = (em.destSol || []).map(x => normalize(x));
+
+  if (role === "sol") {
+    if (!c) return false;
+    if (c === creator) return false;
+    return dest.includes(c) || em.approvazioni?.ALL === "approved";
+  }
+  if (["sop","amministratore"].includes(role)) return !!em.destSop;
+  return false;
+}
+
+function approvalKeyForRole(){
+  if (role === "sol") return normalize(comitato);
+  if (["sop","amministratore"].includes(role)) return "SOP";
+  return null;
+}
+
+function isApprovedForCurrentCommittee(em){
+  if (em.approvazioni?.ALL === "approved") return true;
+
+  if (role === "sol") {
+    const k = normalize(comitato);
+    if (!k) return false;
+    return em.approvazioni?.[k] === "approved";
+  }
+  if (["sop","amministratore","tlc_provinciale"].includes(role)) return true;
+  return false;
+}
+
+function canContribute(em){
+  if (!canSeeEmergenza(em)) return false;
+  if (["sop","amministratore","tlc_provinciale"].includes(role)) return true;
+  if (role === "sol") {
+    if (normalize(em.comitatoCreatore) === normalize(comitato)) return true;
+    return isApprovedForCurrentCommittee(em);
+  }
+  return false;
+}
+
+/* ===========================
+   APPROVAZIONI
+=========================== */
+function setApproval(emId, key, decision){
+  const emergenze = getEmergenze();
+  const idx = emergenze.findIndex(e => e.id === emId);
+  if (idx === -1) return;
+
+  const em = emergenze[idx];
+  ensureEmergenzaShape(em);
+
+  if (!em.approvazioni) em.approvazioni = {};
+  em.approvazioni[key] = decision;
+
+  if (key === "SOP" && decision === "approved") {
+    em.approvazioni.ALL = "approved";
+  }
+  if (key === "SOP" && decision !== "approved") {
+    if (em.approvazioni.ALL) delete em.approvazioni.ALL;
+  }
+
+  em.updatedAt = new Date().toISOString();
+  emergenze[idx] = em;
+  setEmergenze(emergenze);
+
+  showInfoPopup(em);
+  renderEmergenze();
+}
+
+/* ===========================
+   CHIAVI RISORSE
+=========================== */
+function mezzoKey(m){ return `${(m.targa||"").toUpperCase()}|${(m.selettivaRadio||"").toUpperCase()}`; }
+function materialeKey(m){ return `${(m.codice||"").toUpperCase()}|${normalize(m.comitato||"")}|${(m.lotto||"")}`; }
+function volontarioKey(v){ return ((v.cf || "").toUpperCase()).trim(); }
+
+/* ===========================
+   RISORSE MODAL STATE
+=========================== */
+let selectedMezzi = new Set();
+let selectedMateriali = new Map();
+let selectedVolontari = new Set();
+
+function getAllCommittees(){
+  const set = new Set();
+  getMezzi().forEach(m => { const c = normalize(m.comitato); if (c) set.add(c); });
+  getMateriali().forEach(m => { const c = normalize(m.comitato); if (c) set.add(c); });
+  getVolontari().forEach(v => { const c = normalize(v.comitato); if (c) set.add(c); });
+  const em = getEmergenze().find(e => e.id === currentInfoId);
+  if (em) { const c = normalize(em.comitatoCreatore); if (c) set.add(c); }
+  return Array.from(set).sort((a,b) => a.localeCompare(b));
+}
+
+function getMezziDisponibiliPerComitato(cLower){
+  const all = getMezzi();
+  if (["sop","amministratore","tlc_provinciale"].includes(role)) {
+    return cLower ? all.filter(m => normalize(m.comitato) === cLower) : all;
+  }
+  const me = normalize(comitato);
+  return all.filter(m => normalize(m.comitato) === me);
+}
+
+function getMaterialiDisponibiliPerComitato(cLower){
+  const all = getMateriali();
+  if (["sop","amministratore","tlc_provinciale"].includes(role)) {
+    return cLower ? all.filter(m => normalize(m.comitato) === cLower) : all;
+  }
+  const me = normalize(comitato);
+  return all.filter(m => normalize(m.comitato) === me);
+}
+
+function getVolontariDisponibiliPerComitato(cLower){
+  const all = getVolontari();
+  if (["sop","amministratore","tlc_provinciale"].includes(role)) {
+    return cLower ? all.filter(v => normalize(v.comitato) === cLower) : all;
+  }
+  const me = normalize(comitato);
+  return all.filter(v => normalize(v.comitato) === me);
+}
+
+let resTab = "mezzi";
+
+function switchResTab(which){
+  resTab = which;
+
+  const isMezzi = which === "mezzi";
+  const isMateriali = which === "materiali";
+  const isVolontari = which === "volontari";
+
+  tabMezzi.classList.toggle("active", isMezzi);
+  tabMateriali.classList.toggle("active", isMateriali);
+  tabVolontari.classList.toggle("active", isVolontari);
+
+  tabMezzi.setAttribute("aria-selected", isMezzi ? "true" : "false");
+  tabMateriali.setAttribute("aria-selected", isMateriali ? "true" : "false");
+  tabVolontari.setAttribute("aria-selected", isVolontari ? "true" : "false");
+
+  panelMezzi.style.display = isMezzi ? "block" : "none";
+  panelMateriali.style.display = isMateriali ? "block" : "none";
+  panelVolontari.style.display = isVolontari ? "block" : "none";
+
+  btnSelectAllMezzi.style.display = isMezzi ? "inline-block" : "none";
+  btnSelectAllVol.style.display = isVolontari ? "inline-block" : "none";
+
+  renderResources();
+}
+tabMezzi.addEventListener("click", () => switchResTab("mezzi"));
+tabMateriali.addEventListener("click", () => switchResTab("materiali"));
+tabVolontari.addEventListener("click", () => switchResTab("volontari"));
+
+btnClearRes.addEventListener("click", () => {
+  selectedMezzi.clear();
+  selectedMateriali.clear();
+  selectedVolontari.clear();
+  renderResources();
+});
+
+btnSelectAllMezzi.addEventListener("click", () => {
+  const list = getMezziDisponibiliPerComitato(resTargetComitatoLower);
+  list.forEach(m => selectedMezzi.add(mezzoKey(m)));
+  renderResources();
+});
+btnSelectAllVol.addEventListener("click", () => {
+  const list = getVolontariDisponibiliPerComitato(resTargetComitatoLower);
+  list.forEach(v => { const cf = volontarioKey(v); if (cf) selectedVolontari.add(cf); });
+  renderResources();
+});
+
+resSearch.addEventListener("input", renderResources);
+
+function renderChips(){
+  const mezzi = getMezziDisponibiliPerComitato(resTargetComitatoLower);
+  const materiali = getMaterialiDisponibiliPerComitato(resTargetComitatoLower);
+  const volontari = getVolontariDisponibiliPerComitato(resTargetComitatoLower);
+
+  const chipList = [];
+
+  selectedMezzi.forEach(key => {
+    const found = mezzi.find(m => mezzoKey(m) === key) || null;
+    const label = found ? `🚗 ${(found.targa||"").toUpperCase()} · ${found.tipoMezzo||""}` : `🚗 ${key.split("|")[0]}`;
+    chipList.push({ type:"mezzo", key, label });
+  });
+
+  selectedMateriali.forEach((qty, key) => {
+    if (!qty || qty <= 0) return;
+    const found = materiali.find(m => materialeKey(m) === key) || null;
+    const label = found
+      ? `📦 ${(found.nome||found.codice||"Materiale")} · ${qty}${found.unita ? " " + found.unita : ""}`
+      : `📦 ${key.split("|")[0]} · ${qty}`;
+    chipList.push({ type:"materiale", key, label });
+  });
+
+  selectedVolontari.forEach(cf => {
+    const found = volontari.find(v => volontarioKey(v) === cf) || null;
+    const name = found ? `${found.nome||""} ${found.cognome||""}`.trim() : "";
+    const label = name ? `👥 ${name} (${cf})` : `👥 ${cf}`;
+    chipList.push({ type:"volontario", key:cf, label });
+  });
+
+  chips.innerHTML = chipList.length
+    ? chipList.map(c => `
+        <span class="chip">
+          <b>${escapeHtml(c.label)}</b>
+          <button type="button" aria-label="Rimuovi" data-type="${c.type}" data-key="${escapeHtml(c.key)}">×</button>
+        </span>
+      `).join("")
+    : `<span class="muted">Nessuna risorsa selezionata.</span>`;
+
+  chips.querySelectorAll("button[data-key]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const type = btn.getAttribute("data-type");
+      const key = btn.getAttribute("data-key");
+      if (type === "mezzo") selectedMezzi.delete(key);
+      else if (type === "materiale") selectedMateriali.delete(key);
+      else selectedVolontari.delete(key);
+      renderResources();
+    });
+  });
+}
+
+function renderResources(){
+  const q = normalize(resSearch.value);
+  renderChips();
+
+  // MEZZI
+  const mezzi = getMezziDisponibiliPerComitato(resTargetComitatoLower).filter(m => {
+    if (!q) return true;
+    return normalize(m.targa).includes(q) ||
+           normalize(m.tipoMezzo).includes(q) ||
+           normalize(m.selettivaRadio).includes(q) ||
+           normalize(m.comitato).includes(q);
+  });
+
+  mezziCards.innerHTML = mezzi.length ? "" : `<div class="muted">Nessun mezzo disponibile.</div>`;
+  mezzi.forEach(m => {
+    const key = mezzoKey(m);
+    const checked = selectedMezzi.has(key);
+
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <div class="card-top">
+        <div>
+          <h4>${escapeHtml((m.targa || "").toUpperCase())} · ${escapeHtml(m.tipoMezzo || "Mezzo")}</h4>
+          <div class="meta">
+            Selettiva: <b>${escapeHtml((m.selettivaRadio || "").toUpperCase())}</b><br/>
+            Comitato: ${escapeHtml(m.comitato || "")}<br/>
+            Posti: ${escapeHtml(String(m.posti ?? ""))}
+          </div>
+        </div>
+        <div class="right">
+          <input type="checkbox" aria-label="Seleziona mezzo ${escapeHtml(m.targa || "")}" ${checked ? "checked" : ""} />
+        </div>
+      </div>
+    `;
+    const checkbox = el.querySelector('input[type="checkbox"]');
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) selectedMezzi.add(key);
+      else selectedMezzi.delete(key);
+      renderChips();
+    });
+    mezziCards.appendChild(el);
+  });
+
+  // MATERIALI
+  const mats = getMaterialiDisponibiliPerComitato(resTargetComitatoLower).filter(m => {
+    if (!q) return true;
+    return normalize(m.codice).includes(q) ||
+           normalize(m.nome).includes(q) ||
+           normalize(m.categoria).includes(q) ||
+           normalize(m.comitato).includes(q) ||
+           normalize(m.ubicazione).includes(q) ||
+           normalize(m.stato).includes(q);
+  });
+
+  materialiCards.innerHTML = mats.length ? "" : `<div class="muted">Nessun materiale disponibile.</div>`;
+  mats.forEach(m => {
+    const key = materialeKey(m);
+    const available = Number.isFinite(Number(m.quantita)) ? Number(m.quantita) : 0;
+    const current = selectedMateriali.has(key) ? Number(selectedMateriali.get(key) || 0) : 0;
+
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <div class="card-top">
+        <div>
+          <h4>${escapeHtml(m.nome || "Materiale")} · ${escapeHtml((m.codice || "").toUpperCase())}</h4>
+          <div class="meta">
+            Categoria: ${escapeHtml(m.categoria || "")}<br/>
+            Comitato: ${escapeHtml(m.comitato || "")}<br/>
+            Disponibili: <b>${escapeHtml(String(available))}${m.unita ? " " + escapeHtml(m.unita) : ""}</b>
+            ${m.ubicazione ? `<br/>Ubicazione: ${escapeHtml(m.ubicazione)}` : ""}
+          </div>
+        </div>
+        <div class="right">
+          <div class="qty-wrap">
+            <button type="button" class="qty-btn" aria-label="Diminuisci">−</button>
+            <input class="qty-input" type="number" min="0" max="${escapeHtml(String(available))}" step="1" value="${escapeHtml(String(current))}" />
+            <button type="button" class="qty-btn" aria-label="Aumenta">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+    const minus = el.querySelectorAll(".qty-btn")[0];
+    const plus  = el.querySelectorAll(".qty-btn")[1];
+    const input = el.querySelector(".qty-input");
+
+    function clampAndStore(v){
+      let n = parseInt(v, 10);
+      if (Number.isNaN(n)) n = 0;
+      n = Math.max(0, Math.min(available, n));
+      input.value = String(n);
+      if (n > 0) selectedMateriali.set(key, n);
+      else selectedMateriali.delete(key);
+      renderChips();
+    }
+
+    minus.addEventListener("click", () => clampAndStore((parseInt(input.value || "0", 10) || 0) - 1));
+    plus.addEventListener("click", () => clampAndStore((parseInt(input.value || "0", 10) || 0) + 1));
+    input.addEventListener("input", () => clampAndStore(input.value));
+
+    materialiCards.appendChild(el);
+  });
+
+  // VOLONTARI
+  const vols = getVolontariDisponibiliPerComitato(resTargetComitatoLower).filter(v => {
+    if (!q) return true;
+    const name = `${v.nome||""} ${v.cognome||""}`.trim();
+    return normalize(name).includes(q) ||
+           normalize(v.cf).includes(q) ||
+           normalize(v.qualifica).includes(q) ||
+           normalize(v.comitato).includes(q);
+  });
+
+  volontariCards.innerHTML = vols.length ? "" : `<div class="muted">Nessun volontario disponibile.</div>`;
+  vols.forEach(v => {
+    const cf = volontarioKey(v);
+    if (!cf) return;
+    const checked = selectedVolontari.has(cf);
+    const name = `${v.nome||""} ${v.cognome||""}`.trim() || cf;
+
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <div class="card-top">
+        <div>
+          <h4>${escapeHtml(name)}</h4>
+          <div class="meta">
+            CF: <b>${escapeHtml(cf)}</b><br/>
+            Comitato: ${escapeHtml(v.comitato || "")}
+            ${v.qualifica ? `<br/>Qualifica: ${escapeHtml(v.qualifica)}` : ""}
+          </div>
+        </div>
+        <div class="right">
+          <input type="checkbox" aria-label="Seleziona volontario ${escapeHtml(cf)}" ${checked ? "checked" : ""} />
+        </div>
+      </div>
+    `;
+    const checkbox = el.querySelector('input[type="checkbox"]');
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) selectedVolontari.add(cf);
+      else selectedVolontari.delete(cf);
+      renderChips();
+    });
+    volontariCards.appendChild(el);
+  });
+}
+
+/* ===========================
+   APRI/CHIUDI MODALE RISORSE
+=========================== */
+function openResModal(em, targetComLower){
+  if (!canContribute(em)) {
+    alert("Non puoi aggiungere risorse: l'emergenza non è approvata per il tuo comitato (o non hai permessi).");
+    return;
+  }
+
+  resTargetComitatoLower = targetComLower || normalize(comitato) || normalize(em.comitatoCreatore);
+
+  const canPickCommittee = ["sop","amministratore","tlc_provinciale"].includes(role);
+  resCommitteeRow.style.display = canPickCommittee ? "flex" : "none";
+
+  if (canPickCommittee) {
+    const allC = getAllCommittees();
+    resCommitteeSelect.innerHTML = allC.map(c => {
+      const sel = c === resTargetComitatoLower ? "selected" : "";
+      return `<option value="${escapeHtml(c)}" ${sel}>${escapeHtml(c)}</option>`;
+    }).join("");
+    resCommitteeSelect.onchange = () => {
+      resTargetComitatoLower = resCommitteeSelect.value;
+      selectedMezzi.clear();
+      selectedMateriali.clear();
+      selectedVolontari.clear();
+      preloadResSelectionFromContribution(em, resTargetComitatoLower);
+      resSearch.value = "";
+      renderResources();
+    };
+  }
+
+  selectedMezzi.clear();
+  selectedMateriali.clear();
+  selectedVolontari.clear();
+  preloadResSelectionFromContribution(em, resTargetComitatoLower);
+
+  resSearch.value = "";
+  switchResTab("mezzi");
+  renderResources();
+
+  openDialog(resContainer, resSearch);
+}
+
+function preloadResSelectionFromContribution(em, comLower){
+  ensureEmergenzaShape(em);
+  const contrib = em.contributi?.[comLower];
+  if (!contrib) return;
+
+  (contrib.mezziUsati || []).forEach(m => selectedMezzi.add(m.key || mezzoKey(m)));
+  (contrib.materialiUsati || []).forEach(m => {
+    const q = parseInt(m.quantita, 10);
+    if (!Number.isNaN(q) && q > 0) selectedMateriali.set(m.key || materialeKey(m), q);
+  });
+  (contrib.volontariUsati || []).forEach(v => {
+    const cf = (v.cf || "").toUpperCase();
+    if (cf) selectedVolontari.add(cf);
+  });
+}
+
+function closeResModal(){
+  resTargetComitatoLower = null;
+  selectedMezzi.clear();
+  selectedMateriali.clear();
+  selectedVolontari.clear();
+  closeDialog(resContainer);
+}
+resClose.addEventListener("click", closeResModal);
+btnCancelRes.addEventListener("click", closeResModal);
+
+btnSaveRes.addEventListener("click", () => {
+  const emergenze = getEmergenze();
+  const idx = emergenze.findIndex(e => e.id === currentInfoId);
+  if (idx === -1) { alert("Emergenza non trovata."); return; }
+
+  const em = emergenze[idx];
+  ensureEmergenzaShape(em);
+
+  const comLower = resTargetComitatoLower || normalize(comitato);
+  if (!comLower) { alert("Comitato non valido."); return; }
+
+  if (!em.contributi[comLower]) {
+    em.contributi[comLower] = { comitatoLabel: comLower, mezziUsati: [], materialiUsati: [], volontariUsati: [], logInterventi: [] };
+  }
+
+  const mezziAll = getMezzi();
+  const materialiAll = getMateriali();
+  const volontariAll = getVolontari();
+
+  const mezziUsati = Array.from(selectedMezzi).map(key => {
+    const found = mezziAll.find(m => mezzoKey(m) === key) || null;
+    const [targa, selettivaRadio] = key.split("|");
+    return {
+      key,
+      targa: (found?.targa || targa || "").toUpperCase(),
+      selettivaRadio: (found?.selettivaRadio || selettivaRadio || "").toUpperCase(),
+      tipoMezzo: found?.tipoMezzo || "",
+      comitato: found?.comitato || comLower
+    };
+  });
+
+  const materialiUsati = Array.from(selectedMateriali.entries()).map(([key, qty]) => {
+    const found = materialiAll.find(m => materialeKey(m) === key) || null;
+    const codice = (found?.codice || key.split("|")[0] || "").toUpperCase();
+    return {
+      key,
+      codice,
+      nome: found?.nome || "",
+      categoria: found?.categoria || "",
+      comitato: found?.comitato || comLower,
+      lotto: found?.lotto || "",
+      quantita: qty,
+      unita: found?.unita || ""
+    };
+  }).filter(x => x.quantita > 0);
+
+  const volontariUsati = Array.from(selectedVolontari).map(cf => {
+    const found = volontariAll.find(v => (v.cf||"").toUpperCase() === cf) || null;
+    return {
+      cf,
+      nome: found?.nome || "",
+      cognome: found?.cognome || "",
+      comitato: found?.comitato || comLower
+    };
+  }).filter(v => v.cf);
+
+  em.contributi[comLower].mezziUsati = mezziUsati;
+  em.contributi[comLower].materialiUsati = materialiUsati;
+  em.contributi[comLower].volontariUsati = volontariUsati;
+  if (!Array.isArray(em.contributi[comLower].logInterventi)) em.contributi[comLower].logInterventi = [];
+
+  em.updatedAt = new Date().toISOString();
+  emergenze[idx] = em;
+  setEmergenze(emergenze);
+
+  closeResModal();
+
+  const fresh = getEmergenze().find(x => x.id === em.id);
+  if (fresh) showInfoPopup(fresh);
+  renderEmergenze();
+});
+
+/* ===========================
+   LOG MODAL
+=========================== */
+function openLogModal(em, comLower, logEntry){
+  if (!canContribute(em)) {
+    alert("Non puoi inserire log: emergenza non approvata per il tuo comitato (o non hai permessi).");
+    return;
+  }
+
+  currentContribCom = comLower;
+  currentLogEditId = logEntry?.id ?? null;
+
+  ensureEmergenzaShape(em);
+  if (!em.contributi[comLower]) {
+    em.contributi[comLower] = { comitatoLabel: comLower, mezziUsati: [], materialiUsati: [], volontariUsati: [], logInterventi: [] };
+  }
+
+  if (!logEntry) {
+    const now = new Date();
+    const start = new Date(now.getTime());
+    const end = new Date(now.getTime() + 60*60*1000);
+    logStart.value = start.toISOString().slice(0,16);
+    logEnd.value = end.toISOString().slice(0,16);
+    logAttivita.value = "";
+    logResponsabile.value = "";
+    logNote.value = "";
+  } else {
+    logStart.value = (logEntry.startISO || "").slice(0,16);
+    logEnd.value = (logEntry.endISO || "").slice(0,16);
+    logAttivita.value = logEntry.attivita || "";
+    logResponsabile.value = logEntry.responsabile || "";
+    logNote.value = logEntry.note || "";
+  }
+
+  const volontari = getVolontariDisponibiliPerComitato(comLower);
+
+  const defaultVols = (!logEntry)
+    ? new Set((em.contributi[comLower].volontariUsati || []).map(v => (v.cf||"").toUpperCase()).filter(Boolean))
+    : new Set((logEntry.volontari || []).map(x => (x||"").toUpperCase()));
+
+  logVolontari.innerHTML = volontari.map(v => {
+    const cf = (v.cf || "").toUpperCase();
+    const name = `${v.nome || ""} ${v.cognome || ""}`.trim();
+    const label = name ? `${name} (${cf})` : cf;
+    const sel = defaultVols.has(cf) ? "selected" : "";
+    return `<option value="${escapeHtml(cf)}" ${sel}>${escapeHtml(label)}</option>`;
+  }).join("");
+
+  const mezzi = em.contributi[comLower].mezziUsati || [];
+  const selectedM = new Set(logEntry?.mezzi || []);
+  logMezzi.innerHTML = mezzi.length
+    ? mezzi.map(m => {
+        const key = m.key || `${(m.targa||"").toUpperCase()}|${(m.selettivaRadio||"").toUpperCase()}`;
+        const label = `${(m.targa||"").toUpperCase()} · ${m.tipoMezzo || ""} · ${((m.selettivaRadio||"").toUpperCase())}`;
+        const sel = selectedM.has(key) ? "selected" : "";
+        return `<option value="${escapeHtml(key)}" ${sel}>${escapeHtml(label)}</option>`;
+      }).join("")
+    : `<option value="" disabled>Nessun mezzo nel contributo</option>`;
+
+  const mats = em.contributi[comLower].materialiUsati || [];
+  const currentMap = new Map((logEntry?.materiali || []).map(x => [x.key, Number(x.qty)||0]));
+
+  if (!mats.length) {
+    logMaterialiWrap.innerHTML = `<div class="muted">Nessun materiale nel contributo.</div>`;
+  } else {
+    logMaterialiWrap.innerHTML = mats.map(m => {
+      const max = Number(m.quantita) || 0;
+      const cur = Math.max(0, Math.min(max, currentMap.get(m.key) ?? 0));
+      const label = `${m.nome || m.codice || ""} (${m.codice || ""})`;
+      return `
+        <div style="display:flex; justify-content:space-between; gap:10px; align-items:center; padding:8px 6px; border-bottom:1px solid #eee;">
+          <div style="min-width:240px;">
+            <b>${escapeHtml(label)}</b>
+            <div class="muted">Disponibili nel contributo: ${escapeHtml(String(max))}${m.unita ? " " + escapeHtml(m.unita) : ""}</div>
+          </div>
+          <div class="qty-wrap">
+            <button type="button" class="qty-btn" data-mk="${escapeHtml(m.key)}" data-d="-1">−</button>
+            <input class="qty-input" data-mk="${escapeHtml(m.key)}" type="number" min="0" max="${escapeHtml(String(max))}" step="1" value="${escapeHtml(String(cur))}">
+            <button type="button" class="qty-btn" data-mk="${escapeHtml(m.key)}" data-d="1">+</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    logMaterialiWrap.querySelectorAll(".qty-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const mk = btn.getAttribute("data-mk");
+        const d = parseInt(btn.getAttribute("data-d"), 10) || 0;
+        const input = logMaterialiWrap.querySelector(`input.qty-input[data-mk="${CSS.escape(mk)}"]`);
+        if (!input) return;
+        const max = parseInt(input.getAttribute("max") || "0", 10) || 0;
+        const cur = parseInt(input.value || "0", 10) || 0;
+        const next = Math.max(0, Math.min(max, cur + d));
+        input.value = String(next);
+      });
+    });
+  }
+
+  logSubmit.textContent = currentLogEditId ? "Salva Modifiche" : "Salva Intervento";
+  openDialog(logContainer, logStart);
+}
+
+function closeLogModal(){
+  currentLogEditId = null;
+  currentContribCom = null;
+  closeDialog(logContainer);
+  logForm.reset();
+}
+logClose.addEventListener("click", closeLogModal);
+
+logForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const emergenze = getEmergenze();
+  const idx = emergenze.findIndex(x => x.id === currentInfoId);
+  if (idx === -1) { alert("Emergenza non trovata."); return; }
+
+  const em = emergenze[idx];
+  ensureEmergenzaShape(em);
+
+  const comLower = currentContribCom;
+  if (!comLower) { alert("Comitato contributo non valido."); return; }
+
+  if (!em.contributi[comLower]) {
+    em.contributi[comLower] = { comitatoLabel: comLower, mezziUsati: [], materialiUsati: [], volontariUsati: [], logInterventi: [] };
+  }
+
+  if (!logForm.checkValidity()) { logForm.reportValidity(); return; }
+
+  const startISO = logStart.value ? new Date(logStart.value).toISOString() : "";
+  const endISO = logEnd.value ? new Date(logEnd.value).toISOString() : "";
+  if (startISO && endISO && new Date(endISO) < new Date(startISO)) {
+    alert("L'orario di fine non può essere prima dell'inizio.");
+    return;
+  }
+
+  const volontariSel = Array.from(logVolontari.selectedOptions).map(o => (o.value||"").toUpperCase()).filter(Boolean);
+  const mezziSel = Array.from(logMezzi.selectedOptions).map(o => o.value).filter(Boolean);
+
+  const mats = [];
+  logMaterialiWrap.querySelectorAll("input.qty-input").forEach(inp => {
+    const mk = inp.getAttribute("data-mk");
+    const max = parseInt(inp.getAttribute("max") || "0", 10) || 0;
+    const v = Math.max(0, Math.min(max, parseInt(inp.value || "0", 10) || 0));
+    if (v > 0) mats.push({ key: mk, qty: v });
+  });
+
+  const entry = {
+    id: currentLogEditId ?? Date.now(),
+    startISO,
+    endISO,
+    attivita: logAttivita.value.trim(),
+    responsabile: logResponsabile.value.trim(),
+    note: logNote.value.trim(),
+    volontari: volontariSel,
+    mezzi: mezziSel,
+    materiali: mats
+  };
+
+  const logArr = em.contributi[comLower].logInterventi || [];
+  const eidx = logArr.findIndex(x => x.id === entry.id);
+  if (eidx === -1) logArr.push(entry);
+  else logArr[eidx] = entry;
+
+  logArr.sort((a,b) => (a.startISO || "").localeCompare(b.startISO || ""));
+  em.contributi[comLower].logInterventi = logArr;
+
+  em.updatedAt = new Date().toISOString();
+  emergenze[idx] = em;
+  setEmergenze(emergenze);
+
+  closeLogModal();
+
+  const fresh = getEmergenze().find(x => x.id === em.id);
+  if (fresh) showInfoPopup(fresh);
+  renderEmergenze();
+});
+
+function deleteLogEntry(emId, comLower, logId){
+  const emergenze = getEmergenze();
+  const idx = emergenze.findIndex(x => x.id === emId);
+  if (idx === -1) return;
+
+  const em = emergenze[idx];
+  ensureEmergenzaShape(em);
+
+  if (!em.contributi?.[comLower]) return;
+
+  if (!confirm("Vuoi eliminare questo intervento dal log?")) return;
+
+  em.contributi[comLower].logInterventi = (em.contributi[comLower].logInterventi || []).filter(x => x.id !== logId);
+  em.updatedAt = new Date().toISOString();
+  emergenze[idx] = em;
+  setEmergenze(emergenze);
+
+  showInfoPopup(em);
+  renderEmergenze();
+}
+
+/* ===========================
+   PDF/EXCEL (tutti i contributi) + VOLONTARI INCLUSI
+=========================== */
+function buildReportHtml(em){
+  ensureEmergenzaShape(em);
+  const css = `
+    <style>
+      body{font-family:Arial,sans-serif;margin:24px;color:#222}
+      h1{color:#b71c1c;margin:0 0 8px}
+      .sub{color:#666;margin:0 0 16px}
+      .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 18px}
+      .box{border:1px solid #ddd;border-radius:10px;padding:12px}
+      .box h3{margin:0 0 8px;color:#b71c1c}
+      table{width:100%;border-collapse:collapse}
+      th,td{border:1px solid #ddd;padding:8px;font-size:13px;vertical-align:top}
+      th{background:#f3f3f3;text-align:left}
+      .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #ddd;background:#fafafa;font-size:12px;margin:2px 4px 0 0}
+      @media print{ .no-print{display:none} }
+    </style>
+  `;
+
+  const destinatari = [];
+  if ((em.destSol || []).length) destinatari.push("SOL: " + em.destSol.join(", "));
+  if (em.destSop) destinatari.push("SOP");
+  const destStr = destinatari.length ? destinatari.join(" | ") : "Solo creatore";
+
+  const header = `
+    <h1>🚨 Scheda Emergenza</h1>
+    <p class="sub"><b>${escapeHtml(em.titolo||"")}</b> — ${escapeHtml(em.tipo||"")} • ${escapeHtml(em.luogo||"")} • Inizio: ${escapeHtml(formatDate(em.dataInizio))} ${escapeHtml(em.oraInizio||"")}</p>
+    <div class="grid">
+      <div class="box">
+        <h3>Dati</h3>
+        <div><b>Comitato creatore:</b> ${escapeHtml(em.comitatoCreatore||"")}</div>
+        <div><b>Destinatari:</b> ${escapeHtml(destStr)}</div>
+        <div><b>Severità:</b> ${escapeHtml(em.livello||"")}</div>
+        <div><b>Stato:</b> ${escapeHtml(em.stato||"")}</div>
+        <div><b>Referente:</b> ${escapeHtml(em.referente||"—")}</div>
+        <div style="margin-top:8px"><b>Descrizione:</b><br/>${escapeHtml(em.descrizione||"")}</div>
+      </div>
+      <div class="box">
+        <h3>Riepilogo</h3>
+        <div><b>Approvazioni:</b> ${escapeHtml(approvalsToCommitteeList(em.approvazioni))}</div>
+        <div><b>Contributi comitati:</b> ${Object.keys(em.contributi||{}).length}</div>
+        <div><b>Aggiornata:</b> ${escapeHtml(toLocaleDT(em.updatedAt||""))}</div>
+      </div>
+    </div>
+  `;
+
+  const volontariAll = getVolontari();
+  const cfToName = (cf) => {
+    const cfu = (cf||"").toUpperCase();
+    const v = volontariAll.find(x => (x.cf||"").toUpperCase() === cfu);
+    const name = v ? `${v.nome||""} ${v.cognome||""}`.trim() : "";
+    return name ? `${name} (${cfu})` : cfu;
+  };
+
+  const contribBlocks = Object.keys(em.contributi||{}).sort().map(k => {
+    const c = em.contributi[k];
+    const mezzi = c.mezziUsati || [];
+    const mats = c.materialiUsati || [];
+    const vols = c.volontariUsati || [];
+    const logs = c.logInterventi || [];
+
+    const volsTable = `
+      <h4 style="margin:10px 0 6px;color:#b71c1c">👥 Volontari (${vols.length})</h4>
+      <table>
+        <thead><tr><th>Nome</th><th>Cognome</th><th>CF</th></tr></thead>
+        <tbody>
+          ${vols.length ? vols.map(v => `
+            <tr><td>${escapeHtml(v.nome||"")}</td><td>${escapeHtml(v.cognome||"")}</td><td>${escapeHtml((v.cf||"").toUpperCase())}</td></tr>
+          `).join("") : `<tr><td colspan="3" style="color:#666">Nessun volontario</td></tr>`}
+        </tbody>
+      </table>
+    `;
+
+    const mezziTable = `
+      <h4 style="margin:10px 0 6px;color:#b71c1c">🚗 Mezzi (${mezzi.length})</h4>
+      <table>
+        <thead><tr><th>Targa</th><th>Tipo</th><th>Selettiva</th></tr></thead>
+        <tbody>
+          ${mezzi.length ? mezzi.map(m => `
+            <tr><td>${escapeHtml(m.targa||"")}</td><td>${escapeHtml(m.tipoMezzo||"")}</td><td>${escapeHtml(m.selettivaRadio||"")}</td></tr>
+          `).join("") : `<tr><td colspan="3" style="color:#666">Nessun mezzo</td></tr>`}
+        </tbody>
+      </table>
+    `;
+
+    const matsTable = `
+      <h4 style="margin:10px 0 6px;color:#b71c1c">📦 Materiali (${mats.length})</h4>
+      <table>
+        <thead><tr><th>Codice</th><th>Materiale</th><th>Categoria</th><th>Q.tà</th></tr></thead>
+        <tbody>
+          ${mats.length ? mats.map(m => `
+            <tr>
+              <td>${escapeHtml(m.codice||"")}</td>
+              <td>${escapeHtml(m.nome||"")}</td>
+              <td>${escapeHtml(m.categoria||"")}</td>
+              <td>${escapeHtml(String(m.quantita??""))}${m.unita ? " " + escapeHtml(m.unita) : ""}</td>
+            </tr>
+          `).join("") : `<tr><td colspan="4" style="color:#666">Nessun materiale</td></tr>`}
+        </tbody>
+      </table>
+    `;
+
+    const logTable = `
+      <h4 style="margin:10px 0 6px;color:#b71c1c">📝 Log interventi (${logs.length})</h4>
+      <table>
+        <thead><tr><th>Inizio</th><th>Fine</th><th>Attività</th><th>Volontari</th><th>Mezzi</th><th>Materiali</th></tr></thead>
+        <tbody>
+          ${logs.length ? logs.map(x => {
+            const volsP = (x.volontari||[]).map(v => `<span class="pill">${escapeHtml(cfToName(v))}</span>`).join("");
+            const mz = (x.mezzi||[]).map(v => `<span class="pill">${escapeHtml(v)}</span>`).join("");
+            const mt = (x.materiali||[]).map(v => `<span class="pill">${escapeHtml(v.key)}:${escapeHtml(String(v.qty))}</span>`).join("");
+            const extra = `${x.responsabile ? `<div style="color:#666"><b>Resp:</b> ${escapeHtml(x.responsabile)}</div>` : ""}${x.note ? `<div style="color:#666"><b>Note:</b> ${escapeHtml(x.note)}</div>` : ""}`;
+            return `
+              <tr>
+                <td>${escapeHtml(toLocaleDT(x.startISO||""))}</td>
+                <td>${escapeHtml(toLocaleDT(x.endISO||""))}</td>
+                <td><b>${escapeHtml(x.attivita||"")}</b>${extra}</td>
+                <td>${volsP || '<span style="color:#666">—</span>'}</td>
+                <td>${mz || '<span style="color:#666">—</span>'}</td>
+                <td>${mt || '<span style="color:#666">—</span>'}</td>
+              </tr>
+            `;
+          }).join("") : `<tr><td colspan="6" style="color:#666">Nessun intervento</td></tr>`}
+        </tbody>
+      </table>
+    `;
+
+    return `
+      <div class="box" style="margin-bottom:12px">
+        <h3>Comitato: ${escapeHtml(titleCaseComitato(c.comitatoLabel || k))}</h3>
+        ${volsTable}
+        ${mezziTable}
+        ${matsTable}
+        ${logTable}
+      </div>
+    `;
+  }).join("");
+
+  const footer = `<p class="sub no-print" style="margin-top:14px;">Suggerimento: usa “Stampa” e scegli “Salva come PDF”.</p>`;
+
+  return `<!doctype html><html><head><meta charset="utf-8">${css}</head><body>${header}${contribBlocks || "<div class='box'><h3>Nessun contributo</h3></div>"}${footer}</body></html>`;
+}
+
+function exportPDF(em){
+  const w = window.open("", "_blank");
+  if (!w) { alert("Popup bloccato: abilita i popup per esportare la scheda."); return; }
+  w.document.open();
+  w.document.write(buildReportHtml(em));
+  w.document.close();
+  w.focus();
+  setTimeout(() => w.print(), 300);
+}
+
+function exportExcel(em){
+  ensureEmergenzaShape(em);
+  const contribKeys = Object.keys(em.contributi || {}).sort();
+
+  const base = `
+  <table border="1">
+    <tr><th>Titolo</th><td>${escapeHtml(em.titolo||"")}</td></tr>
+    <tr><th>Tipo</th><td>${escapeHtml(em.tipo||"")}</td></tr>
+    <tr><th>Luogo</th><td>${escapeHtml(em.luogo||"")}</td></tr>
+    <tr><th>Inizio</th><td>${escapeHtml(formatDate(em.dataInizio))} ${escapeHtml(em.oraInizio||"")}</td></tr>
+    <tr><th>Comitato creatore</th><td>${escapeHtml(em.comitatoCreatore||"")}</td></tr>
+    <tr><th>Severità</th><td>${escapeHtml(em.livello||"")}</td></tr>
+    <tr><th>Stato</th><td>${escapeHtml(em.stato||"")}</td></tr>
+    <tr><th>Referente</th><td>${escapeHtml(em.referente||"")}</td></tr>
+    <tr><th>Destinatari</th><td>${escapeHtml(((em.destSol||[]).length ? "SOL: " + em.destSol.join(", ") : "Solo creatore") + (em.destSop ? " | SOP" : ""))}</td></tr>
+    <tr><th>Approvazioni</th><td>${escapeHtml(approvalsToCommitteeList(em.approvazioni))}</td></tr>
+    <tr><th>Descrizione</th><td>${escapeHtml(em.descrizione||"")}</td></tr>
+  </table>
+  `;
+
+  const blocks = contribKeys.map(k => {
+    const c = em.contributi[k];
+    const mezzi = c.mezziUsati || [];
+    const mats = c.materialiUsati || [];
+    const vols = c.volontariUsati || [];
+    const logs = c.logInterventi || [];
+
+    return `
+      <h3>Contributo comitato: ${escapeHtml(titleCaseComitato(c.comitatoLabel || k))}</h3>
+
+      <table border="1">
+        <tr><th colspan="3">Volontari</th></tr>
+        <tr><th>Nome</th><th>Cognome</th><th>CF</th></tr>
+        ${vols.length ? vols.map(v => `
+          <tr><td>${escapeHtml(v.nome||"")}</td><td>${escapeHtml(v.cognome||"")}</td><td>${escapeHtml((v.cf||"").toUpperCase())}</td></tr>
+        `).join("") : `<tr><td colspan="3">Nessun volontario</td></tr>`}
+      </table>
+
+      <br/>
+
+      <table border="1">
+        <tr><th colspan="3">Mezzi</th></tr>
+        <tr><th>Targa</th><th>Tipo</th><th>Selettiva</th></tr>
+        ${mezzi.length ? mezzi.map(m => `
+          <tr><td>${escapeHtml(m.targa||"")}</td><td>${escapeHtml(m.tipoMezzo||"")}</td><td>${escapeHtml(m.selettivaRadio||"")}</td></tr>
+        `).join("") : `<tr><td colspan="3">Nessun mezzo</td></tr>`}
+      </table>
+
+      <br/>
+
+      <table border="1">
+        <tr><th colspan="4">Materiali</th></tr>
+        <tr><th>Codice</th><th>Materiale</th><th>Categoria</th><th>Q.tà</th></tr>
+        ${mats.length ? mats.map(m => `
+          <tr><td>${escapeHtml(m.codice||"")}</td><td>${escapeHtml(m.nome||"")}</td><td>${escapeHtml(m.categoria||"")}</td><td>${escapeHtml(String(m.quantita??""))}${m.unita ? " " + escapeHtml(m.unita) : ""}</td></tr>
+        `).join("") : `<tr><td colspan="4">Nessun materiale</td></tr>`}
+      </table>
+
+      <br/>
+
+      <table border="1">
+        <tr><th colspan="8">Log interventi</th></tr>
+        <tr>
+          <th>Inizio</th><th>Fine</th><th>Attività</th><th>Responsabile</th><th>Volontari (CF)</th><th>Mezzi (key)</th><th>Materiali (key:qty)</th><th>Note</th>
+        </tr>
+        ${logs.length ? logs.map(x => `
+          <tr>
+            <td>${escapeHtml(toLocaleDT(x.startISO||""))}</td>
+            <td>${escapeHtml(toLocaleDT(x.endISO||""))}</td>
+            <td>${escapeHtml(x.attivita||"")}</td>
+            <td>${escapeHtml(x.responsabile||"")}</td>
+            <td>${escapeHtml((x.volontari||[]).join(" | "))}</td>
+            <td>${escapeHtml((x.mezzi||[]).join(" | "))}</td>
+            <td>${escapeHtml((x.materiali||[]).map(m => `${m.key}:${m.qty}`).join(" | "))}</td>
+            <td>${escapeHtml(x.note||"")}</td>
+          </tr>
+        `).join("") : `<tr><td colspan="8">Nessun intervento</td></tr>`}
+      </table>
+
+      <br/><br/>
+    `;
+  }).join("");
+
+  const html = `<html><head><meta charset="utf-8"></head><body>
+    <h2>Scheda Emergenza (Tutti i contributi)</h2>
+    ${base}
+    <br/>
+    ${blocks || "<p>Nessun contributo.</p>"}
+  </body></html>`;
+
+  const blob = new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const safeTitle = (em.titolo || "Emergenza").replace(/[\\/:*?"<>|]+/g, "-");
+  a.href = url;
+  a.download = `Emergenza_${safeTitle}_${em.id}.xls`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* ===========================
+   CREA/MODIFICA EMERGENZA
+=========================== */
+function toggleForm(show){
+  if (show){
+    form.comitatoCreatore.value = comitato || "";
+    submitBtn.textContent = editIndex === null ? "Crea Emergenza" : "Salva Modifiche";
+    openDialog(formContainer, form.titolo);
+  } else {
+    closeDialog(formContainer);
+    form.reset();
+    form.comitatoCreatore.value = comitato || "";
+    editIndex = null;
+    submitBtn.textContent = "Crea Emergenza";
+  }
+}
+
+btnApriForm.addEventListener("click", () => {
+  if (!(role === "sol" || role === "sop" || role === "amministratore")) {
+    alert("Solo SOL/SOP/Amministratore possono creare o modificare emergenze.");
+    return;
+  }
+
+  editIndex = null;
+  const now = new Date();
+  form.dataInizio.value = now.toISOString().slice(0,10);
+  form.oraInizio.value = now.toTimeString().slice(0,5);
+
+  toggleForm(true);
+});
+btnChiudiForm.addEventListener("click", () => toggleForm(false));
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  if (!(role === "sol" || role === "sop" || role === "amministratore")) {
+    alert("Solo SOL/SOP/Amministratore possono creare o modificare emergenze.");
+    return;
+  }
+  if (!form.checkValidity()) { form.reportValidity(); return; }
+
+  const emergenze = getEmergenze();
+
+  const destList = getDestinatariFromSelect();
+
+  const destSolRaw = destList.filter(x => x !== "SOP");
+
+  const creatorLower = normalize(form.comitatoCreatore.value);
+
+  const prev = (editIndex === null) ? null : emergenze[editIndex];
+
+  const approvazioniBase = (editIndex === null ? {} : (prev?.approvazioni || {}));
+  approvazioniBase[creatorLower] = "approved";
+
+  destSolRaw.map(x => normalize(x)).filter(Boolean).forEach(k => {
+    if (!approvazioniBase[k]) approvazioniBase[k] = "pending";
+  });
+
+  const toSop = destList.includes("SOP");
+  if (toSop && !approvazioniBase.SOP) approvazioniBase.SOP = "pending";
+  if (!toSop && approvazioniBase.SOP && approvazioniBase.SOP === "pending") delete approvazioniBase.SOP;
+  if (!toSop && approvazioniBase.ALL) delete approvazioniBase.ALL;
+
+  const nuovo = {
+    id: editIndex === null ? Date.now() : (prev?.id ?? Date.now()),
+    titolo: form.titolo.value.trim(),
+    tipo: form.tipo.value.trim(),
+    luogo: form.luogo.value.trim(),
+    livello: form.livello.value,
+    dataInizio: form.dataInizio.value,
+    oraInizio: form.oraInizio.value,
+    referente: form.referente.value.trim(),
+    comitatoCreatore: form.comitatoCreatore.value.trim(),
+    descrizione: form.descrizione.value.trim(),
+    stato: form.stato.value || "attiva",
+    destSol: destSolRaw,
+    destSop: toSop,
+    approvazioni: approvazioniBase,
+    contributi: (prev?.contributi && typeof prev.contributi === "object") ? prev.contributi : {},
+    updatedAt: new Date().toISOString()
+  };
+
+  ensureEmergenzaShape(nuovo);
+
+  if (!nuovo.contributi[creatorLower]) {
+    nuovo.contributi[creatorLower] = { comitatoLabel: creatorLower, mezziUsati: [], materialiUsati: [], volontariUsati: [], logInterventi: [] };
+  }
+
+  if (editIndex === null) emergenze.push(nuovo);
+  else emergenze[editIndex] = nuovo;
+
+  setEmergenze(emergenze);
+  toggleForm(false);
+  renderEmergenze();
+});
+
+/* ===========================
+   INFO POPUP + AZIONI
+=========================== */
+function destinatariStr(em){
+  const destinatari = [];
+  if ((em.destSol || []).length) destinatari.push("SOL: " + em.destSol.join(", "));
+  if (em.destSop) destinatari.push("SOP");
+  return destinatari.length ? destinatari.join(" | ") : "Solo creatore";
+}
+
+/* ✅ nuovo riepilogo contributi: uno sotto l’altro */
+function contribSummaryHtml(em){
+  ensureEmergenzaShape(em);
+  const keys = Object.keys(em.contributi || {}).sort();
+  if (!keys.length) return `<span class="muted">Nessun contributo</span>`;
+
+  return keys.map(k => {
+    const c = em.contributi[k] || {};
+    const mez = (c.mezziUsati || []).length;
+    const mat = (c.materialiUsati || []).length;
+    const vol = (c.volontariUsati || []).length;
+    const log = (c.logInterventi || []).length;
+    return `<div>${escapeHtml(k)}: 🚗${mez} 📦${mat} 👥${vol} 📝${log}</div>`;
+  }).join("");
+}
+
+function showInfoPopup(em){
+  ensureEmergenzaShape(em);
+
+  if (!canSeeEmergenza(em)) {
+    alert("Non hai i permessi per visualizzare questa emergenza.");
+    return;
+  }
+
+  currentInfoId = em.id;
+
+  const creatorLower = normalize(em.comitatoCreatore);
+  const myLower = normalize(comitato);
+
+  const globalApproved = em.approvazioni?.ALL === "approved";
+
+  const approvazioniRows = [];
+  if (creatorLower) approvazioniRows.push(`<tr><td>${escapeHtml(creatorLower)}</td><td>${approvalBadge(em.approvazioni?.[creatorLower] || "approved")}</td></tr>`);
+  (em.destSol || []).map(x => normalize(x)).filter(Boolean).forEach(k => {
+    approvazioniRows.push(`<tr><td>${escapeHtml(k)}</td><td>${approvalBadge(em.approvazioni?.[k] || "pending")}</td></tr>`);
+  });
+  if (em.destSop) {
+    approvazioniRows.push(`<tr><td><b>SOP</b></td><td>${approvalBadge(em.approvazioni?.SOP || "pending")}${globalApproved ? ' <span class="badge badge-global">ALL</span>' : ""}</td></tr>`);
+  }
+
+  const actionsApprove = (() => {
+    if (!canApproveForCurrentRole(em)) return "";
+    const key = approvalKeyForRole();
+    if (!key) return "";
+
+    const st = em.approvazioni?.[key];
+    if (st === "approved") return "";
+
+    if (role === "sol") {
+      const dest = (em.destSol || []).map(x => normalize(x));
+      if (!(dest.includes(myLower))) return "";
+    }
+
+    return `
+      <div class="section-title">✅ Approvazione (per ${escapeHtml(key)})</div>
+      <div class="muted">Conferma se la tua struttura prende in carico l’emergenza.</div>
+      <div style="margin-top:10px;">
+        <button type="button" class="action-btn ok-btn" id="btn-approve">Approva</button>
+        <button type="button" class="action-btn no-btn" id="btn-reject">Rifiuta</button>
+      </div>
+    `;
+  })();
+
+  const canMeta = canManageEmergenzaMetadata(em);
+
+  const metaActions = canMeta ? `
+    <div class="section-title">⚙️ Gestione emergenza</div>
+    ${em.stato === "attiva"
+      ? `<button type="button" class="action-btn close-btn" id="btn-close-em">🔒 Chiudi emergenza</button>`
+      : `<button type="button" class="action-btn reopen-btn" id="btn-reopen-em">🔓 Riapri emergenza</button>`
+    }
+  ` : "";
+
+  const exportActions = `
+    <div class="section-title">
+      📄 Esportazioni
+      <div>
+        <button type="button" class="action-btn pdf-btn" id="btn-pdf">🖨️ Scheda PDF</button>
+        <button type="button" class="action-btn xls-btn" id="btn-xls">📊 Excel</button>
+      </div>
+    </div>
+    <div class="muted">La “Scheda PDF” usa la stampa del browser (poi scegli “Salva come PDF”).</div>
+  `;
+
+  const contribBtn = canContribute(em) ? `
+    <div class="section-title">
+      🧰 Contributo del tuo comitato
+      <div>
+        <button type="button" class="action-btn add-btn" id="btn-manage-res">🚗📦👥 Gestisci risorse</button>
+        <button type="button" class="action-btn add-btn" id="btn-add-log">📝 Aggiungi log</button>
+      </div>
+    </div>
+    <div class="muted">Qui inserisci mezzi/materiali/volontari e registri turni per <b>${escapeHtml(myLower || "il tuo comitato")}</b>.</div>
+  ` : `
+    <div class="section-title">🧰 Contributo del tuo comitato</div>
+    <div class="muted">Per contribuire devi prima avere l’emergenza approvata per il tuo comitato (o approvazione SOP globale).</div>
+  `;
+
+  const contribKeys = Object.keys(em.contributi || {}).sort();
+  const contribTable = `
+    <div class="section-title">📌 Contributi inseriti (${contribKeys.length})</div>
+    <table class="mini-table" aria-label="Contributi">
+      <thead><tr><th>Comitato</th><th>Mezzi</th><th>Materiali</th><th>Volontari</th><th>Log</th></tr></thead>
+      <tbody>
+        ${contribKeys.length ? contribKeys.map(k => {
+          const c = em.contributi[k];
+          const mez = (c.mezziUsati || []).length;
+          const mat = (c.materialiUsati || []).length;
+          const vol = (c.volontariUsati || []).length;
+          const log = (c.logInterventi || []).length;
+          return `<tr><td>${escapeHtml(k)}</td><td>🚗 ${mez}</td><td>📦 ${mat}</td><td>👥 ${vol}</td><td>📝 ${log}</td></tr>`;
+        }).join("") : `<tr><td colspan="5" class="muted">Nessun contributo.</td></tr>`}
+      </tbody>
+    </table>
+  `;
+
+  let myLogHtml = "";
+  if (canContribute(em) && myLower) {
+    const myContrib = em.contributi?.[myLower] || { mezziUsati:[], materialiUsati:[], volontariUsati:[], logInterventi:[] };
+    const logs = myContrib.logInterventi || [];
+
+    const rows = logs.length ? logs.map(x => `
+      <tr>
+        <td class="nowrap">${escapeHtml(toLocaleDT(x.startISO))}</td>
+        <td class="nowrap">${escapeHtml(toLocaleDT(x.endISO))}</td>
+        <td><b>${escapeHtml(x.attivita||"")}</b>${x.responsabile ? `<div class="muted"><b>Resp:</b> ${escapeHtml(x.responsabile)}</div>`:""}${x.note ? `<div class="muted"><b>Note:</b> ${escapeHtml(x.note)}</div>`:""}</td>
+        <td>${escapeHtml((x.volontari||[]).join(" | ")) || '<span class="muted">—</span>'}</td>
+        <td>${escapeHtml((x.mezzi||[]).join(" | ")) || '<span class="muted">—</span>'}</td>
+        <td>${escapeHtml((x.materiali||[]).map(m => `${m.key}:${m.qty}`).join(" | ")) || '<span class="muted">—</span>'}</td>
+        <td class="nowrap">
+          <button type="button" class="action-btn edit-btn" data-logedit="${escapeHtml(String(x.id))}">✏️</button>
+          <button type="button" class="action-btn delete-btn" data-logdel="${escapeHtml(String(x.id))}">🗑️</button>
+        </td>
+      </tr>
+    `).join("") : `<tr><td colspan="7" class="muted">Nessun log registrato.</td></tr>`;
+
+    myLogHtml = `
+      <div class="section-title">📝 Log del tuo comitato (${escapeHtml(myLower)})</div>
+      <table class="mini-table" aria-label="Log comitato">
+        <thead><tr><th>Inizio</th><th>Fine</th><th>Attività</th><th>Volontari</th><th>Mezzi</th><th>Materiali</th><th>Azioni</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="muted" style="margin-top:8px;">
+        Nota: i valori mezzi/materiali nel log sono “key” interne; PDF/Excel includono anche i volontari.
+      </div>
+    `;
+  }
+
+  const dettagli = `
+    <div class="kv"><span class="info-label">Titolo:</span><span class="info-value">${escapeHtml(em.titolo)}</span></div>
+    <div class="kv"><span class="info-label">Tipo:</span><span class="info-value">${escapeHtml(em.tipo)}</span></div>
+    <div class="kv"><span class="info-label">Luogo:</span><span class="info-value">${escapeHtml(em.luogo)}</span></div>
+    <div class="kv"><span class="info-label">Inizio:</span><span class="info-value">${escapeHtml(formatDate(em.dataInizio))} ${escapeHtml(em.oraInizio||"")}</span></div>
+    <div class="kv"><span class="info-label">Comitato creatore:</span><span class="info-value">${escapeHtml(em.comitatoCreatore)}</span></div>
+    <div class="kv"><span class="info-label">Destinatari:</span><span class="info-value">${escapeHtml(destinatariStr(em))}</span></div>
+    <div class="kv"><span class="info-label">Severità:</span><span class="info-value">${severitaBadge(em.livello)}</span></div>
+    <div class="kv"><span class="info-label">Stato:</span><span class="info-value">${statoBadge(em.stato)}</span></div>
+    <div class="kv"><span class="info-label">Referente:</span><span class="info-value">${escapeHtml(em.referente || "—")}</span></div>
+    <div class="kv"><span class="info-label">Descrizione:</span><span class="info-value">${escapeHtml(em.descrizione || "")}</span></div>
+  `;
+
+  const approvazioniHtml = `
+    <div class="section-title">📨 Approvazioni</div>
+    <table class="mini-table" aria-label="Approvazioni">
+      <thead><tr><th>Destinatario</th><th>Stato</th></tr></thead>
+      <tbody>${approvazioniRows.join("") || `<tr><td colspan="2" class="muted">Nessuna approvazione richiesta.</td></tr>`}</tbody>
+    </table>
+    ${globalApproved ? `<div class="muted" style="margin-top:8px;"><span class="badge badge-global">ALL</span> SOP approvato: visibile a tutte le SOL abilitate.</div>` : ""}
+  `;
+
+  infoContent.innerHTML =
+    dettagli +
+    exportActions +
+    approvazioniHtml +
+    actionsApprove +
+    contribBtn +
+    contribTable +
+    myLogHtml +
+    metaActions;
+
+  openDialog(infoPopup, infoClose);
+
+  document.getElementById("btn-pdf")?.addEventListener("click", () => exportPDF(em));
+  document.getElementById("btn-xls")?.addEventListener("click", () => exportExcel(em));
+
+  const key = approvalKeyForRole();
+  document.getElementById("btn-approve")?.addEventListener("click", () => setApproval(em.id, key, "approved"));
+  document.getElementById("btn-reject")?.addEventListener("click", () => setApproval(em.id, key, "rejected"));
+
+  document.getElementById("btn-manage-res")?.addEventListener("click", () => {
+    const t = (["sop","amministratore","tlc_provinciale"].includes(role))
+      ? (normalize(em.comitatoCreatore) || normalize(comitato))
+      : normalize(comitato);
+    openResModal(em, t);
+  });
+
+  document.getElementById("btn-add-log")?.addEventListener("click", () => {
+    const cLower = normalize(comitato);
+    if (!cLower) { alert("Comitato non valido."); return; }
+    openLogModal(em, cLower, null);
+  });
+
+  infoContent.querySelectorAll("button[data-logedit]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = parseInt(btn.getAttribute("data-logedit") || "0", 10);
+      const cLower = normalize(comitato);
+      const eFresh = getEmergenze().find(x => x.id === em.id);
+      if (!eFresh) return;
+      ensureEmergenzaShape(eFresh);
+      const entry = (eFresh.contributi?.[cLower]?.logInterventi || []).find(x => x.id === id);
+      if (!entry) return;
+      openLogModal(eFresh, cLower, entry);
+    });
+  });
+  infoContent.querySelectorAll("button[data-logdel]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = parseInt(btn.getAttribute("data-logdel") || "0", 10);
+      const cLower = normalize(comitato);
+      deleteLogEntry(em.id, cLower, id);
+    });
+  });
+
+  document.getElementById("btn-close-em")?.addEventListener("click", () => changeStatoEmergenza(em.id, "chiusa"));
+  document.getElementById("btn-reopen-em")?.addEventListener("click", () => changeStatoEmergenza(em.id, "attiva"));
+}
+
+function hideInfoPopup(){
+  currentInfoId = null;
+  closeDialog(infoPopup);
+}
+infoClose.addEventListener("click", hideInfoPopup);
+
+function changeStatoEmergenza(id, stato){
+  const emergenze = getEmergenze();
+  const idx = emergenze.findIndex(e => e.id === id);
+  if (idx === -1) return;
+
+  const em = emergenze[idx];
+  ensureEmergenzaShape(em);
+
+  if (!canManageEmergenzaMetadata(em)) {
+    alert("Non hai i permessi per modificare lo stato dell'emergenza.");
+    return;
+  }
+
+  emergenze[idx].stato = stato;
+  emergenze[idx].updatedAt = new Date().toISOString();
+  setEmergenze(emergenze);
+
+  renderEmergenze();
+  showInfoPopup(emergenze[idx]);
+}
+
+/* ===========================
+   EDIT/DELETE/INFO
+=========================== */
+window.showInfoPopupByIndex = function(index){
+  const all = getEmergenze();
+  const em = all[index];
+  if (!em) return;
+  showInfoPopup(em);
+};
+
+window.editEmergenza = function(index){
+  const emergenze = getEmergenze();
+  const em = emergenze[index];
+  if (!em) return;
+
+  ensureEmergenzaShape(em);
+
+  if (!canManageEmergenzaMetadata(em)) {
+    alert("Puoi modificare solo le emergenze create dal tuo comitato (o sei SOP/Admin).");
+    return;
+  }
+
+  editIndex = index;
+
+  form.titolo.value = em.titolo || "";
+  form.tipo.value = em.tipo || "";
+  form.luogo.value = em.luogo || "";
+  form.livello.value = em.livello || "";
+  form.dataInizio.value = em.dataInizio || "";
+  form.oraInizio.value = em.oraInizio || "";
+  form.referente.value = em.referente || "";
+  form.comitatoCreatore.value = em.comitatoCreatore || (comitato || "");
+  form.descrizione.value = em.descrizione || "";
+  form.stato.value = em.stato || "attiva";
+  setDestinatariSelection(em.destSol || [], !!em.destSop);
+
+  toggleForm(true);
+};
+
+window.deleteEmergenza = function(index){
+  const emergenze = getEmergenze();
+  const em = emergenze[index];
+  if (!em) return;
+
+  ensureEmergenzaShape(em);
+
+  // ✅ Eliminazione emergenza consentita SOLO a SOP e Amministratore
+  if (!isSopOrAdmin) {
+    alert("❌ Solo SOP o Amministratore possono eliminare un'emergenza.");
+    return;
+  }
+
+  if (confirm(`🗑️ Sei sicuro di voler eliminare l'emergenza:\n\n${em.titolo}\n${em.luogo}\n\n⚠️ Questa azione è irreversibile!`)) {
+    emergenze.splice(index, 1);
+    setEmergenze(emergenze);
+    if (currentInfoId === em.id) hideInfoPopup();
+    renderEmergenze();
+  }
+};
+
+/* ===========================
+   RENDER LISTA
+=========================== */
+function renderEmergenze(){
+  const filter = normalize(searchInput.value);
+  list.innerHTML = "";
+
+  const all = getEmergenze();
+  const visibili = getVisibleEmergenze();
+
+  visibili
+    .filter(em => {
+      if (!filter) return true;
+      return normalize(em.titolo).includes(filter) ||
+             normalize(em.comitatoCreatore).includes(filter) ||
+             normalize(em.luogo).includes(filter) ||
+             normalize(em.stato).includes(filter) ||
+             normalize(em.tipo).includes(filter);
+    })
+    .sort((a,b) => {
+      const da = `${a.dataInizio || ""}T${a.oraInizio || "00:00"}`;
+      const db = `${b.dataInizio || ""}T${b.oraInizio || "00:00"}`;
+      return db.localeCompare(da);
+    })
+    .forEach(em => {
+      ensureEmergenzaShape(em);
+
+      const globalIndex = all.findIndex(x => x.id === em.id);
+      const dest = destinatariStr(em);
+
+      const canEdit = canManageEmergenzaMetadata(em);
+
+      const actions = `
+        <button type="button" class="action-btn info-btn" onclick="showInfoPopupByIndex(${globalIndex})">ℹ️ Info</button>
+        ${canEdit ? `<button type="button" class="action-btn edit-btn" onclick="editEmergenza(${globalIndex})">✏️ Modifica</button>` : ""}
+        ${isSopOrAdmin ? `<button type="button" class="action-btn delete-btn" onclick="deleteEmergenza(${globalIndex})">🗑️ Elimina</button>` : ""}
+      `;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${escapeHtml(em.titolo || "")}</td>
+        <td>${escapeHtml(formatDate(em.dataInizio))} ${escapeHtml(em.oraInizio || "")}</td>
+        <td>${escapeHtml(em.comitatoCreatore || "")}</td>
+        <td>${escapeHtml(dest)}</td>
+        <td>${severitaBadge(em.livello)}</td>
+        <td>${statoBadge(em.stato)}</td>
+        <td>${contribSummaryHtml(em)}</td>
+        <td>${actions}</td>
+      `;
+      list.appendChild(row);
+    });
+}
+searchInput.addEventListener("input", renderEmergenze);
+
+/* ===========================
+   INIT
+=========================== */
+normalizeAllEmergenze();
+renderEmergenze();

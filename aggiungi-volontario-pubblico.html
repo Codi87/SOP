@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Registrazione Volontario - CRI</title>
+<link href="assets/css/app.css" rel="stylesheet"/> <link href="assets/css/pages/aggiungi-volontario-pubblico.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="container">
+<div class="logo">
+<img alt="Logo Croce Rossa Italiana" id="logo-cri-pubblico" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" src="logo.svg"/>
+<h1 class="fallback">🔴✚ CRI</h1>
+<p id="header-comitato">📋 Registrazione Volontario</p>
+</div>
+<div id="message"></div>
+<p class="required-note">I campi contrassegnati con * sono obbligatori</p>
+<form autocomplete="on" id="form-pubblico">
+<div class="row">
+<input autocomplete="given-name" id="nome" name="nome" placeholder="Nome *" required="" type="text"/>
+<input autocomplete="family-name" id="cognome" name="cognome" placeholder="Cognome *" required="" type="text"/>
+</div>
+<div class="row">
+<input autocomplete="off" id="cf" maxlength="16" minlength="16" name="cf" pattern="[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]" placeholder="Codice Fiscale (16 caratteri) *" required="" style="text-transform: uppercase" type="text"/>
+<input autocomplete="email" id="email" name="email" placeholder="Email *" required="" type="email"/>
+</div>
+<div class="row">
+<input autocomplete="tel" id="telefono" name="telefono" placeholder="Telefono *" required="" type="tel"/>
+<input autocomplete="off" id="contattoEmergenza" name="contattoEmergenza" placeholder="Contatto Emergenza (diverso) *" required="" type="tel"/>
+</div>
+<div class="row">
+<input autocomplete="off" id="luogoNascita" name="luogoNascita" placeholder="Luogo di Nascita *" required="" type="text"/>
+<input id="dataNascita" max="2010-12-31" name="dataNascita" required="" type="date"/>
+</div>
+<div class="row">
+<input autocomplete="country-name" id="stato" name="stato" placeholder="Stato *" required="" type="text" value="Italia"/>
+<input autocomplete="street-address" id="indirizzo" name="indirizzo" placeholder="Indirizzo di residenza" type="text"/>
+</div>
+<div class="row">
+<input autocomplete="address-level2" id="comune" name="comune" placeholder="Comune *" required="" type="text"/>
+<input autocomplete="address-level1" id="provincia" maxlength="2" name="provincia" placeholder="Provincia (es. PU) *" required="" style="text-transform: uppercase" type="text"/>
+</div>
+<div class="row">
+<input autocomplete="postal-code" id="cap" maxlength="5" name="cap" pattern="[0-9]{5}" placeholder="CAP" type="text"/>
+<input autocomplete="off" id="comitato" name="comitato" placeholder="Comitato di appartenenza *" required="" type="text"/>
+</div>
+<div class="row">
+<input autocomplete="off" id="intolleranze" name="intolleranze" placeholder="Intolleranze alimentari" type="text"/>
+<input autocomplete="off" id="allergie" name="allergie" placeholder="Allergie" type="text"/>
+</div>
+<div class="row">
+<input autocomplete="off" id="codiceMGO" name="codiceMGO" placeholder="Codice MGO (opzionale)" type="text"/>
+</div>
+<!-- QUALIFICHE -->
+<fieldset class="qualifiche-container">
+<legend>📋 Qualifiche possedute (opzionale)</legend>
+<label><input class="qualifica-checkbox" type="checkbox" value="OPEM"/> OPEM</label><label><input class="qualifica-checkbox" type="checkbox" value="CSA"/> CSA</label><label><input class="qualifica-checkbox" type="checkbox" value="OPSA"/> OPSA</label><label><input class="qualifica-checkbox" type="checkbox" value="TLC 1"/> TLC 1</label><label><input class="qualifica-checkbox" type="checkbox" value="TLC 2"/> TLC 2</label><label><input class="qualifica-checkbox" type="checkbox" value="UC-OC"/> UC-OC</label><label><input class="qualifica-checkbox" type="checkbox" value="ASP-C"/> ASP-C</label><label><input class="qualifica-checkbox" type="checkbox" value="CAE"/> CAE</label><label><input class="qualifica-checkbox" type="checkbox" value="CSP-A"/> CSP-A</label><label><input class="qualifica-checkbox" type="checkbox" value="CSP-D"/> CSP-D</label><label><input class="qualifica-checkbox" type="checkbox" value="SMTS"/> SMTS</label><label><input class="qualifica-checkbox" type="checkbox" value="AUTISTA SOCCORRITORE"/> AUTISTA SOCCORRITORE</label><label><input class="qualifica-checkbox" type="checkbox" value="SOCCORRITORE"/> SOCCORRITORE</label><label><input class="qualifica-checkbox" type="checkbox" value="TS"/> TS</label><label><input class="qualifica-checkbox" type="checkbox" value="OSG"/> OSG</label><label><input class="qualifica-checkbox" type="checkbox" value="LOGISTA"/> LOGISTA</label><label><input class="qualifica-checkbox" type="checkbox" value="OPERATORE UAS (A1/A3-A2-STS)"/> OPERATORE UAS (A1/A3-A2-STS)</label><label><input class="qualifica-checkbox" type="checkbox" value="HACCP"/> HACCP</label><label><input class="qualifica-checkbox" type="checkbox" value="OPSOCEM"/> OPSOCEM</label><label><input class="qualifica-checkbox" type="checkbox" value="MEDIATORE LINGUISTICO"/> MEDIATORE LINGUISTICO</label></fieldset>
+<!-- PATENTI -->
+<fieldset class="patenti-container">
+<legend>🚗 Patenti CRI possedute (opzionale)</legend>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 1"/> PATENTE 1</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 2"/> PATENTE 2</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 2B"/> PATENTE 2B</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 3"/> PATENTE 3</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 4"/> PATENTE 4</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 5"/> PATENTE 5</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 5B"/> PATENTE 5B</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 6"/> PATENTE 6</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 7"/> PATENTE 7</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 7B"/> PATENTE 7B</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 8"/> PATENTE 8</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 9"/> PATENTE 9</label>
+<label><input class="patenti-checkbox" type="checkbox" value="NESSUNA"/> NESSUNA</label>
+</fieldset>
+<!-- CONSENSO PRIVACY -->
+<div class="privacy">
+<label>
+<input id="consensoGdpr" name="consensoGdpr" required="" type="checkbox"/>
+<strong>✅ CONSENSO GDPR OBBLIGATORIO *</strong><br/>
+        Autorizzo il trattamento dei miei dati personali ai sensi del Regolamento UE 2016/679 (GDPR) e D.Lgs. 196/2003. Acconsento alla comunicazione alla Croce Rossa Italiana per le finalità di gestione emergenze e volontariato.
+      </label>
+</div>
+<button class="btn" id="submit-btn" type="submit">📤 Invia Candidatura</button>
+</form>
+</div>
+<div aria-hidden="true" id="qualifica-tooltip" role="tooltip"></div><script defer="True" src="assets/js/common.js"></script><script defer="" src="assets/js/pages/aggiungi-volontario-pubblico.js"></script>
+</body>
+</html>

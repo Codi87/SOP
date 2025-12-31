@@ -1,0 +1,232 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #b71c1c 0%, #d32f2f 100%);
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .container {
+    background: white;
+    max-width: 700px;
+    width: 95%;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  }
+  
+  .logo {
+    text-align: center;
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .logo img {
+    width: 180px;
+    height: auto;
+    display: block;
+    margin: 0 auto 10px;
+  }
+  
+  .logo h1.fallback {
+    display: none;
+    color: #b71c1c;
+    font-size: 2rem;
+    margin: 0;
+  }
+  
+  .logo p {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 5px 0 0;
+    font-weight: 500;
+  }
+  
+  .row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  
+  label.field-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+  
+  input:focus {
+    outline: none;
+    border-color: #b71c1c;
+  }
+  
+  input[readonly] {
+    background-color: #f8f9fa;
+    color: #495057;
+    cursor: not-allowed;
+  }
+  
+  input:invalid {
+    border-color: #dc3545;
+  }
+  
+  .btn {
+    background: #b71c1c;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.3s;
+    margin-top: 10px;
+  }
+  
+  .btn:hover {
+    background: #9f1b1b;
+  }
+  
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background: #ccc;
+  }
+  
+  .btn-success {
+    background: #28a745 !important;
+  }
+  
+  .btn-success:hover {
+    background: #218838 !important;
+  }
+  
+  .success {
+    background: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border: 1px solid #c3e6cb;
+    animation: slideDown 0.4s ease;
+  }
+  
+  .error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border: 1px solid #f5c6cb;
+    animation: shake 0.5s ease;
+  }
+  
+  .qualifiche-container, .patenti-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .qualifiche-container legend, .patenti-container legend {
+    font-weight: bold;
+    color: #b71c1c;
+    padding: 0 5px;
+    font-size: 1rem;
+  }
+  
+  label {
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-bottom: 5px;
+  }
+  
+  label input[type="checkbox"] {
+    margin-right: 8px;
+    width: auto;
+    flex: none;
+    cursor: pointer;
+  }
+  
+  .privacy {
+    margin: 20px 0;
+    padding: 15px;
+    background: #fff3cd;
+    border-radius: 6px;
+    border-left: 4px solid #ffc107;
+  }
+  
+  .privacy label {
+    line-height: 1.6;
+  }
+  
+  .required-note {
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+  
+  @media (max-width: 768px) {
+    body {
+      padding: 10px;
+    }
+    .container {
+      padding: 20px;
+    }
+    .row {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .qualifiche-container, .patenti-container {
+      grid-template-columns: 1fr;
+    }
+    .logo img {
+      width: 140px;
+    }
+  }

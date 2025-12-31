@@ -1,1148 +1,148 @@
 <!DOCTYPE html>
+
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Gestione Volontari - CRI</title>
-<style>
-  :root {
-    --rosso-cri: #b71c1c;
-    --bianco: #ffffff;
-    --grigio: #f5f5f5;
-    --blu-info: #007bff;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html, body{ height:100%; 
-    overflow: hidden; /* ✅ scroll solo nel main */
-  }
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    display: flex;
-    min-height: 100vh;
-    background: var(--grigio);
-  }
-
-  /* ===== SIDEBAR + MENU come INDEX ===== */
-  .sidebar {
-    width: 260px;
-    flex-shrink: 0;
-    background: var(--rosso-cri);
-    color: var(--bianco);
-    display: flex;
-    flex-direction: column;
-    padding-top: 20px;
-    height: 100vh;
-    overflow: hidden;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    min-height: 0; /* ✅ permette ai figli scrollabili di funzionare */
-}
-
-  .sidebar img {
-    width: 220px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-  }
-
-  .menu {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-    flex-grow: 1;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-}
-
-  .menu li { width: 100%; }
-
-  .menu a {
-    display: block;
-    padding: 15px 20px;
-    color: var(--bianco);
-    text-decoration: none;
-    font-weight: bold;
-  }
-
-  .menu a:hover,
-  .menu a.active {
-    background: #9f1b1b;
-  }
-
-  #logout {
-    flex-shrink: 0;
-    margin: 12px auto 20px auto;
-    padding: 10px 20px;
-    width: 80%;
-    background-color: #fff;
-    color: var(--rosso-cri);
-    border: 2px solid var(--rosso-cri);
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.3s, color 0.3s;
-  }
-  #logout:hover { background-color: var(--rosso-cri); color: #fff; }
-
-  .main {
-    flex-grow: 1;
-    background: var(--bianco);
-    padding: 30px;
-    overflow-y: auto;
-    position: relative;
-    height: 100vh;
-    flex: 1 1 auto;
-    min-height: 0; /* ✅ necessario per scroll su mobile in flex */
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-}
-
-  .main h1 {
-    color: var(--rosso-cri);
-    margin-top: 0;
-  }
-
-  #search {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    font-size: 1rem;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
-
-  #btn-apri-form {
-    background: var(--rosso-cri);
-    color: var(--bianco);
-    border: none;
-    padding: 12px 20px;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-bottom: 20px;
-    transition: background 0.3s;
-  }
-
-  #btn-apri-form:hover {
-    background: #9f1b1b;
-  }
-
-  /* Contenitore form a modale */
-  #form-container {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-
-  #form-container.active {
-    display: flex;
-  }
-
-  #form-box {
-    background: var(--grigio);
-    max-width: 720px;
-    width: 95%;
-    border-radius: 8px;
-    padding: 25px 30px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.25);
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    -webkit-overflow-scrolling: touch;
-}
-
-  #btn-chiudi-form {
-    position: absolute;
-    top: 12px;
-    right: 15px;
-    font-size: 2rem;
-    background: none;
-    border: none;
-    color: var(--rosso-cri);
-    cursor: pointer;
-  }
-
-  form .row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 10px;
-  }
-
-  form input,
-  form select {
-    flex: 1 1 48%;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-  }
-
-  form input[type="date"] {
-    padding: 6px 8px;
-  }
-
-  /* Stile per campi readonly */
-  form input[readonly] {
-    background-color: #e9ecef;
-    color: #6c757d;
-    cursor: not-allowed;
-  }
-
-  /* Qualifiche a due colonne */
-  .qualifiche-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px 20px;
-    margin-bottom: 15px;
-  }
-
-  /* Patenti a due colonne */
-  .patenti-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px 20px;
-    margin-bottom: 15px;
-  }
-
-  /* Consenso a una colonna (testo) + checkbox separata */
-  .consenso-container {
-    margin-bottom: 15px;
-  }
-
-  .consenso-checkbox-wrapper {
-    margin-top: 10px;
-  }
-
-  /* ✅ checkbox privacy leggermente più grande */
-  .consenso-checkbox-wrapper input[type="checkbox"]{
-    width: 18px;
-    height: 18px;
-    vertical-align: middle;
-    margin-right: 8px;
-  }
-
-  form button[type="submit"] {
-    background: var(--rosso-cri);
-    color: var(--bianco);
-    border: none;
-    padding: 12px 20px;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.3s;
-    margin-top: 10px;
-  }
-
-  form button[type="submit"]:hover {
-    background: #9f1b1b;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    max-width: 1200px;
-  }
-
-  table th,
-  table td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: left;
-    vertical-align: middle;
-  }
-
-  table th {
-    background: var(--rosso-cri);
-    color: var(--bianco);
-  }
-
-  .action-btn {
-    cursor: pointer;
-    padding: 6px 10px;
-    margin: 0 2px;
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 0.9rem;
-  }
-
-  .edit-btn { background-color: #ffc107; color: #000; }
-  .delete-btn { background-color: #dc3545; color: #fff; }
-  .info-btn { background-color: var(--blu-info); color: #fff; }
-
-  /* ✅ POPUP INFO MIGLIORATO */
-  #info-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 750px;
-    max-width: 95%;
-    max-height: 90vh;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 50px rgba(0,0,0,0.4);
-    display: none;
-    z-index: 1100;
-    overflow: hidden;
-  }
-
-  #info-popup.active { display: block; }
-
-  #info-popup h3 {
-    margin: 0;
-    padding: 25px 30px;
-    background: var(--rosso-cri);
-    color: white;
-    font-size: 1.4rem;
-    border-radius: 12px 12px 0 0;
-  }
-
-  #info-content {
-    padding: 25px 30px;
-    font-size: 1rem;
-    line-height: 2;
-    color: #333;
-    max-height: calc(90vh - 100px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-  /* ✅ Righe info con sfondo alternato */
-  #info-content > div {
-    display: flex;
-    padding: 12px 15px;
-    border-radius: 6px;
-    margin-bottom: 5px;
-  }
-
-  #info-content > div:nth-child(even) { background: #f8f9fa; }
-
-  .info-label {
-    color: var(--rosso-cri);
-    font-weight: bold;
-    min-width: 200px;
-    flex-shrink: 0;
-  }
-
-  .info-value { color: #333; flex: 1; }
-
-  #info-close {
-    position: absolute;
-    top: 20px;
-    right: 25px;
-    background: rgba(255,255,255,0.2);
-    border: none;
-    font-size: 1.8rem;
-    color: white;
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
-  }
-
-  #info-close:hover {
-    background: rgba(255,255,255,0.3);
-    transform: rotate(90deg);
-  }
-
-  /* ✅ Mini popup descrizioni qualifiche */
-  #qualifica-tooltip{
-    position: fixed;
-    z-index: 2000;
-    display: none;
-    max-width: 320px;
-    background: rgba(0,0,0,0.88);
-    color: #fff;
-    padding: 8px 10px;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    line-height: 1.35;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
-    pointer-events: none;
-  }
-
-  /* ===== MOBILE come INDEX ===== */
-  @media (max-width: 768px){
-    html, body{ height:auto; overflow:auto; }
-body { flex-direction: column; }
-    .sidebar{ position: relative; height:auto; overflow: visible; width:100%; padding: 15px; }
-    .menu{ overflow: visible; }
-    .main{ height:auto; overflow: visible; padding: 20px; }
-  }
-</style>
+<link href="assets/css/app.css" rel="stylesheet"/> <link href="assets/css/pages/volontari.css" rel="stylesheet"/>
 </head>
-<body>
-
-<aside class="sidebar" aria-label="Navigazione principale">
-  <img id="logo-cri" src="logo.svg" alt="Logo Croce Rossa Italiana" />
-  <ul class="menu" id="menu-sidebar" role="navigation" aria-label="Menu principale"></ul>
-  <button id="logout" type="button">Logout</button>
+<body class="layout-admin">
+<aside aria-label="Navigazione principale" class="sidebar">
+<img alt="Logo Croce Rossa Italiana" id="logo-cri" src="logo.svg"/>
+<ul aria-label="Menu principale" class="menu" id="menu-sidebar" role="navigation"></ul>
+<button id="logout" type="button">Logout</button>
 </aside>
-
 <main class="main">
-  <h1 id="pageTitle">👥 Gestione Volontari</h1>
-  <input
-    type="search"
-    id="search"
-    placeholder="🔍 Cerca per nome, cognome, CF o email"
-    aria-label="Cerca volontario"
-  />
-  <button id="btn-apri-form">➕ Aggiungi Volontario</button>
-
-  <table aria-label="Elenco volontari">
-    <thead>
-      <tr>
-        <th scope="col">Nome</th>
-        <th scope="col">Cognome</th>
-        <th scope="col">Codice Fiscale</th>
-        <th scope="col">Telefono</th>
-        <th scope="col">Azioni</th>
-      </tr>
-    </thead>
-    <tbody id="volontari-list"></tbody>
-  </table>
+<h1 id="pageTitle">👥 Gestione Volontari</h1>
+<input aria-label="Cerca volontario" id="search" placeholder="🔍 Cerca per nome, cognome, CF o email" type="search"/>
+<button id="btn-apri-form">➕ Aggiungi Volontario</button>
+<table aria-label="Elenco volontari">
+<thead>
+<tr>
+<th scope="col">Nome</th>
+<th scope="col">Cognome</th>
+<th scope="col">Codice Fiscale</th>
+<th scope="col">Telefono</th>
+<th scope="col">Azioni</th>
+</tr>
+</thead>
+<tbody id="volontari-list"></tbody>
+</table>
 </main>
-
 <!-- Form modale -->
-<div id="form-container" aria-hidden="true">
-  <div id="form-box" role="dialog" aria-modal="true" aria-labelledby="form-title">
-    <button id="btn-chiudi-form" aria-label="Chiudi Modulo">&times;</button>
-    <h2 id="form-title" style="color: var(--rosso-cri); margin-top:0;">Aggiungi Volontario</h2>
-    <form id="volontari-form" autocomplete="off" novalidate>
-      <div class="row">
-        <input type="text" id="nome" name="nome" placeholder="Nome *" required />
-        <input type="text" id="cognome" name="cognome" placeholder="Cognome *" required />
-      </div>
-
-      <div class="row">
-        <input type="text" id="cf" name="cf" placeholder="Codice Fiscale *" maxlength="16" required />
-        <input type="email" id="email" name="email" placeholder="📧 Email *" required />
-      </div>
-
-      <div class="row">
-        <input type="tel" id="telefono" name="telefono" placeholder="📱 Telefono *" required />
-        <input type="text" id="contattoEmergenza" name="contattoEmergenza" placeholder="🚨 Contatto emergenza *" required />
-      </div>
-
-      <div class="row">
-        <input type="text" id="luogoNascita" name="luogoNascita" placeholder="Luogo di nascita *" required />
-        <input type="date" id="dataNascita" name="dataNascita" placeholder="Data di nascita *" required />
-      </div>
-
-      <div class="row">
-        <input type="text" id="stato" name="stato" placeholder="Stato (es. Italia) *" required />
-        <input type="text" id="indirizzo" name="indirizzo" placeholder="🏠 Indirizzo *" required />
-      </div>
-
-      <div class="row">
-        <input type="text" id="comune" name="comune" placeholder="Comune *" required />
-        <input type="text" id="provincia" name="provincia" placeholder="Provincia *" required />
-      </div>
-
-      <div class="row">
-        <input type="text" id="cap" name="cap" placeholder="CAP *" maxlength="5" required />
-        <input type="text" id="comitato" name="comitato" placeholder="Comitato *" required />
-      </div>
-
-      <div class="row">
-        <input type="text" id="intolleranze" name="intolleranze" placeholder="Intolleranze" />
-        <input type="text" id="allergie" name="allergie" placeholder="Allergie" />
-      </div>
-
-      <div class="row">
-        <input type="text" id="codiceMGO" name="codiceMGO" placeholder="Codice MGO" />
-      </div>
-
-      <fieldset class="qualifiche-container">
-        <legend>📋 Qualifiche</legend>
-        <label><input type="checkbox" class="qualifica-checkbox" value="OPEM" /> OPEM</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="CSA" /> CSA</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="OPSA" /> OPSA</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="TLC 1" /> TLC 1</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="TLC 2" /> TLC 2</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="UC-OC" /> UC-OC</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="ASP-C" /> ASP-C</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="CAE" /> CAE</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="CSP-A" /> CSP-A</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="CSP-D" /> CSP-D</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="SMTS" /> SMTS</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="AUTISTA SOCCORRITORE" /> AUTISTA SOCCORRITORE</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="SOCCORRITORE" /> SOCCORRITORE</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="TS" /> TS</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="OSG" /> OSG</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="LOGISTA" /> LOGISTA</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="OPERATORE UAS (A1/A3-A2-STS)" /> OPERATORE UAS (A1/A3-A2-STS)</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="HACCP" /> HACCP</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="OPSOCEM" /> OPSOCEM</label>
-        <label><input type="checkbox" class="qualifica-checkbox" value="MEDIATORE LINGUISTICO" /> MEDIATORE LINGUISTICO</label>
-      </fieldset>
-
-      <fieldset class="patenti-container">
-        <legend>🚗 Patenti CRI</legend>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 1" /> PATENTE 1</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 2" /> PATENTE 2</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 2B" /> PATENTE 2B</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 3" /> PATENTE 3</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 4" /> PATENTE 4</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 5" /> PATENTE 5</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 5B" /> PATENTE 5B</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 6" /> PATENTE 6</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 7" /> PATENTE 7</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 7B" /> PATENTE 7B</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 8" /> PATENTE 8</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="PATENTE 9" /> PATENTE 9</label>
-        <label><input type="checkbox" class="patenti-checkbox" value="NESSUNA" /> NESSUNA</label>
-      </fieldset>
-
-      <fieldset class="consenso-container">
-        <legend>
+<div aria-hidden="true" id="form-container">
+<div aria-labelledby="form-title" aria-modal="true" id="form-box" role="dialog">
+<button aria-label="Chiudi Modulo" id="btn-chiudi-form">×</button>
+<h2 id="form-title" style="color: var(--rosso-cri); margin-top:0;">Aggiungi Volontario</h2>
+<form autocomplete="off" id="volontari-form" novalidate="">
+<div class="row">
+<input id="nome" name="nome" placeholder="Nome *" required="" type="text"/>
+<input id="cognome" name="cognome" placeholder="Cognome *" required="" type="text"/>
+</div>
+<div class="row">
+<input id="cf" maxlength="16" name="cf" placeholder="Codice Fiscale *" required="" type="text"/>
+<input id="email" name="email" placeholder="📧 Email *" required="" type="email"/>
+</div>
+<div class="row">
+<input id="telefono" name="telefono" placeholder="📱 Telefono *" required="" type="tel"/>
+<input id="contattoEmergenza" name="contattoEmergenza" placeholder="🚨 Contatto emergenza *" required="" type="text"/>
+</div>
+<div class="row">
+<input id="luogoNascita" name="luogoNascita" placeholder="Luogo di nascita *" required="" type="text"/>
+<input id="dataNascita" name="dataNascita" placeholder="Data di nascita *" required="" type="date"/>
+</div>
+<div class="row">
+<input id="stato" name="stato" placeholder="Stato (es. Italia) *" required="" type="text"/>
+<input id="indirizzo" name="indirizzo" placeholder="🏠 Indirizzo *" required="" type="text"/>
+</div>
+<div class="row">
+<input id="comune" name="comune" placeholder="Comune *" required="" type="text"/>
+<input id="provincia" name="provincia" placeholder="Provincia *" required="" type="text"/>
+</div>
+<div class="row">
+<input id="cap" maxlength="5" name="cap" placeholder="CAP *" required="" type="text"/>
+<input id="comitato" name="comitato" placeholder="Comitato *" required="" type="text"/>
+</div>
+<div class="row">
+<input id="intolleranze" name="intolleranze" placeholder="Intolleranze" type="text"/>
+<input id="allergie" name="allergie" placeholder="Allergie" type="text"/>
+</div>
+<div class="row">
+<input id="codiceMGO" name="codiceMGO" placeholder="Codice MGO" type="text"/>
+</div>
+<fieldset class="qualifiche-container">
+<legend>📋 Qualifiche</legend>
+<label><input class="qualifica-checkbox" type="checkbox" value="OPEM"/> OPEM</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="CSA"/> CSA</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="OPSA"/> OPSA</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="TLC 1"/> TLC 1</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="TLC 2"/> TLC 2</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="UC-OC"/> UC-OC</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="ASP-C"/> ASP-C</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="CAE"/> CAE</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="CSP-A"/> CSP-A</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="CSP-D"/> CSP-D</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="SMTS"/> SMTS</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="AUTISTA SOCCORRITORE"/> AUTISTA SOCCORRITORE</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="SOCCORRITORE"/> SOCCORRITORE</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="TS"/> TS</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="OSG"/> OSG</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="LOGISTA"/> LOGISTA</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="OPERATORE UAS (A1/A3-A2-STS)"/> OPERATORE UAS (A1/A3-A2-STS)</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="HACCP"/> HACCP</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="OPSOCEM"/> OPSOCEM</label>
+<label><input class="qualifica-checkbox" type="checkbox" value="MEDIATORE LINGUISTICO"/> MEDIATORE LINGUISTICO</label>
+</fieldset>
+<fieldset class="patenti-container">
+<legend>🚗 Patenti CRI</legend>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 1"/> PATENTE 1</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 2"/> PATENTE 2</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 2B"/> PATENTE 2B</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 3"/> PATENTE 3</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 4"/> PATENTE 4</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 5"/> PATENTE 5</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 5B"/> PATENTE 5B</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 6"/> PATENTE 6</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 7"/> PATENTE 7</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 7B"/> PATENTE 7B</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 8"/> PATENTE 8</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 9"/> PATENTE 9</label>
+<label><input class="patenti-checkbox" type="checkbox" value="NESSUNA"/> NESSUNA</label>
+</fieldset>
+<fieldset class="consenso-container">
+<legend>
           Autorizzo il trattamento dei miei dati personali ai sensi del Regolamento (UE) 2016/679 e del D.Lgs. 196/2003 e s.m.i., e acconsento alla loro comunicazione alla Sala Operativa Provinciale CRI di Pesaro e Urbino per le finalità indicate nei moduli.
         </legend>
-        <div class="consenso-checkbox-wrapper">
-          <label>
-            <input type="checkbox" id="consensoGdpr" name="consensoGdpr" required />
+<div class="consenso-checkbox-wrapper">
+<label>
+<input id="consensoGdpr" name="consensoGdpr" required="" type="checkbox"/>
             Ho letto l'informativa privacy e acconsento al trattamento dei dati personali.
           </label>
-        </div>
-      </fieldset>
-
-      <!-- ✅ Ruolo sistema (solo Amministratore) - in fondo -->
-      <div class="row" id="row-ruolo" style="display:none;">
-        <select id="ruoloSpeciale" name="ruoloSpeciale" aria-label="Ruolo sistema">
-          <option value="volontario">Volontario</option>
-          <option value="amministratore">Admin</option>
-          <option value="sop">SOP</option>
-          <option value="sol">SOL</option>
-          <option value="tlc_provinciale">TLC Provinciale</option>
-        </select>
-      </div>
-
-      <button type="submit" id="submit-btn">Aggiungi Volontario</button>
-    </form>
-  </div>
 </div>
-
+</fieldset>
+<!-- ✅ Ruolo sistema (solo Amministratore) - in fondo -->
+<div class="row" id="row-ruolo" style="display:none;">
+<select aria-label="Ruolo sistema" id="ruoloSpeciale" name="ruoloSpeciale">
+<option value="volontario">Volontario</option>
+<option value="amministratore">Admin</option>
+<option value="sop">SOP</option>
+<option value="sol">SOL</option>
+<option value="tlc_provinciale">TLC Provinciale</option>
+</select>
+</div>
+<button id="submit-btn" type="submit">Aggiungi Volontario</button>
+</form>
+</div>
+</div>
 <!-- Popup info volontario -->
-<div
-  id="info-popup"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="info-title"
-  aria-describedby="info-desc"
-  tabindex="-1"
->
-  <button id="info-close" aria-label="Chiudi dettagli volontario">&times;</button>
-  <h3 id="info-title">📋 Dettagli Volontario</h3>
-  <div id="info-content"></div>
+<div aria-describedby="info-desc" aria-labelledby="info-title" aria-modal="true" id="info-popup" role="dialog" tabindex="-1">
+<button aria-label="Chiudi dettagli volontario" id="info-close">×</button>
+<h3 id="info-title">📋 Dettagli Volontario</h3>
+<div id="info-content"></div>
 </div>
-
 <!-- Tooltip qualifiche -->
-<div id="qualifica-tooltip" role="tooltip" aria-hidden="true"></div>
-
-<script>
-const userId = localStorage.getItem("userId");
-const role = (localStorage.getItem("role") || "").toLowerCase().trim();
-const comitato = localStorage.getItem("comitato") || "";
-
-if (!userId) {
-  alert("Devi effettuare il login");
-  window.location.href = "login.html";
-}
-
-/* ===== LOGOUT ===== */
-function logout() {
-  localStorage.clear();
-  window.location.href = "login.html";
-}
-document.getElementById("logout").onclick = logout;
-
-/* ===== LOGO come INDEX ===== */
-const logoImg = document.getElementById("logo-cri");
-let logoSrc = "logo.svg";
-
-const normalize = (s) => (s || "").toString().toLowerCase().trim();
-
-/* ===== RUOLI SISTEMA (compatibile con admin.html) ===== */
-const ruoloMapKey = "cri_ruoli_map";
-function loadRuoliMap(){
-  try { return JSON.parse(localStorage.getItem(ruoloMapKey) || "{}") || {}; }
-  catch { return {}; }
-}
-function saveRuoliMap(m){
-  localStorage.setItem(ruoloMapKey, JSON.stringify(m || {}));
-}
-function normalizeRoleValue(r){
-  const x = normalize(r);
-  if (!x) return "volontario";
-  if (x === "admin") return "amministratore";
-  if (x === "tlc provinciale" || x === "tlc-provinciale" || x === "tlcprovinciale") return "tlc_provinciale";
-  return x;
-}
-function getRoleForCf(cfUpper){
-  const id = (cfUpper || "").toUpperCase().trim();
-  const map = loadRuoliMap();
-  return normalizeRoleValue(map[id]?.ruolo || "");
-}
-function setRoleForVolontario(vol, selectedRole, oldCfUpper){
-  const map = loadRuoliMap();
-  const newCf = (vol?.cf || "").toUpperCase().trim();
-  const oldCf = (oldCfUpper || "").toUpperCase().trim();
-  const r = normalizeRoleValue(selectedRole);
-
-  if (oldCf && oldCf !== newCf) delete map[oldCf];
-
-  if (r === "volontario"){
-    delete map[newCf];
-  } else {
-    map[newCf] = {
-      ruolo: r,
-      nome: `${vol?.nome || ""} ${vol?.cognome || ""}`.trim() || "Admin CRI",
-      comitato: vol?.comitato || ""
-    };
-  }
-  saveRuoliMap(map);
-}
-
-/* ===== Tooltip qualifiche (hover) ===== */
-const qualificaDesc = {
-  "OPEM": "Operatore CRI Attività in Emergenza",
-  "CSA": "Corso Sicurezza Acquatica",
-  "OPSA": "Operatore Polivalente di Salvataggio in Acqua",
-  "TLC 1": "Operatore Telecomunicazioni",
-  "TLC 2": "Specialista Telecomunicazioni",
-  "UC-OC": "Operatore Cinofilo CRI",
-  "ASP-C": "Specializzazione per Operatore di Supporto Ristorazione in Emergenza",
-  "CAE": "Coordinatore Delle Attività di Emergenza",
-  "CSP-A": "Operatore di Sala Operativa",
-  "CSP-D": "Operatore Specializzato CRI in Logistica in Emergenza",
-  "SMTS": "Operatore Soccorso con Mezzi e Tecniche Speciali",
-  "AUTISTA SOCCORRITORE": "Autista Soccorritore Necessario TSSA",
-  "SOCCORRITORE": "Soccorritore Necessario TSSA",
-  "TS": "Corso Trasporti Sanitari",
-  "OSG": "Operatore Sociale Generico",
-  "LOGISTA": "Logista Generico Senza Corso",
-  "OPERATORE UAS (A1/A3-A2-STS)": "Operatore UAS Certificato Con Attestati",
-  "OPSOCEM": "Operatore Sociale CRI in Emergenza"
-  // HACCP e MEDIATORE LINGUISTICO: nessuna descrizione
-};
-
-const tooltip = document.getElementById("qualifica-tooltip");
-function showTooltip(text, x, y){
-  if (!tooltip) return;
-  tooltip.textContent = text;
-  tooltip.style.display = "block";
-  tooltip.setAttribute("aria-hidden", "false");
-
-  const pad = 12;
-  tooltip.style.left = (x + pad) + "px";
-  tooltip.style.top = (y + pad) + "px";
-
-  // clamp to viewport
-  const rect = tooltip.getBoundingClientRect();
-  let nx = x + pad, ny = y + pad;
-  if (rect.right > window.innerWidth - 8) nx = Math.max(8, window.innerWidth - rect.width - 8);
-  if (rect.bottom > window.innerHeight - 8) ny = Math.max(8, window.innerHeight - rect.height - 8);
-  tooltip.style.left = nx + "px";
-  tooltip.style.top = ny + "px";
-}
-function hideTooltip(){
-  if (!tooltip) return;
-  tooltip.style.display = "none";
-  tooltip.setAttribute("aria-hidden", "true");
-}
-function attachQualificheTooltips(){
-  const labels = document.querySelectorAll(".qualifiche-container label");
-  labels.forEach(label => {
-    const input = label.querySelector("input.qualifica-checkbox");
-    if (!input) return;
-    const key = (input.value || "").trim();
-    const desc = qualificaDesc[key] || "";
-    if (!desc) return; // niente popup se non c'è descrizione
-
-    const handlerMove = (e) => showTooltip(desc, e.clientX, e.clientY);
-    label.addEventListener("mouseenter", handlerMove);
-    label.addEventListener("mousemove", handlerMove);
-    label.addEventListener("mouseleave", hideTooltip);
-
-    // accessibilità tastiera: focus sul checkbox
-    input.addEventListener("focus", (e) => {
-      const r = input.getBoundingClientRect();
-      showTooltip(desc, r.left + r.width/2, r.top);
-    });
-    input.addEventListener("blur", hideTooltip);
-  });
-}
-attachQualificheTooltips();
-
-/* ===== Aliases per vecchie qualifiche (compatibilità dati) ===== */
-const qualificaAlias = {
-  "AUTISTA SOCCORRITORE TSSA": "AUTISTA SOCCORRITORE",
-  "SOCCORRITORE TSSA": "SOCCORRITORE",
-  "OPEM GENERICO": "OPEM",
-  "OPEM LOGISTA": "LOGISTA",
-  "OPERATORE TLC": "TLC 1",
-  "OPERATORE SOCIALE GENERICO": "OSG",
-  "CAE COORDINATORE ATTIVITA IN EMERGENZA": "CAE",
-  "OPERATORE SOCIALE IN EMERGENZA": "OPSOCEM"
-};
-
-if (role === "sol") {
-  const c = normalize(comitato);
-  const map = {
-    "pesaro": "logo-pesaro.svg",
-    "urbino": "logo-urbino.svg",
-    "fano": "logo-fano.svg",
-    "pergola": "logo-pergola.svg",
-    "marotta-mondolfo": "logo-marotta-mondolfo.svg",
-    "fossombrone": "logo-fossombrone.svg",
-    "cagli": "logo-cagli.svg",
-    "montelabbate": "logo-montelabbate.svg",
-    "fermignano": "logo-fermignano.svg",
-    "sant'angelo in vado": "logo-santangeloinvado.svg",
-    "santangelo in vado": "logo-santangeloinvado.svg",
-    "sant-angelo-in-vado": "logo-santangeloinvado.svg"
-  };
-  logoSrc = map[c] || "logo-sop.svg";
-} else if (role === "sop" || role === "amministratore" || role === "tlc_provinciale") {
-  logoSrc = "logo-sop.svg";
-}
-
-logoImg.src = logoSrc;
-logoImg.onerror = () => { logoImg.src = "logo-sop.svg"; };
-
-/* ===== MENU come INDEX (con TLC + Admin) ===== */
-const menu = document.getElementById("menu-sidebar");
-menu.innerHTML = "";
-
-const items = [
-  { text: "🏠 Home", href: "index.html" },
-  { text: "✅ Approvazioni", href: "iscrizioni-in-attesa.html" },
-  { text: "👥 Volontari", href: "volontari.html" },
-  { text: "🚗 Mezzi", href: "mezzi.html" },
-  { text: "📦 Materiali", href: "materiali.html" },
-  { text: "🚨 Emergenze", href: "emergenze.html" },
-  { text: "📅 Eventi", href: "eventi.html" },
-  { text: "📄 Documenti", href: "documenti.html" }
-];
-
-if (["sop", "sol", "amministratore", "tlc_provinciale"].includes(role)) {
-  items.push({ text: "📡 TLC", href: "tlc.html" });
-}
-
-if (["sop", "sol", "amministratore"].includes(role)) {
-  items.push({ text: "⚙️ Admin", href: "admin.html" });
-}
-
-const current = (location.pathname.split("/").pop() || "").toLowerCase();
-
-items.forEach(({ text, href }) => {
-  const li = document.createElement("li");
-  const a = document.createElement("a");
-  a.href = href;
-  a.textContent = text;
-
-  const hrefLower = (href || "").toLowerCase();
-  if (current && current === hrefLower) a.classList.add("active");
-  if (!current && hrefLower === "volontari.html") a.classList.add("active");
-  if (current && current.includes("volontari") && hrefLower === "volontari.html") a.classList.add("active");
-
-  li.appendChild(a);
-  menu.appendChild(li);
-});
-
-const formContainer = document.getElementById("form-container");
-const form = document.getElementById("volontari-form");
-const list = document.getElementById("volontari-list");
-const searchInput = document.getElementById("search");
-const btnApriForm = document.getElementById("btn-apri-form");
-const btnChiudiForm = document.getElementById("btn-chiudi-form");
-const submitBtn = document.getElementById("submit-btn");
-const infoPopup = document.getElementById("info-popup");
-const infoContent = document.getElementById("info-content");
-const infoClose = document.getElementById("info-close");
-
-const rowRuolo = document.getElementById("row-ruolo");
-const ruoloSelect = document.getElementById("ruoloSpeciale");
-let editOldCf = null;
-
-// Mostra la selezione ruolo solo all'Amministratore
-if (rowRuolo) rowRuolo.style.display = (role === "amministratore") ? "flex" : "none";
-
-let editIndex = null;
-let lastFocusedElement = null;
-
-function getFocusableElements(container) {
-  return container.querySelectorAll(
-    'a[href], button:not([disabled]), textarea, input:not([disabled]), select, [tabindex]:not([tabindex="-1"])'
-  );
-}
-
-function trapFocus(container, event) {
-  const focusable = getFocusableElements(container);
-  if (!focusable.length) return;
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-
-  if (event.key === "Tab") {
-    if (event.shiftKey) {
-      if (document.activeElement === first) {
-        last.focus();
-        event.preventDefault();
-      }
-    } else {
-      if (document.activeElement === last) {
-        first.focus();
-        event.preventDefault();
-      }
-    }
-  }
-}
-
-function openDialog(container, firstFocusElement) {
-  lastFocusedElement = document.activeElement;
-  container.classList.add("active");
-  container.setAttribute("aria-hidden", "false");
-
-  if (firstFocusElement) {
-    firstFocusElement.focus();
-  } else {
-    const focusable = getFocusableElements(container);
-    if (focusable.length) focusable[0].focus();
-  }
-
-  document.addEventListener("keydown", dialogKeydownHandler);
-}
-
-function closeDialog(container) {
-  container.classList.remove("active");
-  container.setAttribute("aria-hidden", "true");
-  document.removeEventListener("keydown", dialogKeydownHandler);
-
-  if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
-    lastFocusedElement.focus();
-  }
-}
-
-function dialogKeydownHandler(e) {
-  if (formContainer.classList.contains("active")) {
-    trapFocus(formContainer, e);
-    if (e.key === "Escape") {
-      toggleForm(false);
-    }
-  }
-  if (infoPopup.classList.contains("active")) {
-    trapFocus(infoPopup, e);
-    if (e.key === "Escape") {
-      hideInfoPopup();
-    }
-  }
-}
-
-function toggleForm(show) {
-  if (show) {
-    hideInfoPopup();
-    openDialog(formContainer, form.nome);
-    submitBtn.textContent = editIndex === null ? "Aggiungi Volontario" : "Salva Modifiche";
-  } else {
-    closeDialog(formContainer);
-    form.reset();
-    form.comitato.removeAttribute('readonly');
-    editIndex = null;
-    editOldCf = null;
-    if (ruoloSelect) ruoloSelect.value = 'volontario';
-    submitBtn.textContent = "Aggiungi Volontario";
-  }
-}
-
-btnApriForm.addEventListener("click", () => {
-  editIndex = null;
-  editOldCf = null;
-  if (ruoloSelect) ruoloSelect.value = "volontario";
-  if (role === "sol") {
-    form.comitato.value = comitato || "";
-    form.comitato.setAttribute('readonly', true);
-  }
-  toggleForm(true);
-});
-
-btnChiudiForm.addEventListener("click", () => toggleForm(false));
-
-function getVisibleVolontari() {
-  const locali = JSON.parse(localStorage.getItem("volontari") || "[]");
-  if (role === "sop" || role === "amministratore") return locali;
-
-  if (role === "sol") {
-    const c = normalize(comitato);
-    if (!c) return locali;
-    return locali.filter(v => normalize(v.comitato) === c);
-  }
-  return locali;
-}
-
-function showInfoPopup(volontario) {
-  const dataRaw = volontario.dataNascita;
-  let dataFormatted = dataRaw;
-  if (dataRaw) {
-    const parts = dataRaw.split("-");
-    if (parts.length === 3) {
-      dataFormatted = parts[2] + "/" + parts[1] + "/" + parts[0];
-    }
-  }
-
-  const dettagli = `
-<div><span class="info-label">Nome:</span><span class="info-value">${escapeHtml(volontario.nome || '')}</span></div>
-<div><span class="info-label">Cognome:</span><span class="info-value">${escapeHtml(volontario.cognome || '')}</span></div>
-<div><span class="info-label">Codice Fiscale:</span><span class="info-value">${escapeHtml(volontario.cf || '')}</span></div>
-<div><span class="info-label">📧 Email:</span><span class="info-value">${escapeHtml(volontario.email || 'Non inserita')}</span></div>
-<div><span class="info-label">📱 Telefono:</span><span class="info-value">${escapeHtml(volontario.telefono || '')}</span></div>
-<div><span class="info-label">🚨 Contatto Emergenza:</span><span class="info-value">${escapeHtml(volontario.contattoEmergenza || '')}</span></div>
-<div><span class="info-label">Luogo di nascita:</span><span class="info-value">${escapeHtml(volontario.luogoNascita || '')}</span></div>
-<div><span class="info-label">Data di nascita:</span><span class="info-value">${escapeHtml(dataFormatted || '')}</span></div>
-<div><span class="info-label">Stato:</span><span class="info-value">${escapeHtml(volontario.stato || 'Italia')}</span></div>
-<div><span class="info-label">🏠 Indirizzo:</span><span class="info-value">${escapeHtml(volontario.indirizzo || '')}</span></div>
-<div><span class="info-label">Comune:</span><span class="info-value">${escapeHtml(volontario.comune || '')}</span></div>
-<div><span class="info-label">Provincia:</span><span class="info-value">${escapeHtml(volontario.provincia || '')}</span></div>
-<div><span class="info-label">CAP:</span><span class="info-value">${escapeHtml(volontario.cap || '')}</span></div>
-<div><span class="info-label">Comitato:</span><span class="info-value">${escapeHtml(volontario.comitato || '')}</span></div>
-<div><span class="info-label">Intolleranze:</span><span class="info-value">${escapeHtml(volontario.intolleranze || "Nessuna")}</span></div>
-<div><span class="info-label">Allergie:</span><span class="info-value">${escapeHtml(volontario.allergie || "Nessuna")}</span></div>
-<div><span class="info-label">Codice MGO:</span><span class="info-value">${escapeHtml(volontario.codiceMGO || "Non inserito")}</span></div>
-<div><span class="info-label">📋 Qualifiche:</span><span class="info-value">${escapeHtml((volontario.qualifiche ? volontario.qualifiche.join(", ") : "Nessuna"))}</span></div>
-<div><span class="info-label">🚗 Patenti:</span><span class="info-value">${escapeHtml(((volontario.patenti || []).join(", ") || "Nessuna"))}</span></div>
-<div><span class="info-label">Consenso GDPR:</span><span class="info-value">${volontario.consensoGdpr ? "✅ SI" : "❌ NO"}</span></div>
-  `;
-  infoContent.innerHTML = dettagli;
-  openDialog(infoPopup);
-}
-
-function hideInfoPopup() {
-  closeDialog(infoPopup);
-}
-
-infoClose.addEventListener("click", hideInfoPopup);
-
-function escapeHtml(text) {
-  if (text === null || text === undefined) return "";
-  return String(text).replace(/[&<>"']/g, match => {
-    const escapeMap = {
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
-    };
-    return escapeMap[match];
-  });
-}
-
-function renderVolontari() {
-  const filter = searchInput.value.trim().toLowerCase();
-  list.innerHTML = "";
-
-  const visibili = getVisibleVolontari();
-  const tutti = JSON.parse(localStorage.getItem("volontari") || "[]");
-
-  visibili
-    .filter(v =>
-      (v.nome || '').toLowerCase().includes(filter) ||
-      (v.cognome || '').toLowerCase().includes(filter) ||
-      (v.cf || '').toLowerCase().includes(filter) ||
-      (v.email || '').toLowerCase().includes(filter)
-    )
-    .forEach(v => {
-      const globalIndex = tutti.findIndex(vol => vol.cf === v.cf);
-
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${escapeHtml(v.nome)}</td>
-        <td>${escapeHtml(v.cognome)}</td>
-        <td>${escapeHtml(v.cf)}</td>
-        <td>${escapeHtml(v.telefono)}</td>
-        <td>
-          <button type="button" class="action-btn edit-btn" aria-label="Modifica ${escapeHtml(v.nome)} ${escapeHtml(v.cognome)}" onclick="editVolontario(${globalIndex})">✏️ Modifica</button>
-          <button type="button" class="action-btn delete-btn" aria-label="Elimina ${escapeHtml(v.nome)} ${escapeHtml(v.cognome)}" onclick="deleteVolontario(${globalIndex})">🗑️ Elimina</button>
-          <button type="button" class="action-btn info-btn" aria-label="Info ${escapeHtml(v.nome)} ${escapeHtml(v.cognome)}" onclick="showInfoPopupByIndex(${globalIndex})">ℹ️ Info</button>
-        </td>
-      `;
-      list.appendChild(row);
-    });
-}
-
-form.addEventListener("submit", e => {
-  e.preventDefault();
-
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
-  }
-
-  const telefono = form.telefono.value.trim();
-  const contattoEmergenza = form.contattoEmergenza.value.trim();
-  if (telefono && contattoEmergenza && telefono === contattoEmergenza) {
-    alert("❌ Il numero di telefono e il contatto di emergenza devono essere DIVERSI!");
-    form.telefono.focus();
-    return;
-  }
-
-  let selectedRole = "volontario";
-  if (role === "amministratore" && ruoloSelect) {
-    selectedRole = normalizeRoleValue(ruoloSelect.value);
-  } else if (editIndex !== null) {
-    const localiTmp = JSON.parse(localStorage.getItem("volontari") || "[]");
-    const vOld = localiTmp[editIndex] || {};
-    selectedRole = normalizeRoleValue(vOld.ruolo || vOld.role || getRoleForCf(vOld.cf) || "volontario");
-  }
-
-  const nuovoVolontario = {
-    nome: form.nome.value.trim(),
-    cognome: form.cognome.value.trim(),
-    cf: form.cf.value.trim().toUpperCase(),
-    email: form.email.value.trim().toLowerCase(),
-    telefono,
-    contattoEmergenza,
-    luogoNascita: form.luogoNascita.value.trim(),
-    dataNascita: form.dataNascita.value,
-    stato: form.stato.value.trim(),
-    indirizzo: form.indirizzo.value.trim(),
-    comune: form.comune.value.trim(),
-    provincia: form.provincia.value.trim(),
-    cap: form.cap.value.trim(),
-    comitato: form.comitato.value.trim(),
-    intolleranze: form.intolleranze.value.trim(),
-    allergie: form.allergie.value.trim(),
-    codiceMGO: form.codiceMGO.value.trim(),
-    qualifiche: Array.from(form.querySelectorAll(".qualifica-checkbox:checked")).map(cb => cb.value),
-    patenti: Array.from(form.querySelectorAll(".patenti-checkbox:checked")).map(cb => cb.value),
-    consensoGdpr: form.consensoGdpr.checked
-  };
-
-  if (selectedRole !== "volontario") {
-    nuovoVolontario.ruolo = selectedRole;
-    nuovoVolontario.role = selectedRole;
-  }
-
-  const locali = JSON.parse(localStorage.getItem("volontari") || "[]");
-  const duplicateIndex = locali.findIndex((v, idx) => v.cf === nuovoVolontario.cf && idx !== editIndex);
-
-  if (duplicateIndex !== -1) {
-    alert("❌ Errore: codice fiscale già presente per un altro volontario!");
-    return;
-  }
-
-  if (editIndex === null) {
-    locali.push(nuovoVolontario);
-  } else {
-    locali[editIndex] = nuovoVolontario;
-    editIndex = null;
-    submitBtn.textContent = "Aggiungi Volontario";
-  }
-
-  localStorage.setItem("volontari", JSON.stringify(locali));
-
-  if (role === "amministratore") {
-    setRoleForVolontario(nuovoVolontario, selectedRole, editOldCf);
-  }
-
-  toggleForm(false);
-  renderVolontari();
-});
-
-window.editVolontario = function(index){
-  const locali = JSON.parse(localStorage.getItem("volontari") || "[]");
-  const v = locali[index];
-  editIndex = index;
-  editOldCf = (v.cf || "").toUpperCase().trim();
-
-  if (ruoloSelect) {
-    const fromMap = getRoleForCf(v.cf);
-    ruoloSelect.value = normalizeRoleValue(fromMap || v.ruolo || v.role || "volontario");
-  }
-  submitBtn.textContent = "Salva Modifiche";
-
-  form.nome.value = v.nome || "";
-  form.cognome.value = v.cognome || "";
-  form.cf.value = v.cf || "";
-  form.email.value = v.email || "";
-  form.telefono.value = v.telefono || "";
-  form.contattoEmergenza.value = v.contattoEmergenza || "";
-  form.luogoNascita.value = v.luogoNascita || "";
-  form.dataNascita.value = v.dataNascita || "";
-  form.stato.value = v.stato || "";
-  form.indirizzo.value = v.indirizzo || "";
-  form.comune.value = v.comune || "";
-  form.provincia.value = v.provincia || "";
-  form.cap.value = v.cap || "";
-  form.comitato.value = v.comitato || "";
-  form.intolleranze.value = v.intolleranze || "";
-  form.allergie.value = v.allergie || "";
-  form.codiceMGO.value = v.codiceMGO || "";
-  form.consensoGdpr.checked = !!v.consensoGdpr;
-
-  if (role === "sol") {
-    form.comitato.setAttribute('readonly', true);
-  } else {
-    form.comitato.removeAttribute('readonly');
-  }
-
-  const qSet = new Set((v.qualifiche || []).map(x => String(x || "").trim()));
-  // compatibilità: mappa vecchi valori a nuove sigle
-  const normalized = new Set();
-  qSet.forEach(val => {
-    normalized.add(val);
-    if (qualificaAlias[val]) normalized.add(qualificaAlias[val]);
-  });
-
-  form.querySelectorAll(".qualifica-checkbox").forEach(cb => {
-    cb.checked = normalized.has(cb.value);
-  });
-
-  form.querySelectorAll(".patenti-checkbox").forEach(cb => {
-    cb.checked = v.patenti?.includes(cb.value) || false;
-  });
-
-  toggleForm(true);
-};
-
-window.deleteVolontario = function(index){
-  const locali = JSON.parse(localStorage.getItem("volontari") || "[]");
-  const v = locali[index];
-  if(confirm(`🗑️ Sei sicuro di voler eliminare:\n\n${v.nome} ${v.cognome}\nCF: ${v.cf}\n\n⚠️ Questa azione è irreversibile!`)){
-    locali.splice(index,1);
-    localStorage.setItem("volontari", JSON.stringify(locali));
-    renderVolontari();
-    if(editIndex === index){
-      toggleForm(false);
-      editIndex = null;
-      submitBtn.textContent = "Aggiungi Volontario";
-    }
-  }
-};
-
-window.showInfoPopupByIndex = function(index){
-  const locali = JSON.parse(localStorage.getItem("volontari") || "[]");
-  const v = locali[index];
-  if(!v) return;
-  showInfoPopup(v);
-};
-
-searchInput.addEventListener("input", renderVolontari);
-renderVolontari();
-</script>
+<div aria-hidden="true" id="qualifica-tooltip" role="tooltip"></div>
+<script defer="True" src="assets/js/common.js"></script><script defer="" src="assets/js/pages/volontari.js"></script>
 </body>
 </html>

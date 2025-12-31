@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mia Anagrafica - CRI</title>
+<link href="assets/css/app.css" rel="stylesheet"/> <link href="assets/css/pages/anagrafica-volontario.css" rel="stylesheet"/>
+</head>
+<body class="layout-admin">
+<aside class="sidebar">
+<img alt="Logo Croce Rossa Italiana" id="logo-volontario" src="logo-cri.svg"/>
+<ul class="menu">
+<li><a href="index-volontario.html">🏠 Home</a></li>
+<li><a class="active" href="anagrafica-volontario.html">📋 Mia Anagrafica</a></li>
+<li><a href="eventi-volontario.html">📅 Eventi</a></li>
+<li data-qualifiche="TLC 1,TLC 2"><a href="tlc.html">📡 TLC</a></li></ul>
+<button id="logout" type="button">Logout</button>
+</aside>
+<main class="main">
+<h1>📋 La Mia Anagrafica</h1>
+<div class="note">
+    ℹ️ Puoi modificare i tuoi dati, ma <b>Nome, Cognome, Luogo/Data di nascita, Email, Codice MGO e Comitato</b> sono bloccati e modificabili solo dalla tua SOL.
+    <br/>Se aggiungi nuove <b>qualifiche</b> o <b>patenti</b>, la richiesta andrà in <b>approvazione</b> alla SOL.
+  </div>
+<div id="message"></div>
+<div id="pendingMessage"></div>
+<!-- DATI PERSONALI -->
+<div class="section">
+<h2>👤 Dati Personali</h2>
+<form id="form-anagrafica">
+<div class="row">
+<input id="nome" placeholder="Nome *" required="" type="text"/>
+<input id="cognome" placeholder="Cognome *" required="" type="text"/>
+</div>
+<div class="row">
+<input id="cf" placeholder="Codice Fiscale" readonly="" type="text"/>
+<input id="telefono" placeholder="Telefono *" required="" type="tel"/>
+</div>
+<div class="row">
+<input id="contattoEmergenza" placeholder="Contatto Emergenza *" required="" type="text"/>
+<input id="luogoNascita" placeholder="Luogo di Nascita" type="text"/>
+</div>
+<div class="row">
+<input id="dataNascita" type="date"/>
+<input id="stato" placeholder="Stato (es. Italia)" type="text"/>
+</div>
+<div class="row">
+<input id="indirizzo" placeholder="Indirizzo di residenza" type="text"/>
+<input id="comune" placeholder="Comune" type="text"/>
+</div>
+<div class="row">
+<input id="provincia" placeholder="Provincia" type="text"/>
+<input id="cap" maxlength="5" placeholder="CAP" type="text"/>
+</div>
+<div class="row">
+<input id="comitato" placeholder="Comitato" readonly="" type="text"/>
+<input id="intolleranze" placeholder="Intolleranze alimentari" type="text"/>
+</div>
+<div class="row">
+<input id="allergie" placeholder="Allergie" type="text"/>
+<input id="codiceMGO" placeholder="Codice MGO" type="text"/>
+</div>
+<div class="row">
+<input id="email" placeholder="Email" type="email"/>
+</div>
+<!-- QUALIFICHE -->
+<fieldset class="qualifiche-container">
+<legend>📋 Qualifiche possedute</legend>
+<label><input class="qualifica-checkbox" type="checkbox" value="OPEM"/> OPEM</label><label><input class="qualifica-checkbox" type="checkbox" value="CSA"/> CSA</label><label><input class="qualifica-checkbox" type="checkbox" value="OPSA"/> OPSA</label><label><input class="qualifica-checkbox" type="checkbox" value="TLC 1"/> TLC 1</label><label><input class="qualifica-checkbox" type="checkbox" value="TLC 2"/> TLC 2</label><label><input class="qualifica-checkbox" type="checkbox" value="UC-OC"/> UC-OC</label><label><input class="qualifica-checkbox" type="checkbox" value="ASP-C"/> ASP-C</label><label><input class="qualifica-checkbox" type="checkbox" value="CAE"/> CAE</label><label><input class="qualifica-checkbox" type="checkbox" value="CSP-A"/> CSP-A</label><label><input class="qualifica-checkbox" type="checkbox" value="CSP-D"/> CSP-D</label><label><input class="qualifica-checkbox" type="checkbox" value="SMTS"/> SMTS</label><label><input class="qualifica-checkbox" type="checkbox" value="AUTISTA SOCCORRITORE"/> AUTISTA SOCCORRITORE</label><label><input class="qualifica-checkbox" type="checkbox" value="SOCCORRITORE"/> SOCCORRITORE</label><label><input class="qualifica-checkbox" type="checkbox" value="TS"/> TS</label><label><input class="qualifica-checkbox" type="checkbox" value="OSG"/> OSG</label><label><input class="qualifica-checkbox" type="checkbox" value="LOGISTA"/> LOGISTA</label><label><input class="qualifica-checkbox" type="checkbox" value="OPERATORE UAS (A1/A3-A2-STS)"/> OPERATORE UAS (A1/A3-A2-STS)</label><label><input class="qualifica-checkbox" type="checkbox" value="HACCP"/> HACCP</label><label><input class="qualifica-checkbox" type="checkbox" value="OPSOCEM"/> OPSOCEM</label><label><input class="qualifica-checkbox" type="checkbox" value="MEDIATORE LINGUISTICO"/> MEDIATORE LINGUISTICO</label></fieldset>
+<!-- PATENTI -->
+<fieldset class="patenti-container">
+<legend>🚗 Patenti possedute</legend>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 1"/> PATENTE 1</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 2"/> PATENTE 2</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 2B"/> PATENTE 2B</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 3"/> PATENTE 3</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 4"/> PATENTE 4</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 5"/> PATENTE 5</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 5B"/> PATENTE 5B</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 6"/> PATENTE 6</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 7"/> PATENTE 7</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 7B"/> PATENTE 7B</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 8"/> PATENTE 8</label>
+<label><input class="patenti-checkbox" type="checkbox" value="PATENTE 9"/> PATENTE 9</label>
+<label><input class="patenti-checkbox" type="checkbox" value="NESSUNA"/> NESSUNA</label>
+</fieldset>
+<button class="btn" type="submit">💾 Salva Modifiche</button>
+</form>
+</div>
+<!-- CAMBIO PASSWORD -->
+<div class="section">
+<h2>🔒 Cambio Password</h2>
+<form id="form-password">
+<div class="row">
+<input id="password-attuale" placeholder="Password Attuale *" required="" type="password"/>
+</div>
+<div class="row">
+<input id="password-nuova" minlength="6" placeholder="Nuova Password (min 6 caratteri) *" required="" type="password"/>
+<input id="password-conferma" minlength="6" placeholder="Conferma Nuova Password *" required="" type="password"/>
+</div>
+<button class="btn btn-secondary" type="submit">🔒 Cambia Password</button>
+</form>
+</div>
+</main>
+<div aria-hidden="true" id="qualifica-tooltip" role="tooltip"></div><script defer="True" src="assets/js/common.js"></script><script defer="" src="assets/js/pages/anagrafica-volontario.js"></script>
+</body>
+</html>
