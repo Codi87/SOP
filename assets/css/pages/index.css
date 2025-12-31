@@ -79,7 +79,10 @@ body {
   
     height: 100vh;
     flex: 1 1 auto;
-  }
+  
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
 
   .topbar {
     display: flex;
@@ -133,7 +136,8 @@ body {
   .empty-state { color: #999; font-style: italic; padding: 10px 0; }
 
   @media (max-width: 768px){
-    body { flex-direction: column; 
+    html, body{ height:auto; overflow:auto; }
+body { flex-direction: column; 
     .sidebar{ position: relative; height:auto; overflow: visible; width:100%; }
 
     .menu{ overflow: visible; }

@@ -79,10 +79,13 @@ const comitatoInput = document.getElementById("comitato");
 
 function setLogo(src){
   if (!logoImg) return;
-  // ri-mostra sempre l'immagine (nel caso fosse stata nascosta da onerror precedente)
   logoImg.style.display = "block";
   if (logoImg.nextElementSibling) logoImg.nextElementSibling.style.display = "none";
-  logoImg.onerror = () => { logoImg.src = "logo.svg"; logoImg.style.display = "block"; if (logoImg.nextElementSibling) logoImg.nextElementSibling.style.display = "none"; };
+  logoImg.onerror = () => {
+    logoImg.src = "logo.svg";
+    logoImg.style.display = "block";
+    if (logoImg.nextElementSibling) logoImg.nextElementSibling.style.display = "none";
+  };
   logoImg.src = src;
 }
 
@@ -90,7 +93,6 @@ function setLogo(src){
 // - comitato=<SOL>  -> logo-<sol>.svg, comitato BLOCCATO e valorizzato con <sol>
 // - comitato=sop    -> logo-sop.svg, comitato SCRIVIBILE e OBBLIGATORIO (vuoto)
 // - comitato=tlc    -> logo-tlc.svg, comitato SCRIVIBILE e OBBLIGATORIO (vuoto)
-// - fallback: logo CRI
 if (comitatoUrl) {
   if (comitatoUrl === "sop") {
     setLogo("logo-sop.svg");
@@ -114,30 +116,6 @@ if (comitatoUrl) {
     comitatoInput.readOnly = true;
     comitatoInput.required = true;
   }
-} else if (role === "tlc_provinciale") {
-  // Se aperto senza query, ma da TLC provinciale: logo TLC e comitato scrivibile/obbligatorio
-  setLogo("logo-tlc.svg");
-  headerComitato.textContent = "📋 Registrazione Volontario";
-  comitatoInput.value = "";
-  comitatoInput.readOnly = false;
-  comitatoInput.required = true;
-  comitatoInput.placeholder = "Comitato di appartenenza *";
-} else if (role === "sop" || role === "amministratore") {
-  // SOP senza query: logo SOP e comitato scrivibile/obbligatorio
-  setLogo("logo-sop.svg");
-  headerComitato.textContent = "📋 Registrazione Volontario";
-  comitatoInput.value = "";
-  comitatoInput.readOnly = false;
-  comitatoInput.required = true;
-  comitatoInput.placeholder = "Comitato di appartenenza *";
-} else if (role === "sol" && comitatoStorage) {
-  // SOL senza query: logo sol e comitato bloccato
-  const slug = comitatoStorage.toLowerCase().trim().replace(/\s+/g,"-");
-  setLogo(`logo-${slug}.svg`);
-  headerComitato.textContent = "📋 Registrazione Volontario";
-  comitatoInput.value = slug;
-  comitatoInput.readOnly = true;
-  comitatoInput.required = true;
 } else {
   headerComitato.textContent = "📋 Registrazione Volontario";
   setLogo("logo.svg");
