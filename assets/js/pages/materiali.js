@@ -395,5 +395,91 @@ window.showInfoPopupByIndex = function(index) {
   showInfoPopup(m);
 };
 
+/* ===========================
+   DEMO MATERIALI (10 Pesaro + 10 Urbino) - solo se mancano
+=========================== */
+function seedDemoMateriali(){
+  const locali = JSON.parse(localStorage.getItem("materiali") || "[]");
+
+  function key(codice, comitato, lotto){
+    return `${(codice||"").toUpperCase()}|${(comitato||"").toLowerCase().trim()}|${(lotto||"").trim()}`;
+  }
+
+  const existing = new Set(locali.map(m => key(m.codice, m.comitato, m.lotto)));
+
+  function add(mat){
+    const k = key(mat.codice, mat.comitato, mat.lotto);
+    if (!mat.codice || !mat.comitato) return;
+    if (existing.has(k)) return;
+    existing.add(k);
+    locali.push(mat);
+  }
+
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const toISO = (y,m,d) => `${y}-${pad2(m)}-${pad2(d)}`;
+
+  // date demo
+  const dataCarico = toISO(yyyy-1, 6, 15);
+  const scad1 = toISO(yyyy+1, 12, 31);
+  const scad2 = toISO(yyyy, 8, 31);
+  const scad3 = toISO(yyyy+2, 3, 31);
+
+  function base(comitatoLabel, idx, obj){
+    const i = String(idx).padStart(2, "0");
+    return {
+      codice: (obj.codice || `MAT-${comitatoLabel.slice(0,2).toUpperCase()}-${i}`).toUpperCase(),
+      nome: obj.nome || "Materiale",
+      categoria: obj.categoria || "Varie",
+      stato: obj.stato || "Disponibile",
+      quantita: Number.isFinite(obj.quantita) ? obj.quantita : 0,
+      unita: obj.unita || "pz",
+      comitato: comitatoLabel,
+      ubicazione: obj.ubicazione || "Magazzino",
+      dataCarico: obj.dataCarico || dataCarico,
+      dataScadenza: obj.dataScadenza || "",
+      lotto: (obj.lotto || `${comitatoLabel.slice(0,2).toUpperCase()}-${i}`).trim(),
+      fornitore: obj.fornitore || "CRI",
+      note: obj.note || ""
+    };
+  }
+
+  // 10 materiali PESARO
+  const pesaro = [
+    base("Pesaro", 1, { codice:"KIT-PS-01", nome:"Kit medicazione", categoria:"Sanitario", stato:"Disponibile", quantita:12, unita:"pz", ubicazione:"Magazzino A - Scaffale 1", dataScadenza: scad1 }),
+    base("Pesaro", 2, { codice:"DAE-PS-01", nome:"Defibrillatore (DAE)", categoria:"Sanitario", stato:"In uso", quantita:2, unita:"pz", ubicazione:"Ambulanza CRI010PS", note:"Controllo batterie mensile." }),
+    base("Pesaro", 3, { codice:"O2-PS-01", nome:"Bombola ossigeno 2L", categoria:"Sanitario", stato:"Disponibile", quantita:8, unita:"pz", ubicazione:"Magazzino A - Scaffale 2" }),
+    base("Pesaro", 4, { codice:"PPE-PS-01", nome:"Guanti nitrile (scatole)", categoria:"DPI", stato:"Disponibile", quantita:30, unita:"scat", ubicazione:"Magazzino A - Scaffale 3", dataScadenza: scad3 }),
+    base("Pesaro", 5, { codice:"MAS-PS-01", nome:"Mascherine FFP2", categoria:"DPI", stato:"Da reintegrare", quantita:5, unita:"scat", ubicazione:"Magazzino A - Scaffale 3", note:"Sotto soglia minima." }),
+    base("Pesaro", 6, { codice:"RAD-PS-01", nome:"Radio portatile", categoria:"TLC", stato:"Disponibile", quantita:10, unita:"pz", ubicazione:"Stanza TLC", lotto:"PS-RAD-2025" }),
+    base("Pesaro", 7, { codice:"BAT-PS-01", nome:"Batterie radio", categoria:"TLC", stato:"Disponibile", quantita:20, unita:"pz", ubicazione:"Stanza TLC", dataScadenza: scad2 }),
+    base("Pesaro", 8, { codice:"GEN-PS-01", nome:"Generatore 2kW", categoria:"Logistica", stato:"In uso", quantita:1, unita:"pz", ubicazione:"Furgone CRI005PS" }),
+    base("Pesaro", 9, { codice:"CON-PS-01", nome:"Coni stradali", categoria:"Logistica", stato:"Disponibile", quantita:25, unita:"pz", ubicazione:"Magazzino B - Scaffale 1" }),
+    base("Pesaro",10, { codice:"BND-PS-01", nome:"Bende elastiche", categoria:"Sanitario", stato:"Disponibile", quantita:40, unita:"pz", ubicazione:"Magazzino A - Scaffale 1", dataScadenza: scad1 })
+  ];
+
+  // 10 materiali URBINO
+  const urbino = [
+    base("Urbino", 1, { codice:"KIT-UR-01", nome:"Kit medicazione", categoria:"Sanitario", stato:"Disponibile", quantita:10, unita:"pz", ubicazione:"Magazzino U - Scaffale 1", dataScadenza: scad1 }),
+    base("Urbino", 2, { codice:"DAE-UR-01", nome:"Defibrillatore (DAE)", categoria:"Sanitario", stato:"Disponibile", quantita:1, unita:"pz", ubicazione:"Magazzino U - Armadio sanitario", note:"Verifica elettrodi trimestrale." }),
+    base("Urbino", 3, { codice:"O2-UR-01", nome:"Bombola ossigeno 5L", categoria:"Sanitario", stato:"In uso", quantita:3, unita:"pz", ubicazione:"Ambulanza CRI001UR" }),
+    base("Urbino", 4, { codice:"PPE-UR-01", nome:"Visiere protettive", categoria:"DPI", stato:"Disponibile", quantita:15, unita:"pz", ubicazione:"Magazzino U - Scaffale 2" }),
+    base("Urbino", 5, { codice:"MAS-UR-01", nome:"Mascherine chirurgiche", categoria:"DPI", stato:"Disponibile", quantita:20, unita:"scat", ubicazione:"Magazzino U - Scaffale 2", dataScadenza: scad3 }),
+    base("Urbino", 6, { codice:"RAD-UR-01", nome:"Radio veicolare", categoria:"TLC", stato:"Disponibile", quantita:4, unita:"pz", ubicazione:"Stanza TLC", lotto:"UR-RAD-2025" }),
+    base("Urbino", 7, { codice:"KIT-PC-UR", nome:"Kit protezione civile", categoria:"Protezione Civile", stato:"Disponibile", quantita:5, unita:"pz", ubicazione:"Magazzino U - Area PC" }),
+    base("Urbino", 8, { codice:"TOR-UR-01", nome:"Torcia ricaricabile", categoria:"Logistica", stato:"Da reintegrare", quantita:2, unita:"pz", ubicazione:"Magazzino U - Scaffale 3", note:"Necessario reintegro." }),
+    base("Urbino", 9, { codice:"COP-UR-01", nome:"Coperte isotermiche", categoria:"Sanitario", stato:"Disponibile", quantita:50, unita:"pz", ubicazione:"Magazzino U - Scaffale 1" }),
+    base("Urbino",10, { codice:"DIS-UR-01", nome:"Disinfettante mani", categoria:"Sanitario", stato:"Disponibile", quantita:12, unita:"flac", ubicazione:"Magazzino U - Scaffale 1", dataScadenza: scad2 })
+  ];
+
+  pesaro.forEach(add);
+  urbino.forEach(add);
+
+  localStorage.setItem("materiali", JSON.stringify(locali));
+}
+
 searchInput.addEventListener("input", renderMateriali);
+seedDemoMateriali();
 renderMateriali();
+
