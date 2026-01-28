@@ -398,82 +398,6 @@ function normalizeAllEmergenze(){
   });
   if (changed) setEmergenze(arr);
 }
-/* ===========================
-   DEMO EMERGENZE (debug)
-=========================== */
-function seedDemoEmergenze(){
-  try {
-    console.log("[DEMO] seedDemoEmergenze() start");
-
-    const emergenze = JSON.parse(localStorage.getItem("emergenze") || "[]");
-    console.log("[DEMO] emergenze attuali:", emergenze.length);
-
-    const now = new Date();
-    const dataInizio = now.toISOString().slice(0,10);
-    const oraInizio = now.toTimeString().slice(0,5);
-
-    function addIfMissing(demo){
-      ensureEmergenzaShape(demo);
-      const exists = emergenze.some(e => e && e.id === demo.id);
-      if (!exists) emergenze.push(demo);
-      console.log("[DEMO] add", demo.id, exists ? "(già esiste)" : "(aggiunta)");
-    }
-
-    // PESARO
-    addIfMissing({
-      id: 999001,
-      titolo: "DEMO PESARO - Incidente stradale",
-      tipo: "Incidente",
-      luogo: "Pesaro - SS Adriatica",
-      livello: "S2",
-      dataInizio,
-      oraInizio,
-      referente: "C.O. 112",
-      comitatoCreatore: "Pesaro",
-      descrizione: "Emergenza demo (Pesaro).",
-      stato: "attiva",
-      destSol: ["Urbino"],   // così la vede anche SOL Urbino
-      destSop: true,
-      approvazioni: {
-        pesaro: "approved",
-        urbino: "pending",
-        SOP: "pending"
-      },
-      contributi: {},
-      updatedAt: new Date().toISOString()
-    });
-
-    // URBINO
-    addIfMissing({
-      id: 999002,
-      titolo: "DEMO URBINO - Assistenza sanitaria evento",
-      tipo: "Assistenza",
-      luogo: "Urbino - Centro storico",
-      livello: "S1",
-      dataInizio,
-      oraInizio,
-      referente: "C.O. 118",
-      comitatoCreatore: "Urbino",
-      descrizione: "Emergenza demo (Urbino).",
-      stato: "attiva",
-      destSol: ["Pesaro"],   // così la vede anche SOL Pesaro
-      destSop: true,
-      approvazioni: {
-        urbino: "approved",
-        pesaro: "pending",
-        SOP: "pending"
-      },
-      contributi: {},
-      updatedAt: new Date().toISOString()
-    });
-
-    localStorage.setItem("emergenze", JSON.stringify(emergenze));
-    console.log("[DEMO] salvate emergenze totali:", emergenze.length);
-
-  } catch (err) {
-    console.error("[DEMO] ERRORE seedDemoEmergenze:", err);
-  }
-}
 
 /* ===========================
    BADGE / STATUS
@@ -1976,6 +1900,56 @@ searchInput.addEventListener("input", renderEmergenze);
 /* ===========================
    INIT
 =========================== */
-seedDemoEmergenza();
+// DEMO: crea 2 emergenze se non ce ne sono
+(() => {
+  const emergenze = JSON.parse(localStorage.getItem("emergenze") || "[]");
+  if (emergenze.length) return;
+
+  const now = new Date();
+  const dataInizio = now.toISOString().slice(0,10);
+  const oraInizio = now.toTimeString().slice(0,5);
+
+  emergenze.push({
+    id: 999001,
+    titolo: "DEMO PESARO - Incidente stradale",
+    tipo: "Incidente",
+    luogo: "Pesaro - SS Adriatica",
+    livello: "S2",
+    dataInizio,
+    oraInizio,
+    referente: "C.O. 112",
+    comitatoCreatore: "Pesaro",
+    descrizione: "Emergenza demo (Pesaro).",
+    stato: "attiva",
+    destSol: ["Urbino"],
+    destSop: true,
+    approvazioni: { pesaro: "approved", urbino: "pending", SOP: "pending" },
+    contributi: {},
+    updatedAt: new Date().toISOString()
+  });
+
+  emergenze.push({
+    id: 999002,
+    titolo: "DEMO URBINO - Assistenza sanitaria evento",
+    tipo: "Assistenza",
+    luogo: "Urbino - Centro storico",
+    livello: "S1",
+    dataInizio,
+    oraInizio,
+    referente: "C.O. 118",
+    comitatoCreatore: "Urbino",
+    descrizione: "Emergenza demo (Urbino).",
+    stato: "attiva",
+    destSol: ["Pesaro"],
+    destSop: true,
+    approvazioni: { urbino: "approved", pesaro: "pending", SOP: "pending" },
+    contributi: {},
+    updatedAt: new Date().toISOString()
+  });
+
+  localStorage.setItem("emergenze", JSON.stringify(emergenze));
+})();
+
 normalizeAllEmergenze();
 renderEmergenze();
+
