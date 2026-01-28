@@ -398,6 +398,99 @@ function normalizeAllEmergenze(){
   });
   if (changed) setEmergenze(arr);
 }
+/* ===========================
+   DEMO EMERGENZE (Pesaro + Urbino) - solo se non esistono
+=========================== */
+function seedDemoEmergenze(){
+  const emergenze = getEmergenze();
+
+  // ID fissi per evitare duplicati ad ogni refresh
+  const DEMO_PESARO_ID = 999001;
+  const DEMO_URBINO_ID = 999002;
+
+  const now = new Date();
+  const dataInizio = now.toISOString().slice(0,10);
+  const oraInizio = now.toTimeString().slice(0,5);
+
+  function makeDemo({ id, creatore, titolo, tipo, luogo, livello, destSol }) {
+    const creatorLower = normalize(creatore);
+
+    const approvazioni = {
+      [creatorLower]: "approved",
+      SOP: "pending"
+    };
+
+    // i destinatari SOL partono pending
+    (destSol || []).map(x => normalize(x)).filter(Boolean).forEach(k => {
+      if (!approvazioni[k]) approvazioni[k] = "pending";
+    });
+
+    const demo = {
+      id,
+      titolo,
+      tipo,
+      luogo,
+      livello,
+      dataInizio,
+      oraInizio,
+      referente: "C.O. 112",
+      comitatoCreatore: creatore,
+      descrizione: "Emergenza demo per test: approvazioni, risorse e log.",
+      stato: "attiva",
+
+      // destinatari
+      destSol: destSol || [],
+      destSop: true,
+
+      approvazioni,
+      contributi: {},
+      updatedAt: new Date().toISOString()
+    };
+
+    ensureEmergenzaShape(demo);
+
+    // crea contributo del comitato creatore (come fai in submit)
+    if (!demo.contributi[creatorLower]) {
+      demo.contributi[creatorLower] = {
+        comitatoLabel: creatorLower,
+        mezziUsati: [],
+        materialiUsati: [],
+        volontariUsati: [],
+        logInterventi: []
+      };
+    }
+
+    return demo;
+  }
+
+  // 1) Emergenza demo Pesaro
+  if (!emergenze.some(e => e && e.id === DEMO_PESARO_ID)) {
+    emergenze.push(makeDemo({
+      id: DEMO_PESARO_ID,
+      creatore: "Pesaro",
+      titolo: "DEMO PESARO - Incidente stradale",
+      tipo: "Incidente",
+      luogo: "Pesaro - SS Adriatica",
+      livello: "S2",
+      destSol: ["Urbino"] // destinatario SOL
+    }));
+  }
+
+  // 2) Emergenza demo Urbino
+  if (!emergenze.some(e => e && e.id === DEMO_URBINO_ID)) {
+    emergenze.push(makeDemo({
+      id: DEMO_URBINO_ID,
+      creatore: "Urbino",
+      titolo: "DEMO URBINO - Assistenza sanitaria evento",
+      tipo: "Assistenza",
+      luogo: "Urbino - Centro storico",
+      livello: "S1",
+      destSol: ["Pesaro"] // destinatario SOL
+    }));
+  }
+
+  setEmergenze(emergenze);
+}
 
 /* ===========================
    BADGE / STATUS
@@ -1900,5 +1993,6 @@ searchInput.addEventListener("input", renderEmergenze);
 /* ===========================
    INIT
 =========================== */
+seedDemoEmergenza();
 normalizeAllEmergenze();
 renderEmergenze();
