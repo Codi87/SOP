@@ -399,97 +399,80 @@ function normalizeAllEmergenze(){
   if (changed) setEmergenze(arr);
 }
 /* ===========================
-   DEMO EMERGENZE (Pesaro + Urbino) - solo se non esistono
+   DEMO EMERGENZE (debug)
 =========================== */
 function seedDemoEmergenze(){
-  const emergenze = getEmergenze();
+  try {
+    console.log("[DEMO] seedDemoEmergenze() start");
 
-  // ID fissi per evitare duplicati ad ogni refresh
-  const DEMO_PESARO_ID = 999001;
-  const DEMO_URBINO_ID = 999002;
+    const emergenze = JSON.parse(localStorage.getItem("emergenze") || "[]");
+    console.log("[DEMO] emergenze attuali:", emergenze.length);
 
-  const now = new Date();
-  const dataInizio = now.toISOString().slice(0,10);
-  const oraInizio = now.toTimeString().slice(0,5);
+    const now = new Date();
+    const dataInizio = now.toISOString().slice(0,10);
+    const oraInizio = now.toTimeString().slice(0,5);
 
-  function makeDemo({ id, creatore, titolo, tipo, luogo, livello, destSol }) {
-    const creatorLower = normalize(creatore);
-
-    const approvazioni = {
-      [creatorLower]: "approved",
-      SOP: "pending"
-    };
-
-    // i destinatari SOL partono pending
-    (destSol || []).map(x => normalize(x)).filter(Boolean).forEach(k => {
-      if (!approvazioni[k]) approvazioni[k] = "pending";
-    });
-
-    const demo = {
-      id,
-      titolo,
-      tipo,
-      luogo,
-      livello,
-      dataInizio,
-      oraInizio,
-      referente: "C.O. 112",
-      comitatoCreatore: creatore,
-      descrizione: "Emergenza demo per test: approvazioni, risorse e log.",
-      stato: "attiva",
-
-      // destinatari
-      destSol: destSol || [],
-      destSop: true,
-
-      approvazioni,
-      contributi: {},
-      updatedAt: new Date().toISOString()
-    };
-
-    ensureEmergenzaShape(demo);
-
-    // crea contributo del comitato creatore (come fai in submit)
-    if (!demo.contributi[creatorLower]) {
-      demo.contributi[creatorLower] = {
-        comitatoLabel: creatorLower,
-        mezziUsati: [],
-        materialiUsati: [],
-        volontariUsati: [],
-        logInterventi: []
-      };
+    function addIfMissing(demo){
+      ensureEmergenzaShape(demo);
+      const exists = emergenze.some(e => e && e.id === demo.id);
+      if (!exists) emergenze.push(demo);
+      console.log("[DEMO] add", demo.id, exists ? "(già esiste)" : "(aggiunta)");
     }
 
-    return demo;
-  }
-
-  // 1) Emergenza demo Pesaro
-  if (!emergenze.some(e => e && e.id === DEMO_PESARO_ID)) {
-    emergenze.push(makeDemo({
-      id: DEMO_PESARO_ID,
-      creatore: "Pesaro",
+    // PESARO
+    addIfMissing({
+      id: 999001,
       titolo: "DEMO PESARO - Incidente stradale",
       tipo: "Incidente",
       luogo: "Pesaro - SS Adriatica",
       livello: "S2",
-      destSol: ["Urbino"] // destinatario SOL
-    }));
-  }
+      dataInizio,
+      oraInizio,
+      referente: "C.O. 112",
+      comitatoCreatore: "Pesaro",
+      descrizione: "Emergenza demo (Pesaro).",
+      stato: "attiva",
+      destSol: ["Urbino"],   // così la vede anche SOL Urbino
+      destSop: true,
+      approvazioni: {
+        pesaro: "approved",
+        urbino: "pending",
+        SOP: "pending"
+      },
+      contributi: {},
+      updatedAt: new Date().toISOString()
+    });
 
-  // 2) Emergenza demo Urbino
-  if (!emergenze.some(e => e && e.id === DEMO_URBINO_ID)) {
-    emergenze.push(makeDemo({
-      id: DEMO_URBINO_ID,
-      creatore: "Urbino",
+    // URBINO
+    addIfMissing({
+      id: 999002,
       titolo: "DEMO URBINO - Assistenza sanitaria evento",
       tipo: "Assistenza",
       luogo: "Urbino - Centro storico",
       livello: "S1",
-      destSol: ["Pesaro"] // destinatario SOL
-    }));
-  }
+      dataInizio,
+      oraInizio,
+      referente: "C.O. 118",
+      comitatoCreatore: "Urbino",
+      descrizione: "Emergenza demo (Urbino).",
+      stato: "attiva",
+      destSol: ["Pesaro"],   // così la vede anche SOL Pesaro
+      destSop: true,
+      approvazioni: {
+        urbino: "approved",
+        pesaro: "pending",
+        SOP: "pending"
+      },
+      contributi: {},
+      updatedAt: new Date().toISOString()
+    });
 
-  setEmergenze(emergenze);
+    localStorage.setItem("emergenze", JSON.stringify(emergenze));
+    console.log("[DEMO] salvate emergenze totali:", emergenze.length);
+
+  } catch (err) {
+    console.error("[DEMO] ERRORE seedDemoEmergenze:", err);
+  }
 }
 
 /* ===========================
