@@ -26,24 +26,127 @@
     const giàPresente = volontari.some(v => (v.cf || "").toUpperCase() === demoCf);
 
     if (!giàPresente) {
-      volontari.push({
-        cf: demoCf,
-        username: "mario.rossi",
-        password: "cri2025",
-        nome: "Mario",
-        cognome: "Rossi",
-        comitato: "Pesaro",
-        qualifiche: ["OPEM"] // opzionale
-      });
-      volontari.push({
-        cf: "BNCLGU90B12F205X",
-        username: "luigi.bianchi",
-        password: "cri2025",
-        nome: "Luigi",
-        cognome: "Bianchi",
-        comitato: "Urbino",
-       qualifiche: ["OPEM"] // oppure ["OPEM", "Soccorritore"]
-      });
+  // Mario (il tuo)
+  volontari.push({
+    cf: demoCf,
+    username: "mario.rossi",
+    password: "cri2025",
+    nome: "Mario",
+    cognome: "Rossi",
+    comitato: "Pesaro",
+    qualifiche: ["OPEM"]
+  });
+
+  // Altri volontari (Pesaro / Urbino)
+  volontari.push({
+    cf: "BNCLGU90B12F205X",
+    username: "luigi.bianchi",
+    password: "cri2025",
+    nome: "Luigi",
+    cognome: "Bianchi",
+    comitato: "Urbino",
+    qualifiche: ["CS A", "SOCCORRITORE"]
+  });
+
+  volontari.push({
+    cf: "VRDMRA88C23H501Z",
+    username: "marta.verdi",
+    password: "cri2025",
+    nome: "Marta",
+    cognome: "Verdi",
+    comitato: "Pesaro",
+    qualifiche: ["OPSA", "TLC 1"]
+  });
+
+  volontari.push({
+    cf: "NRAGNN85D11F205K",
+    username: "gianna.nera",
+    password: "cri2025",
+    nome: "Gianna",
+    cognome: "Neri",
+    comitato: "Urbino",
+    qualifiche: ["TLC 2", "UC-OC"]
+  });
+
+  volontari.push({
+    cf: "RSSLRC92E14H501P",
+    username: "lorenzo.russo",
+    password: "cri2025",
+    nome: "Lorenzo",
+    cognome: "Russo",
+    comitato: "Pesaro",
+    qualifiche: ["ASP-C", "CAE"]
+  });
+
+  volontari.push({
+    cf: "FNTCHR87F10F205Q",
+    username: "chiara.fontana",
+    password: "cri2025",
+    nome: "Chiara",
+    cognome: "Fontana",
+    comitato: "Urbino",
+    qualifiche: ["CSP-A", "CSP-D"]
+  });
+
+  volontari.push({
+    cf: "MNTSTF91G22H501R",
+    username: "stefano.monti",
+    password: "cri2025",
+    nome: "Stefano",
+    cognome: "Monti",
+    comitato: "Pesaro",
+    qualifiche: ["SMTS", "TS"]
+  });
+
+  volontari.push({
+    cf: "GRSMNL89H02F205T",
+    username: "manuela.guerra",
+    password: "cri2025",
+    nome: "Manuela",
+    cognome: "Guerra",
+    comitato: "Urbino",
+    qualifiche: ["AUTISTA SOCCORRITORE", "SOCCORRITORE"]
+  });
+
+  volontari.push({
+    cf: "PLLMRC93I19H501U",
+    username: "marco.pellegrini",
+    password: "cri2025",
+    nome: "Marco",
+    cognome: "Pellegrini",
+    comitato: "Pesaro",
+    qualifiche: ["OSG", "LOGISTA"]
+  });
+
+  volontari.push({
+    cf: "DLCFRC86L07F205V",
+    username: "francesca.dolci",
+    password: "cri2025",
+    nome: "Francesca",
+    cognome: "Dolci",
+    comitato: "Urbino",
+    qualifiche: ["OPERATORE UAS (A1/A3-A2-STS)"]
+  });
+
+  volontari.push({
+    cf: "SRRLNZ90M15H501W",
+    username: "lorenzo.serra",
+    password: "cri2025",
+    nome: "Lorenzo",
+    cognome: "Serra",
+    comitato: "Pesaro",
+    qualifiche: ["HACCP", "OPSOCEM"]
+  });
+
+  volontari.push({
+    cf: "CNTMRY95N24F205Y",
+    username: "mary.conti",
+    password: "cri2025",
+    nome: "Mary",
+    cognome: "Conti",
+    comitato: "Urbino",
+    qualifiche: ["MEDIATORE LINGUISTICO", "TLC 1"]
+  });
       localStorage.setItem("volontari", JSON.stringify(volontari));
     }
 
