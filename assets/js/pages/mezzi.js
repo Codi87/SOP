@@ -391,5 +391,81 @@ window.showInfoPopupByIndex = function(index) {
   showInfoPopup(m);
 };
 
+/* ===========================
+   DEMO MEZZI (10 Pesaro + 10 Urbino) - solo se mancano
+=========================== */
+function seedDemoMezzi(){
+  const locali = JSON.parse(localStorage.getItem("mezzi") || "[]");
+
+  function exists(targa, selettivaRadio){
+    return locali.some(m =>
+      (m.targa || "").toUpperCase() === targa.toUpperCase() &&
+      (m.selettivaRadio || "").toUpperCase() === selettivaRadio.toUpperCase()
+    );
+  }
+
+  function addMezzo(m){
+    const t = (m.targa || "").toUpperCase();
+    const s = (m.selettivaRadio || "").toUpperCase();
+    if (!t || !s) return;
+    if (exists(t, s)) return;
+    locali.push({
+      targa: t,
+      tipoMezzo: m.tipoMezzo || "Ambulanza",
+      selettivaRadio: s,
+      posti: Number.isFinite(m.posti) ? m.posti : (m.posti ? parseInt(m.posti,10) : 4),
+      comitato: m.comitato || "",
+      sede: m.sede || "",
+      dataImmatricolazione: m.dataImmatricolazione || "",
+      dataAssegnazione: m.dataAssegnazione || "",
+      categoriaCRI: m.categoriaCRI || "",
+      classeVeicolo: m.classeVeicolo || "",
+      alimentazione: m.alimentazione || "",
+      anno: m.anno || "",
+      statoMezzo: m.statoMezzo || "Operativo",
+      telaio: m.telaio || "",
+      dotazioni: m.dotazioni || "Zaino emergenza, DAE, bombole O2",
+      note: m.note || ""
+    });
+  }
+
+  const now = new Date();
+  const year = now.getFullYear();
+
+  // 10 MEZZI PESARO
+  const mezziPesaro = [
+    { targa:"CRI001PS", selettivaRadio:"PS-ALFA-1", tipoMezzo:"Ambulanza", posti:4, comitato:"Pesaro", sede:"Pesaro", alimentazione:"Diesel", anno: year-4, categoriaCRI:"Sanitario", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"PS0001" },
+    { targa:"CRI002PS", selettivaRadio:"PS-ALFA-2", tipoMezzo:"Ambulanza", posti:4, comitato:"Pesaro", sede:"Pesaro", alimentazione:"Diesel", anno: year-5, categoriaCRI:"Sanitario", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"PS0002" },
+    { targa:"CRI003PS", selettivaRadio:"PS-DELTA-1", tipoMezzo:"Auto Medica", posti:5, comitato:"Pesaro", sede:"Pesaro", alimentazione:"Benzina", anno: year-3, categoriaCRI:"Sanitario", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"PS0003" },
+    { targa:"CRI004PS", selettivaRadio:"PS-ECHO-1", tipoMezzo:"Pulmino", posti:9, comitato:"Pesaro", sede:"Pesaro", alimentazione:"Diesel", anno: year-6, categoriaCRI:"Trasporti", classeVeicolo:"M2", statoMezzo:"Operativo", telaio:"PS0004" },
+    { targa:"CRI005PS", selettivaRadio:"PS-LOG-1", tipoMezzo:"Furgone", posti:3, comitato:"Pesaro", sede:"Pesaro", alimentazione:"Diesel", anno: year-7, categoriaCRI:"Logistica", classeVeicolo:"N1", statoMezzo:"Operativo", telaio:"PS0005" },
+    { targa:"CRI006PS", selettivaRadio:"PS-4X4-1", tipoMezzo:"Fuoristrada", posti:5, comitato:"Pesaro", sede:"Pesaro", alimentazione:"Diesel", anno: year-8, categoriaCRI:"Protezione Civile", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"PS0006" },
+    { targa:"CRI007PS", selettivaRadio:"PS-TLC-1", tipoMezzo:"Unità TLC", posti:3, comitato:"Pesaro", sede:"Pesaro", alimentazione:"Diesel", anno: year-6, categoriaCRI:"TLC", classeVeicolo:"N1", statoMezzo:"Operativo", telaio:"PS0007" },
+    { targa:"CRI008PS", selettivaRadio:"PS-SUP-1", tipoMezzo:"Auto di Supporto", posti:5, comitato:"Pesaro", sede:"Pesaro", alimentazione:"Ibrida", anno: year-2, categoriaCRI:"Supporto", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"PS0008" },
+    { targa:"CRI009PS", selettivaRadio:"PS-LOG-2", tipoMezzo:"Furgone", posti:3, comitato:"Pesaro", sede:"Pesaro", alimentazione:"Diesel", anno: year-9, categoriaCRI:"Logistica", classeVeicolo:"N1", statoMezzo:"Manutenzione", telaio:"PS0009", note:"In officina per tagliando." },
+    { targa:"CRI010PS", selettivaRadio:"PS-ALFA-3", tipoMezzo:"Ambulanza", posti:4, comitato:"Pesaro", sede:"Pesaro", alimentazione:"Diesel", anno: year-1, categoriaCRI:"Sanitario", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"PS0010" }
+  ];
+
+  // 10 MEZZI URBINO
+  const mezziUrbino = [
+    { targa:"CRI001UR", selettivaRadio:"UR-ALFA-1", tipoMezzo:"Ambulanza", posti:4, comitato:"Urbino", sede:"Urbino", alimentazione:"Diesel", anno: year-4, categoriaCRI:"Sanitario", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"UR0001" },
+    { targa:"CRI002UR", selettivaRadio:"UR-ALFA-2", tipoMezzo:"Ambulanza", posti:4, comitato:"Urbino", sede:"Urbino", alimentazione:"Diesel", anno: year-5, categoriaCRI:"Sanitario", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"UR0002" },
+    { targa:"CRI003UR", selettivaRadio:"UR-DELTA-1", tipoMezzo:"Auto Medica", posti:5, comitato:"Urbino", sede:"Urbino", alimentazione:"Benzina", anno: year-3, categoriaCRI:"Sanitario", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"UR0003" },
+    { targa:"CRI004UR", selettivaRadio:"UR-ECHO-1", tipoMezzo:"Pulmino", posti:9, comitato:"Urbino", sede:"Urbino", alimentazione:"Diesel", anno: year-6, categoriaCRI:"Trasporti", classeVeicolo:"M2", statoMezzo:"Operativo", telaio:"UR0004" },
+    { targa:"CRI005UR", selettivaRadio:"UR-LOG-1", tipoMezzo:"Furgone", posti:3, comitato:"Urbino", sede:"Urbino", alimentazione:"Diesel", anno: year-7, categoriaCRI:"Logistica", classeVeicolo:"N1", statoMezzo:"Operativo", telaio:"UR0005" },
+    { targa:"CRI006UR", selettivaRadio:"UR-4X4-1", tipoMezzo:"Fuoristrada", posti:5, comitato:"Urbino", sede:"Urbino", alimentazione:"Diesel", anno: year-8, categoriaCRI:"Protezione Civile", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"UR0006" },
+    { targa:"CRI007UR", selettivaRadio:"UR-TLC-1", tipoMezzo:"Unità TLC", posti:3, comitato:"Urbino", sede:"Urbino", alimentazione:"Diesel", anno: year-6, categoriaCRI:"TLC", classeVeicolo:"N1", statoMezzo:"Operativo", telaio:"UR0007" },
+    { targa:"CRI008UR", selettivaRadio:"UR-SUP-1", tipoMezzo:"Auto di Supporto", posti:5, comitato:"Urbino", sede:"Urbino", alimentazione:"Ibrida", anno: year-2, categoriaCRI:"Supporto", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"UR0008" },
+    { targa:"CRI009UR", selettivaRadio:"UR-LOG-2", tipoMezzo:"Furgone", posti:3, comitato:"Urbino", sede:"Urbino", alimentazione:"Diesel", anno: year-9, categoriaCRI:"Logistica", classeVeicolo:"N1", statoMezzo:"Manutenzione", telaio:"UR0009", note:"In manutenzione programmata." },
+    { targa:"CRI010UR", selettivaRadio:"UR-ALFA-3", tipoMezzo:"Ambulanza", posti:4, comitato:"Urbino", sede:"Urbino", alimentazione:"Diesel", anno: year-1, categoriaCRI:"Sanitario", classeVeicolo:"M1", statoMezzo:"Operativo", telaio:"UR0010" }
+  ];
+
+  mezziPesaro.forEach(addMezzo);
+  mezziUrbino.forEach(addMezzo);
+
+  localStorage.setItem("mezzi", JSON.stringify(locali));
+}
+
 searchInput.addEventListener("input", renderMezzi);
+seedDemoMezzi();
 renderMezzi();
