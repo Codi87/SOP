@@ -1020,6 +1020,98 @@ window.showInfoPopupByIndex = function(index) {
 /* ===========================
    INIT
 =========================== */
+
+/* ===========================
+   DEMO EVENTI (turni emergenze Pesaro/Urbino)
+   - crea 3 turni (08-14, 14-20, 20-08) su giorni diversi
+   - evita duplicati per (titolo + dataInizio + oraInizio + comitatoCreatore)
+=========================== */
+function seedDemoEventiEmergenze(){
+  const eventi = getEventi();
+
+  function exists(ev){
+    return eventi.some(x =>
+      (x.titolo || "").trim() === (ev.titolo || "").trim() &&
+      (x.dataInizio || "") === (ev.dataInizio || "") &&
+      (x.oraInizio || "") === (ev.oraInizio || "") &&
+      normalize(x.comitatoCreatore) === normalize(ev.comitatoCreatore)
+    );
+  }
+
+  // helper date ISO yyyy-mm-dd
+  const pad2 = (n) => String(n).padStart(2, "0");
+  function addDays(base, days){
+    const d = new Date(base.getTime());
+    d.setDate(d.getDate() + days);
+    return d;
+  }
+  function toISODate(d){
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  }
+
+  // scegliamo giorni "diversi": oggi+1, oggi+3, oggi+6
+  const base = new Date();
+  base.setHours(0,0,0,0);
+  const d1 = toISODate(addDays(base, 1));
+  const d2 = toISODate(addDays(base, 3));
+  const d3 = toISODate(addDays(base, 6));
+
+  // turni richiesti
+  // 08-14 (stesso giorno)
+  // 14-20 (stesso giorno)
+  // 20-08 (notte: finisce il giorno dopo)
+  function makeShift(comitatoCreatore, luogo, whenDate, start, end, endDateOverride){
+    const creatorLower = normalize(comitatoCreatore);
+    const approvazioni = {};
+    approvazioni[creatorLower] = "approved"; // come la logica emergenze: creatore già ok
+
+    const ev = {
+      id: Date.now() + Math.floor(Math.random() * 1000000),
+      titolo: `Turno Emergenza ${comitatoCreatore} (${start}-${end})`,
+      luogo: luogo,
+      dataInizio: whenDate,
+      oraInizio: start,
+      dataFine: endDateOverride || whenDate,
+      oraFine: end,
+      maxPartecipanti: 0,
+      tipoEvento: "Emergenza / Turno",
+      qualificheRichieste: [],   // puoi metterle se vuoi
+      patentiRichieste: [],      // puoi metterle se vuoi
+      comitatoCreatore: comitatoCreatore,
+      descrizione: `Turno operativo per emergenza ${comitatoCreatore}. Fascia ${start}-${end}.`,
+      destSol: [],               // opzionale: metti ["Pesaro","Urbino"] se vuoi estenderlo
+      destSop: false,
+      approvazioni: approvazioni,
+      iscrizioni: []
+    };
+
+    normalizeIscrizioniForEvento(ev);
+    normalizeRequisitiEvento(ev);
+    return ev;
+  }
+
+  // PESARO: 3 turni in giorni diversi
+  const pesaro_1 = makeShift("Pesaro", "Pesaro (zona intervento)", d1, "08:00", "14:00");
+  const pesaro_2 = makeShift("Pesaro", "Pesaro (zona intervento)", d2, "14:00", "20:00");
+  // notte: fine giorno successivo
+  const pesaro_3 = makeShift("Pesaro", "Pesaro (zona intervento)", d3, "20:00", "08:00", toISODate(addDays(new Date(d3+"T00:00:00"), 1)));
+
+  // URBINO: 3 turni in giorni diversi (spostati di 1 giorno rispetto a Pesaro)
+  const urbino_1 = makeShift("Urbino", "Urbino (zona intervento)", toISODate(addDays(new Date(d1+"T00:00:00"), 1)), "08:00", "14:00");
+  const urbino_2 = makeShift("Urbino", "Urbino (zona intervento)", toISODate(addDays(new Date(d2+"T00:00:00"), 1)), "14:00", "20:00");
+  const urbino_3 = makeShift("Urbino", "Urbino (zona intervento)", toISODate(addDays(new Date(d3+"T00:00:00"), 1)), "20:00", "08:00",
+    toISODate(addDays(new Date(toISODate(addDays(new Date(d3+"T00:00:00"), 1))+"T00:00:00"), 1))
+  );
+
+  [pesaro_1, pesaro_2, pesaro_3, urbino_1, urbino_2, urbino_3].forEach(ev => {
+    if (!exists(ev)) eventi.push(ev);
+  });
+
+  setEventi(eventi);
+}
+
 buildRequisitiUI();
+seedDemoEventiEmergenze();
 searchInput.addEventListener("input", renderEventi);
 renderEventi();
+
