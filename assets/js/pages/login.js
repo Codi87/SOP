@@ -35,6 +35,15 @@
         comitato: "Pesaro",
         qualifiche: ["OPEM"] // opzionale
       });
+      volontari.push({
+        cf: "BNCLGU90B12F205X",
+        username: "luigi.bianchi",
+        password: "cri2025",
+        nome: "Luigi",
+        cognome: "Bianchi",
+        comitato: "Urbino",
+       qualifiche: ["OPEM"] // oppure ["OPEM", "Soccorritore"]
+      });
       localStorage.setItem("volontari", JSON.stringify(volontari));
     }
 
