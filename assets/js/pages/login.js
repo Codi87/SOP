@@ -33,7 +33,7 @@
         nome: "Mario",
         cognome: "Rossi",
         comitato: "Pesaro",
-        qualifiche: "OPEM, OPSA" [] // opzionale
+        qualifiche: [] // opzionale
       });
       localStorage.setItem("volontari", JSON.stringify(volontari));
     }
