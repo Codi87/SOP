@@ -504,9 +504,22 @@ function getVisibleEventi() {
     const isApprovedGlobally = approvazioni["ALL"] === "approved";
     const closed = isEventoChiuso(ev);
 
+    // SOP/Admin vedono tutto
     if (role === "sop" || role === "amministratore") return true;
-    if (role === "sol") return true;
 
+    // SOL: vede SOLO
+    // - eventi creati dal suo comitato
+    // - eventi dove è destinatario (destSol include il suo comitato)
+    // - eventi globali (ALL approved)
+    if (role === "sol") {
+      if (!c) return false;
+
+      const creator = normalize(ev.comitatoCreatore);
+      const dest = (ev.destSol || []).map(x => normalize(x));
+      return creator === c || dest.includes(c) || isApprovedGlobally;
+    }
+
+    // Volontario: come prima, ma solo se approvato per il comitato e non chiuso
     if (role === "volontario") {
       if (closed) return false;
       if (!c) return false;
@@ -519,6 +532,7 @@ function getVisibleEventi() {
     return false;
   });
 }
+
 
 /* ===========================
    POPUP INFO
